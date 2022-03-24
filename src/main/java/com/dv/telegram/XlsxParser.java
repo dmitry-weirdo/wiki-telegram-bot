@@ -8,9 +8,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +51,7 @@ public class XlsxParser {
             String pageUrl = getStringSafe(row,1);
             String wordsString = getStringSafe(row,2).toLowerCase(Locale.ROOT); // assure lowercase words
 
-            String[] wordsArray = wordsString.split(",");
+            String[] wordsArray = wordsString.split(WORDS_SEPARATOR);
 
             List<String> words = Arrays.asList(wordsArray);
             words = words
@@ -72,10 +71,9 @@ public class XlsxParser {
     }
 
     private static Workbook parseWorkbook(String fileName) throws IOException {
-        URL resource = XlsxParser.class.getClassLoader().getResource(fileName);
-
-        try (FileInputStream file = new FileInputStream(resource.getFile())) {
-            return new XSSFWorkbook(file);
+        ClassLoader classLoader = XlsxParser.class.getClassLoader();
+        try (InputStream stream = classLoader.getResourceAsStream(fileName)) { // getResource does not work within jar!
+            return new XSSFWorkbook(stream);
         }
     }
 

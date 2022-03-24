@@ -7,7 +7,7 @@
         </Console>
 
 <!--        <File name="MyFile" fileName="c:/logs/wiki-bot.log" immediateFlush="false" append="false">-->
-        <File name="MyFile" fileName="c:/logs/wiki-bot.log">
+        <File name="MyFile" fileName="c:/logs/wiki-bot-OVERRIDE.log">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" charset="UTF-8"/>
         </File>
     </Appenders>

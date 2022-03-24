@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Log4j2
 public class WikiBot extends TelegramLongPollingBot {
@@ -30,8 +31,9 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     public String getBotToken() {
+//        String token = System.getProperty(WIKI_BOT_TOKEN_ENV_NAME);
         String token = System.getenv(WIKI_BOT_TOKEN_ENV_NAME);
-        if (token == null || token.isBlank()) {
+        if (StringUtils.isBlank(token)) {
             throw new IllegalStateException(String.format("Env variable %s is not set.", WIKI_BOT_TOKEN_ENV_NAME));
         }
 
@@ -49,43 +51,50 @@ public class WikiBot extends TelegramLongPollingBot {
         String text = updateMessage.getText();
         String chatId = updateMessage.getChatId().toString();
 
-
-        String responseText = getResponseText(text);
-
-        if (responseText != null) {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(chatId);
-            sendMessage.setText(responseText);
-
-            sendMessage.disableWebPagePreview();
-
-            sendMessage.setReplyToMessageId(updateMessage.getMessageId());
-
-            try {
-                execute(sendMessage); // Call method to send the message
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+        Optional<String> responseTextOptional = getResponseText(text);
+        if (responseTextOptional.isEmpty()) { // command is not for the bot
+            return;
         }
-        else {
-            log.info("Unknown command received: " + text);
+
+        // command is for the bot -> send the answer
+        String responseText = responseTextOptional.get();
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(responseText);
+
+        sendMessage.disableWebPagePreview();
+
+        sendMessage.setReplyToMessageId(updateMessage.getMessageId());
+
+        try {
+            execute(sendMessage); // Call method to send the message
+        } catch (TelegramApiException e) {
+            log.error("TelegramApiException occurred", e); // todo: add which message has failed the bot
+            throw new RuntimeException(e);
         }
     }
 
-    private String getResponseText(String text) {
-        if (text == null || text.isBlank()) {
-            return null;
+    private boolean messageIsForTheBot(String lowerText) {
+        return lowerText.contains(ALTERNATIVE_BOT_NAME_LOWER_CASE)
+            || lowerText.contains(BOT_NAME_LOWER_CASE);
+    }
+
+    private Optional<String> getResponseText(String text) {
+        if (StringUtils.isBlank(text)) {
+            return Optional.empty();
         }
 
         String lowerText = text.toLowerCase(Locale.ROOT);
 
-        if (!lowerText.contains(ALTERNATIVE_BOT_NAME_LOWER_CASE) && !lowerText.contains(BOT_NAME_LOWER_CASE)) { // only work when bot is mentioned by name
-            return null;
+        if (!messageIsForTheBot(lowerText)) { // only work when bot is mentioned by name
+            return Optional.empty();
         }
 
         List<WikiPageData> matchingPages = findMatchingPages(lowerText);
 
-        return getAnswerText(text, matchingPages);
+        String answerText = getAnswerText(text, matchingPages);
+        return Optional.of(answerText);
     }
 
     private List<WikiPageData> findMatchingPages(String text) {
@@ -97,6 +106,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private String getAnswerText(String text, List<WikiPageData> matchingPages) {
         if (matchingPages.isEmpty()) {
+            log.info("Unknown command for the bot: {}", text);
             return getNoResultAnswer(text);
         }
 
