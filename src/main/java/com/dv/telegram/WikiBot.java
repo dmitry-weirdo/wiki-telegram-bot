@@ -1,16 +1,33 @@
 package com.dv.telegram;
 
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
 import java.util.Locale;
 
+@Log4j2
 public class WikiBot extends TelegramLongPollingBot {
 
     public static final String WIKI_BOT_TOKEN_ENV_NAME = "WIKI_BOT_TOKEN";
+
+    public static final String BOT_NAME = "Дюся";
+    public static final String BOT_NAME_LOWER_CASE = BOT_NAME.toLowerCase(Locale.ROOT);
+
+    public static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
+
+    private final List<WikiPageData> pages;
+
+    public WikiBot(List<WikiPageData> wikiPagesData) {
+        super();
+
+        this.pages = wikiPagesData;
+    }
 
     public String getBotToken() {
         String token = System.getenv(WIKI_BOT_TOKEN_ENV_NAME);
@@ -51,7 +68,7 @@ public class WikiBot extends TelegramLongPollingBot {
             }
         }
         else {
-            System.out.println("Unknown command received: " + text);
+            log.info("Unknown command received: " + text);
         }
     }
 
@@ -62,19 +79,41 @@ public class WikiBot extends TelegramLongPollingBot {
 
         String lowerText = text.toLowerCase(Locale.ROOT);
 
-        if (lowerText.contains("список чатов")) {
-            return "Список чатов по городам: https://bit.ly/3sVsDTI";
+        if (!lowerText.contains(ALTERNATIVE_BOT_NAME_LOWER_CASE) && !lowerText.contains(BOT_NAME_LOWER_CASE)) { // only work when bot is mentioned by name
+            return null;
         }
 
-        if (lowerText.contains("машин") || lowerText.contains("автомобил")) {
-            return "Автомобили и что с ними делать: https://bit.ly/365Kkaq";
+        List<WikiPageData> matchingPages = findMatchingPages(lowerText);
+
+        return getAnswerText(text, matchingPages);
+    }
+
+    private List<WikiPageData> findMatchingPages(String text) {
+        return pages
+            .stream()
+            .filter(page -> page.isPresentIn(text))
+            .toList();
+    }
+
+    private String getAnswerText(String text, List<WikiPageData> matchingPages) {
+        if (matchingPages.isEmpty()) {
+            return getNoResultAnswer(text);
         }
 
-        if (lowerText.contains("wiki") || lowerText.contains("вики")) {
-            return "Стартовая страница вики: https://bit.ly/35ZoUM3";
+        if (matchingPages.size() == 1) {
+            return matchingPages.get(0).getOneLineAnswer();
         }
 
-        return null;
+        List<String> multilineAnswers = matchingPages
+            .stream()
+            .map(WikiPageData::getMultiLineAnswer)
+            .toList();
+
+        return StringUtils.join(multilineAnswers, "\n");
+    }
+
+    private String getNoResultAnswer(String text) { // todo: think about redirecting to the root wiki page
+        return String.format("%s ничего не знает про ваш запрос «%s» :(", BOT_NAME, text);
     }
 
     public String getBotUsername() {
