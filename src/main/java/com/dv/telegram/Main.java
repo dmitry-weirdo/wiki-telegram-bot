@@ -19,7 +19,7 @@ public class Main {
             WikiBot wikiBot = new WikiBot(wikiPagesData);
             botsApi.registerBot(wikiBot);
 
-            log.info("The bot \"{}\" has started!", wikiBot.getBotUsername());
+            log.info("The bot \"{}\" has started on \"{}\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
         }
         catch (TelegramApiException e) {
             e.printStackTrace();

@@ -23,6 +23,12 @@ Set the environment variable `WIKI_BOT_TOKEN`:
 export WIKI_BOT_TOKEN=...
 ```
 
+Set the environment variable `WIKI_BOT_ENVIRONMENT_NAME` to indicate the environment:
+```bash
+export WIKI_BOT_ENVIRONMENT_NAME="My local super environment"
+```
+
+
 Execute the java Main class from the jar file.
 You can override the log4j configuration via the `log4j.configurationFile` property.
 
@@ -62,6 +68,7 @@ screen -S wiki-bot
 Make sure you've set up the environment variables:
 ```bash
 export WIKI_BOT_TOKEN=...
+export WIKI_BOT_ENVIRONMENT_NAME="Wiki Bot AWS EC2 Instance"
 ```
 
 Run the bot using the `run-ec2.sh` script

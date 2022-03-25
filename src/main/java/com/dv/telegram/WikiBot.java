@@ -16,6 +16,7 @@ import java.util.Optional;
 public class WikiBot extends TelegramLongPollingBot {
 
     public static final String WIKI_BOT_TOKEN_ENV_NAME = "WIKI_BOT_TOKEN";
+    public static final String WIKI_BOT_ENVIRONMENT_NAME_ENV_NAME = "WIKI_BOT_ENVIRONMENT_NAME";
 
     public static final String BOT_NAME = "Дюся";
     public static final String BOT_NAME_LOWER_CASE = BOT_NAME.toLowerCase(Locale.ROOT);
@@ -23,21 +24,26 @@ public class WikiBot extends TelegramLongPollingBot {
     public static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
 
     private final List<WikiPageData> pages;
+    private final String environmentName;
 
     public WikiBot(List<WikiPageData> wikiPagesData) {
         super();
 
         this.pages = wikiPagesData;
+        this.environmentName = getEnvVariable(WIKI_BOT_ENVIRONMENT_NAME_ENV_NAME);
     }
 
     public String getBotToken() {
-//        String token = System.getProperty(WIKI_BOT_TOKEN_ENV_NAME);
-        String token = System.getenv(WIKI_BOT_TOKEN_ENV_NAME);
-        if (StringUtils.isBlank(token)) {
-            throw new IllegalStateException(String.format("Env variable %s is not set.", WIKI_BOT_TOKEN_ENV_NAME));
+        return getEnvVariable(WIKI_BOT_TOKEN_ENV_NAME);
+    }
+
+    private static String getEnvVariable(String name) {
+        String value = System.getenv(name);
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalStateException(String.format("Environment variable %s is not set.", name));
         }
 
-        return token;
+        return value;
     }
 
     public void onUpdateReceived(Update update) {
@@ -91,10 +97,24 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.empty();
         }
 
+        Optional<String> specialCommandResponseOptional = handleSpecialCommands(lowerText);
+        if (specialCommandResponseOptional.isPresent()) { // special command received -> return response for the special command
+            return specialCommandResponseOptional;
+        }
+
         List<WikiPageData> matchingPages = findMatchingPages(lowerText);
 
         String answerText = getAnswerText(text, matchingPages);
         return Optional.of(answerText);
+    }
+
+    private Optional<String> handleSpecialCommands(String text) {
+        if (text.contains("ты где") || text.contains("где ты")) {
+            String response = String.format("%s живёт здесь: %s.", BOT_NAME, getEnvironmentName());
+            return Optional.of(response);
+        }
+
+        return Optional.empty();
     }
 
     private List<WikiPageData> findMatchingPages(String text) {
@@ -128,5 +148,9 @@ public class WikiBot extends TelegramLongPollingBot {
 
     public String getBotUsername() {
         return "dv_wiki_bot";
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
     }
 }
