@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info"> <!-- changing this to DEBUG will add tons of DEBUG logs from log4j2 itself -->
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" />
+        </Console>
+
+<!--        <File name="MyFile" fileName="c:/logs/wiki-bot.log" immediateFlush="false" append="false">-->
+        <File name="MyFile" fileName="/home/ec2-user/wiki-bot/wiki-bot.log">
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" charset="UTF-8"/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="MyFile" />
+        </Root>
+
+        <Logger name="com.dv.telegram" level="debug" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="MyFile" />
+        </Logger>
+
+    </Loggers>
+</Configuration>

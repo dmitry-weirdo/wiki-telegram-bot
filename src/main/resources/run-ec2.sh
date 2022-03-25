@@ -1,0 +1,1 @@
+java -Dlog4j.configurationFile=/home/ec2-user/wiki-bot/log4j2-ec2.xml -jar wiki-telegram-bot-1.0-SNAPSHOT-jar-with-dependencies.jar
