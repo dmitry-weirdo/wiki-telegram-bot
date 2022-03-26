@@ -15,35 +15,28 @@ import java.util.Optional;
 @Log4j2
 public class WikiBot extends TelegramLongPollingBot {
 
-    public static final String WIKI_BOT_TOKEN_ENV_NAME = "WIKI_BOT_TOKEN";
-    public static final String WIKI_BOT_ENVIRONMENT_NAME_ENV_NAME = "WIKI_BOT_ENVIRONMENT_NAME";
-
-    public static final String BOT_NAME = "Дюся";
-    public static final String BOT_NAME_LOWER_CASE = BOT_NAME.toLowerCase(Locale.ROOT);
-
     public static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
 
+    private final WikiBotConfig config;
     private final List<WikiPageData> pages;
+
+    private final String botName;
+    private final String botNameLowerCase;
     private final String environmentName;
 
-    public WikiBot(List<WikiPageData> wikiPagesData) {
+    public WikiBot(WikiBotConfig config, List<WikiPageData> wikiPagesData) {
         super();
 
+        this.config = config;
         this.pages = wikiPagesData;
-        this.environmentName = getEnvVariable(WIKI_BOT_ENVIRONMENT_NAME_ENV_NAME);
+
+        this.botName = config.getBotName();
+        this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
+        this.environmentName = config.getEnvironmentName();
     }
 
     public String getBotToken() {
-        return getEnvVariable(WIKI_BOT_TOKEN_ENV_NAME);
-    }
-
-    private static String getEnvVariable(String name) {
-        String value = System.getenv(name);
-        if (StringUtils.isBlank(value)) {
-            throw new IllegalStateException(String.format("Environment variable %s is not set.", name));
-        }
-
-        return value;
+        return config.getBotToken();
     }
 
     public void onUpdateReceived(Update update) {
@@ -83,7 +76,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private boolean messageIsForTheBot(String lowerText) {
         return lowerText.contains(ALTERNATIVE_BOT_NAME_LOWER_CASE)
-            || lowerText.contains(BOT_NAME_LOWER_CASE);
+            || lowerText.contains(botNameLowerCase);
     }
 
     private Optional<String> getResponseText(String text) {
@@ -110,7 +103,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private Optional<String> handleSpecialCommands(String text) {
         if (text.contains("ты где") || text.contains("где ты")) {
-            String response = String.format("%s живёт здесь: %s.", BOT_NAME, getEnvironmentName());
+            String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
             return Optional.of(response);
         }
 
@@ -143,11 +136,11 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private String getNoResultAnswer(String text) { // todo: think about redirecting to the root wiki page
-        return String.format("%s ничего не знает про ваш запрос «%s» :(", BOT_NAME, text);
+        return String.format("%s ничего не знает про ваш запрос «%s» :(", botName, text);
     }
 
     public String getBotUsername() {
-        return "dv_wiki_bot";
+        return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by
     }
 
     public String getEnvironmentName() {
