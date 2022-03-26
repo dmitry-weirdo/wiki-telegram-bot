@@ -8,5 +8,8 @@
   "googleSpreadsheetId": "...",
   "wikiPagesSheetName": "Страницы вики и ключевые слова",
   "cityChatsSheetName": "Список чатов по городам",
-  "commandsSheetName": "Список болталки"
+  "commandsSheetName": "Список болталки",
+
+  // special commands
+  "reloadFromGoogleSheetCommand": "gs-reload 666-5150"
 }

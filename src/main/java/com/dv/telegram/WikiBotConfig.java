@@ -18,4 +18,7 @@ public class WikiBotConfig {
     public String wikiPagesSheetName;
     public String cityChatsSheetName;
     public String commandsSheetName;
+
+    // special commands
+    public String reloadFromGoogleSheetCommand;
 }

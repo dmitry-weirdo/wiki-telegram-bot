@@ -18,12 +18,13 @@ public class WikiBot extends TelegramLongPollingBot {
     public static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
 
     private final WikiBotConfig config;
-    private final List<WikiPageData> pages;
-    private final List<WikiBotCommandData> commands;
+    private List<WikiPageData> pages;
+    private List<WikiBotCommandData> commands;
 
     private final String botName;
     private final String botNameLowerCase;
     private final String environmentName;
+    private final String reloadFromGoogleSheetCommandLowerCase;
 
     public WikiBot(WikiBotConfig config, List<WikiPageData> wikiPagesData, List<WikiBotCommandData> commands) {
         super();
@@ -35,6 +36,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.botName = config.getBotName();
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
         this.environmentName = config.getEnvironmentName();
+        this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
     }
 
     public String getBotToken() {
@@ -128,9 +130,28 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.of(response);
         }
 
-        // todo: reload data from Google Sheet command
+        if (text.contains(reloadFromGoogleSheetCommandLowerCase)) {
+            return reloadBotDataFromGoogleSheet();
+        }
 
         return Optional.empty();
+    }
+
+    private Optional<String> reloadBotDataFromGoogleSheet() {
+        try {
+            log.info("Reloading bot data from the Google Sheet..."  );
+            GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
+            this.pages = botData.getPages();
+            this.commands = botData.getCommands();
+            log.info("Bot data successfully reloaded from the Google Sheet.");
+
+            return Optional.of("Данные бота успешно загружены из Google Sheet.");
+        }
+        catch (Exception e) {
+            log.error("Error when loading bot data from the Google Sheet", e);
+
+            return Optional.of("При загрузке данных из Google Sheet произошла ошибка.");
+        }
     }
 
     private List<WikiBotCommandData> findMatchingCommands(String text) {
