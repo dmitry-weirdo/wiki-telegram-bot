@@ -1,5 +1,6 @@
 package com.dv.telegram;
 
+import com.dv.telegram.data.CommandsParser;
 import com.dv.telegram.data.WikiPagesParser;
 import com.dv.telegram.google.GoogleSheetReader;
 import com.dv.telegram.google.WikiBotGoogleSheet;
@@ -19,8 +20,9 @@ public class Main {
             WikiBotConfig config = WikiBotUtils.readConfig();
 
             List<WikiPageData> wikiPagesData = getWikiPagesData(config);
+            List<WikiBotCommandData> commandsData = getCommandsData(config);
 
-            WikiBot wikiBot = new WikiBot(config, wikiPagesData);
+            WikiBot wikiBot = new WikiBot(config, wikiPagesData, commandsData);
 
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(wikiBot);
@@ -34,13 +36,28 @@ public class Main {
     private static List<WikiPageData> getWikiPagesData(WikiBotConfig config) {
         try {
             WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
-            return WikiPagesParser.parseWikiPagesData(wikiBotGoogleSheet);
+            return WikiPagesParser.parseWikiPages(wikiBotGoogleSheet);
         }
         catch (Exception e) {
             log.error("Failed to parse wiki pages from Google Sheet.", e);
 
             log.warn("Loading wiki pages from the XLSX file");
             return XlsxParser.parseWikiPagesDataSafe();
+        }
+    }
+
+    private static List<WikiBotCommandData> getCommandsData(WikiBotConfig config) {
+        try {
+            WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
+            return CommandsParser.parseWikiBotCommands(wikiBotGoogleSheet);
+        }
+        catch (Exception e) {
+            log.error("Failed to parse commands from Google Sheet.", e);
+
+            // todo: parse from XLS in worst case
+            throw new RuntimeException(e);
+//            log.warn("Loading commands from the XLSX file");
+//            return XlsxParser.parseWikiPagesDataSafe();
         }
     }
 }

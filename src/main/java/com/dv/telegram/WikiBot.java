@@ -19,16 +19,18 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private final WikiBotConfig config;
     private final List<WikiPageData> pages;
+    private final List<WikiBotCommandData> commands;
 
     private final String botName;
     private final String botNameLowerCase;
     private final String environmentName;
 
-    public WikiBot(WikiBotConfig config, List<WikiPageData> wikiPagesData) {
+    public WikiBot(WikiBotConfig config, List<WikiPageData> wikiPagesData, List<WikiBotCommandData> commands) {
         super();
 
         this.config = config;
         this.pages = wikiPagesData;
+        this.commands = commands;
 
         this.botName = config.getBotName();
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
@@ -37,6 +39,14 @@ public class WikiBot extends TelegramLongPollingBot {
 
     public String getBotToken() {
         return config.getBotToken();
+    }
+
+    public String getBotUsername() {
+        return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
     }
 
     public void onUpdateReceived(Update update) {
@@ -90,15 +100,26 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.empty();
         }
 
+        // special commands - not configured in the Google Sheet
         Optional<String> specialCommandResponseOptional = handleSpecialCommands(lowerText);
         if (specialCommandResponseOptional.isPresent()) { // special command received -> return response for the special command
             return specialCommandResponseOptional;
         }
 
+        // normal commands - configured in the Google Sheet
+        List<WikiBotCommandData> matchingCommands = findMatchingCommands(lowerText);
+        if (!matchingCommands.isEmpty()) { // matching command found -> only handle the command
+            String commandAnswerText = getCommandAnswerText(text, matchingCommands);
+            return Optional.of(commandAnswerText);
+        }
+
+        // todo: city chats must be applied to the wiki pages data
+
+        // wiki pages - configured in the Google Sheet
         List<WikiPageData> matchingPages = findMatchingPages(lowerText);
 
-        String answerText = getAnswerText(text, matchingPages);
-        return Optional.of(answerText);
+        String wikiPageAnswerText = getWikiPageAnswerText(text, matchingPages);
+        return Optional.of(wikiPageAnswerText);
     }
 
     private Optional<String> handleSpecialCommands(String text) {
@@ -107,7 +128,16 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.of(response);
         }
 
+        // todo: reload data from Google Sheet command
+
         return Optional.empty();
+    }
+
+    private List<WikiBotCommandData> findMatchingCommands(String text) {
+        return commands
+            .stream()
+            .filter(command -> command.isPresentIn(text))
+            .toList();
     }
 
     private List<WikiPageData> findMatchingPages(String text) {
@@ -117,7 +147,25 @@ public class WikiBot extends TelegramLongPollingBot {
             .toList();
     }
 
-    private String getAnswerText(String text, List<WikiPageData> matchingPages) {
+    private String getCommandAnswerText(String text, List<WikiBotCommandData> matchingCommands) {
+        if (matchingCommands.isEmpty()) {
+            log.info("Unknown command for the bot: {}", text);
+            return getNoResultAnswer(text);
+        }
+
+        if (matchingCommands.size() == 1) {
+            return matchingCommands.get(0).getOneLineAnswer();
+        }
+
+        List<String> multilineAnswers = matchingCommands
+            .stream()
+            .map(WikiBotCommandData::getMultiLineAnswer)
+            .toList();
+
+        return StringUtils.join(multilineAnswers, "\n");
+    }
+
+    private String getWikiPageAnswerText(String text, List<WikiPageData> matchingPages) {
         if (matchingPages.isEmpty()) {
             log.info("Unknown command for the bot: {}", text);
             return getNoResultAnswer(text);
@@ -137,13 +185,5 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private String getNoResultAnswer(String text) { // todo: think about redirecting to the root wiki page
         return String.format("%s ничего не знает про ваш запрос «%s» :(", botName, text);
-    }
-
-    public String getBotUsername() {
-        return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by
-    }
-
-    public String getEnvironmentName() {
-        return environmentName;
     }
 }

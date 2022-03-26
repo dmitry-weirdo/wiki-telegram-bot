@@ -12,7 +12,7 @@ import java.util.List;
 @Log4j2
 public class WikiPagesParser {
 
-    public static List<WikiPageData> parseWikiPagesData(WikiBotGoogleSheet sheet) {
+    public static List<WikiPageData> parseWikiPages(WikiBotGoogleSheet sheet) {
         SheetData wikiPagesSheet = sheet.getWikiPagesSheet();
         List<RowData> rows = wikiPagesSheet.getRowsWithoutFirstRow();
 
