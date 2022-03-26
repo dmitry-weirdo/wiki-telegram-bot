@@ -1,5 +1,8 @@
 package com.dv.telegram;
 
+import com.dv.telegram.data.WikiPagesParser;
+import com.dv.telegram.google.GoogleSheetReader;
+import com.dv.telegram.google.WikiBotGoogleSheet;
 import com.dv.telegram.util.WikiBotUtils;
 import lombok.extern.log4j.Log4j2;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -15,17 +18,29 @@ public class Main {
         try {
             WikiBotConfig config = WikiBotUtils.readConfig();
 
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-
-            List<WikiPageData> wikiPagesData = XlsxParser.parseWikiPagesDataSafe();
+            List<WikiPageData> wikiPagesData = getWikiPagesData(config);
 
             WikiBot wikiBot = new WikiBot(config, wikiPagesData);
-            botsApi.registerBot(wikiBot);
 
+            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+            botsApi.registerBot(wikiBot);
             log.info("The bot \"{}\" has started on \"{}\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
         }
         catch (TelegramApiException e) {
             log.error("Error when starting the WikiBot", e);
+        }
+    }
+
+    private static List<WikiPageData> getWikiPagesData(WikiBotConfig config) {
+        try {
+            WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
+            return WikiPagesParser.parseWikiPagesData(wikiBotGoogleSheet);
+        }
+        catch (Exception e) {
+            log.error("Failed to parse wiki pages from Google Sheet.", e);
+
+            log.warn("Loading wiki pages from the XLSX file");
+            return XlsxParser.parseWikiPagesDataSafe();
         }
     }
 }

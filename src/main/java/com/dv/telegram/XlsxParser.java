@@ -1,7 +1,7 @@
 package com.dv.telegram;
 
+import com.dv.telegram.data.DataUtils;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -11,7 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,7 +18,6 @@ import java.util.Locale;
 public class XlsxParser {
 
     private static final String FILE_NAME = "Wiki-pages-and-keywords.xlsx";
-    private static final String WORDS_SEPARATOR = ",";
 
     public static void main(String[] args) throws IOException {
         parseWikiPagesData();
@@ -51,14 +49,7 @@ public class XlsxParser {
             String pageUrl = getStringSafe(row,1);
             String wordsString = getStringSafe(row,2).toLowerCase(Locale.ROOT); // assure lowercase words
 
-            String[] wordsArray = wordsString.split(WORDS_SEPARATOR);
-
-            List<String> words = Arrays.asList(wordsArray);
-            words = words
-                .stream()
-                .filter(StringUtils::isNotBlank) // prevent empty strings
-                .map(s -> s.toLowerCase(Locale.ROOT).trim())
-                .toList();
+            List<String> words = DataUtils.parseWords(wordsString);
 
             WikiPageData pageData = new WikiPageData(pageName, pageUrl, wordsString, words);
             pages.add(pageData);

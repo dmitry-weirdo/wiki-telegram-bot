@@ -17,4 +17,8 @@ public class SheetData {
     public void addRow(RowData row) {
         rows.add(row);
     }
+
+    public List<RowData> getRowsWithoutFirstRow() {
+        return rows.subList(1, rows.size());
+    }
 }

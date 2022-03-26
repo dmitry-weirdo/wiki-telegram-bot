@@ -17,4 +17,12 @@ public class RowData {
     public void addCell(String cell) {
         cells.add(cell);
     }
+
+    public String getCellOrBlank(int index) {
+        if ((0 <= index) && (index < cells.size())) {
+            return cells.get(index);
+        }
+
+        return "";
+    }
 }
