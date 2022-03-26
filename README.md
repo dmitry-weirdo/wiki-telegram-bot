@@ -18,16 +18,20 @@ The bot runs as a simple Java `Main` class.
 
 # Run the bot from the jar with dependencies
 
-Set the environment variable `WIKI_BOT_TOKEN`:
+Set the environment variable `WIKI_BOT_CONFIG_FILE_PATH`:
 ```bash
-export WIKI_BOT_TOKEN=...
+export WIKI_BOT_CONFIG_FILE_PATH=/path/to/your/file/wiki-bot-config.json
 ```
 
-Set the environment variable `WIKI_BOT_ENVIRONMENT_NAME` to indicate the environment:
-```bash
-export WIKI_BOT_ENVIRONMENT_NAME="My local super environment"
+In the json config, set `environmentName` property to indicate the environment:
+```json
+  "environmentName": "My local super environment",
 ```
 
+and `botToken` for your bot instance (test, prod, etc)
+```json
+  "botToken": "1234567890:AAFxrf7...",
+```
 
 Execute the java Main class from the jar file.
 You can override the log4j configuration via the `log4j.configurationFile` property.
@@ -65,10 +69,9 @@ Create a `screen` session for the bot:
 screen -S wiki-bot
 ```
 
-Make sure you've set up the environment variables:
+Make sure you've set up the environment variable:
 ```bash
-export WIKI_BOT_TOKEN=...
-export WIKI_BOT_ENVIRONMENT_NAME="Wiki Bot AWS EC2 Instance"
+export WIKI_BOT_CONFIG_FILE_PATH="/home/ec2-user/wiki-bot/wiki-bot-config.json"
 ```
 
 Run the bot using the `run-ec2.sh` script
