@@ -1,0 +1,12 @@
+{
+  "botName": "Дюся",
+  "botToken": "...",
+  "environmentName": "My local dev environment",
+
+  // Google Sheets
+  "googleSheetsApiKey": "...",
+  "googleSpreadsheetId": "...",
+  "wikiPagesSheetName": "Страницы вики и ключевые слова",
+  "cityChatsSheetName": "Список чатов по городам",
+  "commandsSheetName": "Список болталки"
+}
