@@ -9,3 +9,7 @@ scp -i /c/_wiki-bot/ec2-wiki-bot-keypair.pem \
 scp -i /c/_wiki-bot/ec2-wiki-bot-keypair.pem \
   ./src/main/resources/run-ec2.sh \
   ec2-user@ec2-3-64-53-227.eu-central-1.compute.amazonaws.com:/home/ec2-user/wiki-bot/run-ec2.sh
+
+scp -i /c/_wiki-bot/ec2-wiki-bot-keypair.pem \
+  ./.ignoreme/wiki-bot-config-prod.json \
+  ec2-user@ec2-3-64-53-227.eu-central-1.compute.amazonaws.com:/home/ec2-user/wiki-bot/wiki-bot-config-prod.json
