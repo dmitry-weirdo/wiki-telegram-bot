@@ -1,5 +1,6 @@
 package com.dv.telegram;
 
+import com.dv.telegram.data.CityChatsParser;
 import com.dv.telegram.data.CommandsParser;
 import com.dv.telegram.data.WikiPagesParser;
 import com.dv.telegram.google.GoogleSheetReader;
@@ -20,9 +21,10 @@ public class Main {
             WikiBotConfig config = WikiBotUtils.readConfig();
 
             List<WikiPageData> wikiPagesData = getWikiPagesData(config);
+            List<CityChatData> cityChatsData = getCityChatsData(config);
             List<WikiBotCommandData> commandsData = getCommandsData(config);
 
-            WikiBot wikiBot = new WikiBot(config, wikiPagesData, commandsData);
+            WikiBot wikiBot = new WikiBot(config, wikiPagesData, cityChatsData, commandsData);
 
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(wikiBot);
@@ -43,6 +45,21 @@ public class Main {
 
             log.warn("Loading wiki pages from the XLSX file");
             return XlsxParser.parseWikiPagesDataSafe();
+        }
+    }
+
+    private static List<CityChatData> getCityChatsData(WikiBotConfig config) {
+        try {
+            WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
+            return CityChatsParser.parseCityChats(wikiBotGoogleSheet);
+        }
+        catch (Exception e) {
+            log.error("Failed to parse city chats from Google Sheet.", e);
+
+            // todo: parse from XLS in worst case
+            throw new RuntimeException(e);
+//            log.warn("Loading commands from the XLSX file");
+//            return XlsxParser.parseWikiPagesDataSafe();
         }
     }
 

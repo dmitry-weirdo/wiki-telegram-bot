@@ -19,6 +19,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private final WikiBotConfig config;
     private List<WikiPageData> pages;
+    private List<CityChatData> cityChats;
     private List<WikiBotCommandData> commands;
 
     private final String botName;
@@ -26,11 +27,17 @@ public class WikiBot extends TelegramLongPollingBot {
     private final String environmentName;
     private final String reloadFromGoogleSheetCommandLowerCase;
 
-    public WikiBot(WikiBotConfig config, List<WikiPageData> wikiPagesData, List<WikiBotCommandData> commands) {
+    public WikiBot(
+        WikiBotConfig config,
+        List<WikiPageData> wikiPagesData,
+        List<CityChatData> cityChatsData,
+        List<WikiBotCommandData> commands
+    ) {
         super();
 
         this.config = config;
         this.pages = wikiPagesData;
+        this.cityChats = cityChatsData;
         this.commands = commands;
 
         this.botName = config.getBotName();
@@ -80,7 +87,8 @@ public class WikiBot extends TelegramLongPollingBot {
 
         try {
             execute(sendMessage); // Call method to send the message
-        } catch (TelegramApiException e) {
+        }
+        catch (TelegramApiException e) {
             log.error("TelegramApiException occurred", e); // todo: add which message has failed the bot
             throw new RuntimeException(e);
         }
@@ -115,13 +123,31 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.of(commandAnswerText);
         }
 
-        // todo: city chats must be applied to the wiki pages data
-
         // wiki pages - configured in the Google Sheet
         List<WikiPageData> matchingPages = findMatchingPages(lowerText);
+        Optional<String> wikiPageAnswerText = getWikiPageAnswerText(matchingPages);
 
-        String wikiPageAnswerText = getWikiPageAnswerText(text, matchingPages);
-        return Optional.of(wikiPageAnswerText);
+        // city pages - configured in the Google Sheet
+        List<CityChatData> matchingCityChats = findMatchingCityChats(lowerText);
+        Optional<String> cityChatsAnswerText = getCityChatsAnswerText(matchingCityChats);
+
+        if (wikiPageAnswerText.isPresent()) { // wiki pages answer is present
+            if (cityChatsAnswerText.isPresent()) { // both wiki pages and city chats present -> return "No result" response
+                String combinedAnswers = String.format("%s%n%n%s", wikiPageAnswerText.get(), cityChatsAnswerText.get());
+                return Optional.of(combinedAnswers);
+            }
+            else { // only wiki pages answer is present
+                return wikiPageAnswerText;
+            }
+        }
+        else if (cityChatsAnswerText.isPresent()) { // only city chats answer is present
+            return cityChatsAnswerText;
+        }
+        else { // neither wiki pages nor city chats present -> return "No result" response
+            log.info("Unknown command for the bot: {}", text);
+            String noResultAnswer = getNoResultAnswer(text);
+            return Optional.of(noResultAnswer);
+        }
     }
 
     private Optional<String> handleSpecialCommands(String text) {
@@ -139,9 +165,10 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private Optional<String> reloadBotDataFromGoogleSheet() {
         try {
-            log.info("Reloading bot data from the Google Sheet..."  );
+            log.info("Reloading bot data from the Google Sheet...");
             GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
             this.pages = botData.getPages();
+            this.cityChats = botData.getCityChats();
             this.commands = botData.getCommands();
             log.info("Bot data successfully reloaded from the Google Sheet.");
 
@@ -168,6 +195,13 @@ public class WikiBot extends TelegramLongPollingBot {
             .toList();
     }
 
+    private List<CityChatData> findMatchingCityChats(String text) {
+        return cityChats
+            .stream()
+            .filter(cityChat -> cityChat.isPresentIn(text))
+            .toList();
+    }
+
     private String getCommandAnswerText(String text, List<WikiBotCommandData> matchingCommands) {
         if (matchingCommands.isEmpty()) {
             log.info("Unknown command for the bot: {}", text);
@@ -186,14 +220,14 @@ public class WikiBot extends TelegramLongPollingBot {
         return StringUtils.join(multilineAnswers, "\n");
     }
 
-    private String getWikiPageAnswerText(String text, List<WikiPageData> matchingPages) {
+    private Optional<String> getWikiPageAnswerText(List<WikiPageData> matchingPages) {
         if (matchingPages.isEmpty()) {
-            log.info("Unknown command for the bot: {}", text);
-            return getNoResultAnswer(text);
+            return Optional.empty();
         }
 
         if (matchingPages.size() == 1) {
-            return matchingPages.get(0).getOneLineAnswer();
+            String oneLineAnswer = matchingPages.get(0).getOneLineAnswer();
+            return Optional.of(oneLineAnswer);
         }
 
         List<String> multilineAnswers = matchingPages
@@ -201,7 +235,22 @@ public class WikiBot extends TelegramLongPollingBot {
             .map(WikiPageData::getMultiLineAnswer)
             .toList();
 
-        return StringUtils.join(multilineAnswers, "\n");
+        String answer = StringUtils.join(multilineAnswers, "\n");
+        return Optional.of(answer);
+    }
+
+    private Optional<String> getCityChatsAnswerText(List<CityChatData> matchingCityChats) {
+        if (matchingCityChats.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<String> multilineAnswers = matchingCityChats
+            .stream()
+            .map(CityChatData::getChatsAnswer)
+            .toList();
+
+        String answer = StringUtils.join(multilineAnswers, "\n\n");
+        return Optional.of(answer);
     }
 
     private String getNoResultAnswer(String text) { // todo: think about redirecting to the root wiki page

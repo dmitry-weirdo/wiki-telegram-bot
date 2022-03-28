@@ -9,6 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 public class GoogleSheetBotData {
     private final List<WikiPageData> pages;
-    // todo: city chats data
+    private final List<CityChatData> cityChats;
     private final List<WikiBotCommandData> commands;
 }
