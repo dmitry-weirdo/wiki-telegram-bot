@@ -11,5 +11,8 @@
   "commandsSheetName": "Список болталки",
 
   // special commands
-  "reloadFromGoogleSheetCommand": "gs-reload 666-5150"
+  "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
+
+  // messages
+  "startMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!"
 }

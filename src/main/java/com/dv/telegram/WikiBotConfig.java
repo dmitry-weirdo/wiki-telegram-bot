@@ -21,4 +21,7 @@ public class WikiBotConfig {
 
     // special commands
     public String reloadFromGoogleSheetCommand;
+
+    // messages
+    public String startMessage;
 }

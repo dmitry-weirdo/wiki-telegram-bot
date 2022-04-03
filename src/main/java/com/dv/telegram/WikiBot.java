@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -15,7 +16,8 @@ import java.util.Optional;
 @Log4j2
 public class WikiBot extends TelegramLongPollingBot {
 
-    public static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
+    private static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
+    private static final String START_COMMAND = "/start";
 
     private final WikiBotConfig config;
     private List<WikiPageData> pages;
@@ -26,6 +28,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private final String botNameLowerCase;
     private final String environmentName;
     private final String reloadFromGoogleSheetCommandLowerCase;
+    private final String startMessage;
 
     public WikiBot(
         WikiBotConfig config,
@@ -44,6 +47,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
         this.environmentName = config.getEnvironmentName();
         this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
+        this.startMessage = config.getStartMessage();
     }
 
     public String getBotToken() {
@@ -96,7 +100,9 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private boolean messageIsForTheBot(String lowerText) {
         return lowerText.contains(ALTERNATIVE_BOT_NAME_LOWER_CASE)
-            || lowerText.contains(botNameLowerCase);
+            || lowerText.contains(botNameLowerCase)
+            || lowerText.equals(START_COMMAND)
+        ;
     }
 
     private Optional<String> getResponseText(String text) {
@@ -151,6 +157,11 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private Optional<String> handleSpecialCommands(String text) {
+        if (text.equals(START_COMMAND)) {
+            String response = MessageFormat.format(startMessage, botName);
+            return Optional.of(response);
+        }
+
         if (text.contains("ты где") || text.contains("где ты")) {
             String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
             return Optional.of(response);
