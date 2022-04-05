@@ -1,6 +1,7 @@
 package com.dv.telegram.util;
 
 import com.dv.telegram.WikiBotConfig;
+import com.dv.telegram.WikiBotConfigs;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -38,6 +39,14 @@ public final class JacksonUtils {
         logger.debug("Successfully parsed config from file {}", filePath);
 //        logger.debug("Config: {}", config);
         return config;
+    }
+
+    public static WikiBotConfigs parseConfigs(String filePath) {
+        File file = new File(filePath);
+        WikiBotConfigs configs = parse(file, WikiBotConfigs.class);
+        logger.debug("Successfully parsed configs from file {}", filePath);
+//        logger.debug("Configs: {}", configs);
+        return configs;
     }
 
     public static void serialize(File file, Object object) {

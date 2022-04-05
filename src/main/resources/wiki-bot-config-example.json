@@ -1,18 +1,20 @@
 {
-  "botName": "Дюся",
-  "botToken": "...",
-  "environmentName": "My local dev environment",
+  "configs": {
+    "botName": "Дюся",
+    "botToken": "...",
+    "environmentName": "My local dev environment",
 
-  // Google Sheets
-  "googleSheetsApiKey": "...",
-  "googleSpreadsheetId": "...",
-  "wikiPagesSheetName": "Страницы вики и ключевые слова",
-  "cityChatsSheetName": "Список чатов по городам",
-  "commandsSheetName": "Список болталки",
+    // Google Sheets
+    "googleSheetsApiKey": "...",
+    "googleSpreadsheetId": "...",
+    "wikiPagesSheetName": "Страницы вики и ключевые слова",
+    "cityChatsSheetName": "Список чатов по городам",
+    "commandsSheetName": "Список болталки",
 
-  // special commands
-  "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
+    // special commands
+    "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
 
-  // messages
-  "startMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!"
+    // messages
+    "startMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!"
+  }
 }

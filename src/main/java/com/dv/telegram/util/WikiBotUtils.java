@@ -1,6 +1,7 @@
 package com.dv.telegram.util;
 
 import com.dv.telegram.WikiBotConfig;
+import com.dv.telegram.WikiBotConfigs;
 import org.apache.commons.lang3.StringUtils;
 
 public final class WikiBotUtils {
@@ -13,6 +14,11 @@ public final class WikiBotUtils {
     public static WikiBotConfig readConfig() {
         String configFilePath = getConfigFilePath();
         return JacksonUtils.parseConfig(configFilePath);
+    }
+
+    public static WikiBotConfigs readConfigs() {
+        String configFilePath = getConfigFilePath();
+        return JacksonUtils.parseConfigs(configFilePath);
     }
 
     public static String getConfigFilePath() {

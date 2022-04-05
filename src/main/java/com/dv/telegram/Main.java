@@ -12,27 +12,54 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Log4j2
 public class Main {
 
     public static void main(String[] args) {
         try {
-            WikiBotConfig config = WikiBotUtils.readConfig();
+            WikiBotConfigs wikiBotConfigs = WikiBotUtils.readConfigs();
 
-            List<WikiPageData> wikiPagesData = getWikiPagesData(config);
-            List<CityChatData> cityChatsData = getCityChatsData(config);
-            List<WikiBotCommandData> commandsData = getCommandsData(config);
+            int threadsCount = wikiBotConfigs.getConfigs().size();
 
-            WikiBot wikiBot = new WikiBot(config, wikiPagesData, cityChatsData, commandsData);
+            List<Callable<String>> callableTasks = wikiBotConfigs
+                .getConfigs()
+                .stream()
+                .map(Main::createCallableTask)
+                .toList();
 
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(wikiBot);
-            log.info("The bot \"{}\" has started on \"{}\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
+            ExecutorService executorService = Executors.newFixedThreadPool(threadsCount);
+            executorService.invokeAll(callableTasks);
         }
-        catch (TelegramApiException e) {
-            log.error("Error when starting the WikiBot", e);
+        catch (InterruptedException e) {
+            log.debug("============================================");
+            log.error("executorService.invokeAll was interrupted", e);
+            throw new RuntimeException(e);
         }
+    }
+
+    private static Callable<String> createCallableTask(WikiBotConfig config) {
+        return () -> {
+            try {
+                List<WikiPageData> wikiPagesData = getWikiPagesData(config);
+                List<CityChatData> cityChatsData = getCityChatsData(config);
+                List<WikiBotCommandData> commandsData = getCommandsData(config);
+
+                WikiBot wikiBot = new WikiBot(config, wikiPagesData, cityChatsData, commandsData);
+
+                TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+                botsApi.registerBot(wikiBot);
+                log.info("The bot \"{}\" has started on \"{}\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
+                return String.format("The bot \"%s\" has started on \"%s\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
+            }
+            catch (TelegramApiException e) {
+                log.error("Error when starting the WikiBot", e);
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     private static List<WikiPageData> getWikiPagesData(WikiBotConfig config) {
