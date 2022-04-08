@@ -14,6 +14,8 @@ After changing the privacy setting, you may need to remove and add the bot to th
 
 To change the bot username in Telegram, use the `/setname` command in the [@BotFather](https://t.me/BotFather). 
 
+To change the bot avatar in Telegram, use the `/setuserpic` command in the [@BotFather](https://t.me/BotFather).
+
 The bot runs as a simple Java `Main` class.
 
 # Run the bot from the jar with dependencies
