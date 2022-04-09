@@ -1,9 +1,11 @@
 package com.dv.telegram;
 
+import com.dv.telegram.config.BotSettings;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -28,7 +30,8 @@ public class WikiBot extends TelegramLongPollingBot {
     private final String botNameLowerCase;
     private final String environmentName;
     private final String reloadFromGoogleSheetCommandLowerCase;
-    private final String startMessage;
+
+    private final BotSettings settings; // settings cache in memory
 
     public WikiBot(
         WikiBotConfig config,
@@ -47,7 +50,8 @@ public class WikiBot extends TelegramLongPollingBot {
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
         this.environmentName = config.getEnvironmentName();
         this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
-        this.startMessage = config.getStartMessage();
+
+        this.settings = BotSettings.create(config);
     }
 
     public String getBotToken() {
@@ -78,6 +82,24 @@ public class WikiBot extends TelegramLongPollingBot {
             return;
         }
 
+        Message replyToMessage = updateMessage.getReplyToMessage();
+        boolean updateMessageIsReply = (replyToMessage != null);
+
+        boolean deleteBotCallMessage = settings.deleteBotCallMessageOnMessageReply && updateMessageIsReply;
+        if (deleteBotCallMessage) {
+            DeleteMessage deleteMessage = new DeleteMessage(
+                updateMessage.getChatId().toString(),
+                updateMessage.getMessageId()
+            );
+
+            try {
+                execute(deleteMessage);
+            }
+            catch (TelegramApiException e) {
+                log.error("Failed to delete message", e);
+            }
+        }
+
         // command is for the bot -> send the answer
         String responseText = responseTextOptional.get();
 
@@ -87,7 +109,12 @@ public class WikiBot extends TelegramLongPollingBot {
 
         sendMessage.disableWebPagePreview();
 
-        sendMessage.setReplyToMessageId(updateMessage.getMessageId());
+        Integer replyToMessageId = deleteBotCallMessage
+            ? replyToMessage.getMessageId() // reply to the original message
+            : updateMessage.getMessageId() // reply to bot message
+        ;
+
+        sendMessage.setReplyToMessageId(replyToMessageId);
 
         try {
             execute(sendMessage); // Call method to send the message
@@ -158,7 +185,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private Optional<String> handleSpecialCommands(String text) {
         if (text.equals(START_COMMAND)) {
-            String response = MessageFormat.format(startMessage, botName);
+            String response = MessageFormat.format(settings.startMessage, botName);
             return Optional.of(response);
         }
 

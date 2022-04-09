@@ -13,8 +13,15 @@
 
     // special commands
     "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
+    "listSettingsCommand": "listSettings",
+    "getSettingCommand": "getSetting",
+    "setSettingCommand": "setSetting",
+    "helpSettingCommand": "helpSetting",
 
-    // messages
-    "startMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!"
+    // settings that can be changed in runtime
+    "settings": {
+      "StartMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!",
+      "DeleteBotCallMessageOnMessageReply": "true"
+    }
   }
 }

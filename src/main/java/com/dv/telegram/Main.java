@@ -1,5 +1,6 @@
 package com.dv.telegram;
 
+import com.dv.telegram.config.SettingValidationException;
 import com.dv.telegram.data.CityChatsParser;
 import com.dv.telegram.data.CommandsParser;
 import com.dv.telegram.data.WikiPagesParser;
@@ -24,6 +25,7 @@ public class Main {
             WikiBotConfigs wikiBotConfigs = WikiBotUtils.readConfigs();
 
             int threadsCount = wikiBotConfigs.getConfigs().size();
+            log.info("Total bot configs: {}", threadsCount);
 
             List<Callable<String>> callableTasks = wikiBotConfigs
                 .getConfigs()
@@ -32,7 +34,7 @@ public class Main {
                 .toList();
 
             ExecutorService executorService = Executors.newFixedThreadPool(threadsCount);
-            executorService.invokeAll(callableTasks);
+            executorService.invokeAll(callableTasks); // todo: this currently does not stop Main on exception in the thread
         }
         catch (InterruptedException e) {
             log.debug("============================================");
@@ -57,6 +59,10 @@ public class Main {
             }
             catch (TelegramApiException e) {
                 log.error("Error when starting the WikiBot", e);
+                throw new RuntimeException(e);
+            }
+            catch (SettingValidationException e) {
+                log.error("Settings validation error when starting the WikiBot", e);
                 throw new RuntimeException(e);
             }
         };

@@ -2,6 +2,8 @@ package com.dv.telegram;
 
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 public class WikiBotConfig {
     public String botName;
@@ -21,7 +23,10 @@ public class WikiBotConfig {
 
     // special commands
     public String reloadFromGoogleSheetCommand;
+    public String listSettingsCommand;
+    public String getSettingCommand;
+    public String setSettingCommand;
+    public String helpSettingCommand;
 
-    // messages
-    public String startMessage;
+    public Map<String, String> settings;
 }
