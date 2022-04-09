@@ -234,7 +234,7 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.of(response);
         }
 
-        if (lowerText.contains("ты где") || lowerText.contains("где ты")) {
+        if (lowerText.contains("ты где") || lowerText.contains("где ты")) { // todo: extract to config commands
             String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
             return Optional.of(response);
         }
@@ -251,7 +251,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
         for (BotSetting<?> setting : settings.settings.values()) {
             settingsLines.add(String.format(
-                "— *%s*: %s",
+                "— *%s*:%n%s",
                 setting.getName(),
                 setting.getValue()
             ));
