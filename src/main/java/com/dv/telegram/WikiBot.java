@@ -152,7 +152,9 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return text.contains(config.listSettingsCommand)
-            || text.contains(config.helpSettingCommand);
+            || text.contains(config.helpSettingCommand)
+            || text.contains(config.getSettingCommand)
+            || text.contains(config.setSettingCommand);
     }
 
     private Optional<String> getResponseText(String text) {
@@ -222,6 +224,16 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.of(response);
         }
 
+        if (text.contains(config.getSettingCommand)) {
+            String response = getGetSettingResponse(text);
+            return Optional.of(response);
+        }
+
+        if (text.contains(config.setSettingCommand)) {
+            String response = getSetSettingResponse(text);
+            return Optional.of(response);
+        }
+
         if (lowerText.contains("ты где") || lowerText.contains("где ты")) {
             String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
             return Optional.of(response);
@@ -267,6 +279,66 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return String.format("*%s*%n%s", botSetting.getName(), botSetting.getDescription());
+    }
+
+    private String getGetSettingResponse(String text) {
+        int commandStartIndex = text.indexOf(config.getSettingCommand);
+        if (commandStartIndex < 0) {
+            return unknownSettingResponse();
+        }
+
+        int commandEndIndex = commandStartIndex + config.getSettingCommand.length();
+        if (commandEndIndex >= text.length()) {
+            return unknownSettingResponse();
+        }
+
+        String settingName = text.substring(commandEndIndex).trim();
+
+        BotSetting<?> botSetting = settings.getBotSetting(settingName);
+        if (botSetting == null) {
+            return unknownSettingResponse();
+        }
+
+        return String.format("*%s*%n%s", botSetting.getName(), botSetting.getValue());
+    }
+
+    private String getSetSettingResponse(String text) {
+        int commandStartIndex = text.indexOf(config.setSettingCommand);
+        if (commandStartIndex < 0) {
+            return unknownSettingResponse();
+        }
+
+        int commandEndIndex = commandStartIndex + config.setSettingCommand.length();
+        if (commandEndIndex >= text.length()) {
+            return unknownSettingResponse();
+        }
+
+        String settingNameAndValue = text.substring(commandEndIndex).trim();
+
+        String nameValueSeparator = " ";
+        int separatorIndex = settingNameAndValue.indexOf(nameValueSeparator);
+
+        if (separatorIndex < 0 || separatorIndex >= settingNameAndValue.length()) {
+            return unknownSettingResponse(); // todo: probably another more concrete response
+        }
+
+        String settingName = settingNameAndValue.substring(0, separatorIndex).trim();
+        String settingValue = settingNameAndValue.substring(separatorIndex).trim();
+
+        BotSetting<?> botSetting = settings.getBotSetting(settingName);
+        if (botSetting == null) {
+            return unknownSettingResponse();
+        }
+
+        try {
+            botSetting.setValue(settingValue);
+            settings.fillSettingCacheFields();
+        }
+        catch (Exception e) {
+            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, settingValue);
+        }
+
+        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), botSetting.getValue());
     }
 
     private String unknownSettingResponse() {

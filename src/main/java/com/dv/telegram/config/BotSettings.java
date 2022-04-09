@@ -8,8 +8,8 @@ public class BotSettings {
 
     public final Map<String, BotSetting<?>> settings;
 
-    public final String startMessage;
-    public final boolean deleteBotCallMessageOnMessageReply;
+    public String startMessage;
+    public boolean deleteBotCallMessageOnMessageReply;
 
     public static BotSettings create(WikiBotConfig config) {
         Map<String, BotSetting<?>> settingsMap = BotSettingUtils.fillSettingsMap(config);
@@ -18,7 +18,10 @@ public class BotSettings {
 
     public BotSettings(Map<String, BotSetting<?>> settings) {
         this.settings = settings;
+        fillSettingCacheFields();
+    }
 
+    public void fillSettingCacheFields() {
         this.startMessage = getStartMessage();
         this.deleteBotCallMessageOnMessageReply = getDeleteBotCallMessageOnMessageReply();
     }
