@@ -13,10 +13,10 @@
 
     // special commands
     "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
-    "listSettingsCommand": "listSettings",
-    "getSettingCommand": "getSetting",
-    "setSettingCommand": "setSetting",
-    "helpSettingCommand": "helpSetting",
+    "listSettingsCommand": "/listSettings",
+    "getSettingCommand": "/getSetting",
+    "setSettingCommand": "/setSetting",
+    "helpSettingCommand": "/helpSetting",
 
     // settings that can be changed in runtime
     "settings": {

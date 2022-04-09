@@ -1,5 +1,6 @@
 package com.dv.telegram;
 
+import com.dv.telegram.config.BotSetting;
 import com.dv.telegram.config.BotSettings;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -18,7 +20,6 @@ import java.util.Optional;
 @Log4j2
 public class WikiBot extends TelegramLongPollingBot {
 
-    private static final String ALTERNATIVE_BOT_NAME_LOWER_CASE = "боот";
     private static final String START_COMMAND = "/start";
 
     private final WikiBotConfig config;
@@ -59,7 +60,7 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     public String getBotUsername() {
-        return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by
+        return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by what is set by "/setname" in the @BotFather
     }
 
     public String getEnvironmentName() {
@@ -87,17 +88,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
         boolean deleteBotCallMessage = settings.deleteBotCallMessageOnMessageReply && updateMessageIsReply;
         if (deleteBotCallMessage) {
-            DeleteMessage deleteMessage = new DeleteMessage(
-                updateMessage.getChatId().toString(),
-                updateMessage.getMessageId()
-            );
-
-            try {
-                execute(deleteMessage);
-            }
-            catch (TelegramApiException e) {
-                log.error("Failed to delete message", e);
-            }
+            deleteBotCallMessage(updateMessage);
         }
 
         // command is for the bot -> send the answer
@@ -107,11 +98,15 @@ public class WikiBot extends TelegramLongPollingBot {
         sendMessage.setChatId(chatId);
         sendMessage.setText(responseText);
 
+        if (useMarkdown(text)) {
+            sendMessage.setParseMode("Markdown");
+        }
+
         sendMessage.disableWebPagePreview();
 
         Integer replyToMessageId = deleteBotCallMessage
             ? replyToMessage.getMessageId() // reply to the original message
-            : updateMessage.getMessageId() // reply to bot message
+            : updateMessage.getMessageId() // reply to the "call bot" message
         ;
 
         sendMessage.setReplyToMessageId(replyToMessageId);
@@ -125,11 +120,39 @@ public class WikiBot extends TelegramLongPollingBot {
         }
     }
 
+    private void deleteBotCallMessage(Message updateMessage) {
+        DeleteMessage deleteMessage = new DeleteMessage(
+            updateMessage.getChatId().toString(),
+            updateMessage.getMessageId()
+        );
+
+        try {
+            execute(deleteMessage);
+        }
+        catch (TelegramApiException e) {
+            log.error("Failed to delete message", e);
+        }
+    }
+
     private boolean messageIsForTheBot(String lowerText) {
-        return lowerText.contains(ALTERNATIVE_BOT_NAME_LOWER_CASE)
-            || lowerText.contains(botNameLowerCase)
+        return lowerText.contains(botNameLowerCase)
             || lowerText.equals(START_COMMAND)
         ;
+    }
+
+    private boolean useMarkdown(String text) {
+        if (StringUtils.isBlank(text)) {
+            return false;
+        }
+
+        String lowerText = text.toLowerCase(Locale.ROOT);
+
+        if (!messageIsForTheBot(lowerText)) {
+            return false;
+        }
+
+        return text.contains(config.listSettingsCommand)
+            || text.contains(config.helpSettingCommand);
     }
 
     private Optional<String> getResponseText(String text) {
@@ -144,7 +167,7 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         // special commands - not configured in the Google Sheet
-        Optional<String> specialCommandResponseOptional = handleSpecialCommands(lowerText);
+        Optional<String> specialCommandResponseOptional = handleSpecialCommands(text, lowerText);
         if (specialCommandResponseOptional.isPresent()) { // special command received -> return response for the special command
             return specialCommandResponseOptional;
         }
@@ -183,22 +206,71 @@ public class WikiBot extends TelegramLongPollingBot {
         }
     }
 
-    private Optional<String> handleSpecialCommands(String text) {
-        if (text.equals(START_COMMAND)) {
+    private Optional<String> handleSpecialCommands(String text, String lowerText) {
+        if (lowerText.equals(START_COMMAND)) {
             String response = MessageFormat.format(settings.startMessage, botName);
             return Optional.of(response);
         }
 
-        if (text.contains("ты где") || text.contains("где ты")) {
+        if (text.contains(config.listSettingsCommand)) {
+            String response = getListSettingsResponse();
+            return Optional.of(response);
+        }
+
+        if (text.contains(config.helpSettingCommand)) {
+            String response = getHelpSettingResponse(text);
+            return Optional.of(response);
+        }
+
+        if (lowerText.contains("ты где") || lowerText.contains("где ты")) {
             String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
             return Optional.of(response);
         }
 
-        if (text.contains(reloadFromGoogleSheetCommandLowerCase)) {
+        if (lowerText.contains(reloadFromGoogleSheetCommandLowerCase)) {
             return reloadBotDataFromGoogleSheet();
         }
 
         return Optional.empty();
+    }
+
+    private String getListSettingsResponse() {
+        List<String> settingsLines = new ArrayList<>();
+
+        for (BotSetting<?> setting : settings.settings.values()) {
+            settingsLines.add(String.format(
+                "— *%s*: %s",
+                setting.getName(),
+                setting.getValue()
+            ));
+        }
+
+        return StringUtils.join(settingsLines, "\n\n");
+    }
+
+    private String getHelpSettingResponse(String text) {
+        int commandStartIndex = text.indexOf(config.helpSettingCommand);
+        if (commandStartIndex < 0) {
+            return unknownSettingResponse();
+        }
+
+        int commandEndIndex = commandStartIndex + config.helpSettingCommand.length();
+        if (commandEndIndex >= text.length()) {
+            return unknownSettingResponse();
+        }
+
+        String settingName = text.substring(commandEndIndex).trim();
+
+        BotSetting<?> botSetting = settings.getBotSetting(settingName);
+        if (botSetting == null) {
+            return unknownSettingResponse();
+        }
+
+        return String.format("*%s*%n%s", botSetting.getName(), botSetting.getDescription());
+    }
+
+    private String unknownSettingResponse() {
+        return "Неизвестное имя настройки.";
     }
 
     private Optional<String> reloadBotDataFromGoogleSheet() {
@@ -292,6 +364,6 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private String getNoResultAnswer(String text) { // todo: think about redirecting to the root wiki page
-        return String.format("%s ничего не знает про ваш запрос «%s» :(", botName, text);
+        return String.format("%s ничего не знает про ваш запрос «%s» :(", botName, text); // todo: make this text a setting
     }
 }

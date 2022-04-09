@@ -23,6 +23,10 @@ public class BotSettings {
         this.deleteBotCallMessageOnMessageReply = getDeleteBotCallMessageOnMessageReply();
     }
 
+    public BotSetting<?> getBotSetting(String settingName) {
+        return settings.get(settingName);
+    }
+
     private String getStartMessage() {
         return getStringSetting(StartMessage.NAME);
     }
