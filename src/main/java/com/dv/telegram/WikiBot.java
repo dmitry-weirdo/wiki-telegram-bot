@@ -53,7 +53,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
 
         String regex = String.format("(?i).*\\b%s\\b.*", botName);
-        this.botNameWordPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        this.botNameWordPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); // see https://stackoverflow.com/a/43738714/8534088
 
         this.environmentName = config.getEnvironmentName();
         this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
