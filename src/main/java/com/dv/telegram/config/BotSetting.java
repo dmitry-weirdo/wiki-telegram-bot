@@ -12,7 +12,8 @@ public interface BotSetting<T> {
     static List<BotSetting<?>> getAllSettings() {
         return List.of(
             new StartMessage(),
-            new DeleteBotCallMessageOnMessageReply()
+            new DeleteBotCallMessageOnMessageReply(),
+            new BotTriggerMode()
         );
     }
 }

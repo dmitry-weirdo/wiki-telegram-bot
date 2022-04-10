@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Log4j2
 public class WikiBot extends TelegramLongPollingBot {
@@ -29,6 +30,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private final String botName;
     private final String botNameLowerCase;
+    private final Pattern botNameWordPattern;
     private final String environmentName;
     private final String reloadFromGoogleSheetCommandLowerCase;
 
@@ -49,6 +51,10 @@ public class WikiBot extends TelegramLongPollingBot {
 
         this.botName = config.getBotName();
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
+
+        String regex = String.format("(?i).*\\b%s\\b.*", botName);
+        this.botNameWordPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
         this.environmentName = config.getEnvironmentName();
         this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
 
@@ -135,9 +141,15 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private boolean messageIsForTheBot(String lowerText) {
-        return lowerText.contains(botNameLowerCase)
-            || lowerText.equals(START_COMMAND)
-        ;
+        if (lowerText.equals(START_COMMAND)) {
+            return true;
+        }
+
+        return switch (settings.triggerMode) {
+            case ANY_SUBSTRING -> lowerText.contains(botNameLowerCase);
+            case STRING_START -> lowerText.startsWith(botNameLowerCase);
+            case FULL_WORD -> botNameWordPattern.matcher(lowerText).matches();
+        };
     }
 
     private boolean useMarkdown(String text) {
@@ -145,7 +157,7 @@ public class WikiBot extends TelegramLongPollingBot {
             return false;
         }
 
-        String lowerText = text.toLowerCase(Locale.ROOT);
+        String lowerText = text.toLowerCase(Locale.ROOT).trim();
 
         if (!messageIsForTheBot(lowerText)) {
             return false;
@@ -253,7 +265,7 @@ public class WikiBot extends TelegramLongPollingBot {
             settingsLines.add(String.format(
                 "— *%s*:%n%s",
                 setting.getName(),
-                setting.getValue()
+                getSettingValueForMarkdown(setting)
             ));
         }
 
@@ -299,7 +311,18 @@ public class WikiBot extends TelegramLongPollingBot {
             return unknownSettingResponse();
         }
 
-        return String.format("*%s*%n%s", botSetting.getName(), botSetting.getValue());
+        String value = getSettingValueForMarkdown(botSetting);
+        return String.format("*%s*%n%s", botSetting.getName(), value);
+    }
+
+    private String getSettingValueForMarkdown(BotSetting<?> botSetting) {
+        return getSettingValueForMarkdown(
+            botSetting.getValue().toString()
+        );
+    }
+
+    private String getSettingValueForMarkdown(String settingValue) {
+        return settingValue.replaceAll("\\_", "\\\\_"); // for Markdown, escape "_" as "\_" to not fail sending the Telegram message
     }
 
     private String getSetSettingResponse(String text) {
@@ -335,10 +358,10 @@ public class WikiBot extends TelegramLongPollingBot {
             settings.fillSettingCacheFields();
         }
         catch (Exception e) {
-            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, settingValue);
+            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, getSettingValueForMarkdown(settingValue));
         }
 
-        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), botSetting.getValue());
+        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), getSettingValueForMarkdown(botSetting));
     }
 
     private String unknownSettingResponse() {

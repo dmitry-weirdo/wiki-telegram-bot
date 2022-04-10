@@ -10,6 +10,7 @@ public class BotSettings {
 
     public String startMessage;
     public boolean deleteBotCallMessageOnMessageReply;
+    public BotTriggerMode.Mode triggerMode;
 
     public static BotSettings create(WikiBotConfig config) {
         Map<String, BotSetting<?>> settingsMap = BotSettingUtils.fillSettingsMap(config);
@@ -24,6 +25,7 @@ public class BotSettings {
     public void fillSettingCacheFields() {
         this.startMessage = getStartMessage();
         this.deleteBotCallMessageOnMessageReply = getDeleteBotCallMessageOnMessageReply();
+        this.triggerMode = getBotTriggerMode();
     }
 
     public BotSetting<?> getBotSetting(String settingName) {
@@ -36,6 +38,11 @@ public class BotSettings {
 
     private boolean getDeleteBotCallMessageOnMessageReply() {
         return getBooleanSetting(DeleteBotCallMessageOnMessageReply.NAME);
+    }
+
+    private BotTriggerMode.Mode getBotTriggerMode() {
+        BotSetting<?> setting = getSetting(BotTriggerMode.NAME);
+        return (BotTriggerMode.Mode) setting.getValue();
     }
 
     private String getStringSetting(String settingName) {
