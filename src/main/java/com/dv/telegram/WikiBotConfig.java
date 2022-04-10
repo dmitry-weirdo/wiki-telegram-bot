@@ -28,5 +28,10 @@ public class WikiBotConfig {
     public String setSettingCommand;
     public String helpSettingCommand;
 
+    // special commands - statistics
+    public String getStatisticsCommand;
+    public String getFailedRequestsCommand;
+    public String clearFailedRequestsCommand;
+
     public Map<String, String> settings;
 }

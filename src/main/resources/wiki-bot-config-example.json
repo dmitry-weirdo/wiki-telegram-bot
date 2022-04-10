@@ -11,12 +11,18 @@
     "cityChatsSheetName": "Список чатов по городам",
     "commandsSheetName": "Список болталки",
 
+    // todo: group commands under "commands" block and without "command" keyword
     // special commands
     "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
     "listSettingsCommand": "/listSettings",
     "getSettingCommand": "/getSetting",
     "setSettingCommand": "/setSetting",
     "helpSettingCommand": "/helpSetting",
+
+    // -- stats
+    "getStatisticsCommand": "/getStats",
+    "getFailedRequestsCommand": "/getFailedRequests",
+    "clearFailedRequestsCommand": "/clearFailedRequests",
 
     // settings that can be changed in runtime
     "settings": {

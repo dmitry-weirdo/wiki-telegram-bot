@@ -12,6 +12,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.text.MessageFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +38,10 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private final BotSettings settings; // settings cache in memory
 
+    private final BotStatistics statistics;
+
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm:ss");
+
     public WikiBot(
         WikiBotConfig config,
         List<WikiPageData> wikiPagesData,
@@ -59,6 +65,8 @@ public class WikiBot extends TelegramLongPollingBot {
         this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
 
         this.settings = BotSettings.create(config);
+
+        this.statistics = new BotStatistics();
     }
 
     public String getBotToken() {
@@ -183,8 +191,12 @@ public class WikiBot extends TelegramLongPollingBot {
         // special commands - not configured in the Google Sheet
         Optional<String> specialCommandResponseOptional = handleSpecialCommands(text, lowerText);
         if (specialCommandResponseOptional.isPresent()) { // special command received -> return response for the special command
+            statistics.specialCommandsCount++;
             return specialCommandResponseOptional;
         }
+
+        // todo: nicer straightforward success/no success code instead of ++/-- on "no answer"
+        statistics.successfulRequestsCount++;
 
         // normal commands - configured in the Google Sheet
         List<WikiBotCommandData> matchingCommands = findMatchingCommands(lowerText);
@@ -214,11 +226,17 @@ public class WikiBot extends TelegramLongPollingBot {
             return cityChatsAnswerText;
         }
         else { // neither wiki pages nor city chats present -> return "No result" response
+            statistics.successfulRequestsCount--;
+            statistics.failedRequestsCount++;
+            statistics.addFailedRequest(text);
+
             return getNoResultResponse(text);
         }
     }
 
     private Optional<String> handleSpecialCommands(String text, String lowerText) {
+        // todo: make this a nicer code instead a chain of "ifs"
+
         if (lowerText.equals(START_COMMAND)) {
             String response = MessageFormat.format(settings.startMessage, botName);
             return Optional.of(response);
@@ -241,6 +259,21 @@ public class WikiBot extends TelegramLongPollingBot {
 
         if (text.contains(config.setSettingCommand)) {
             String response = getSetSettingResponse(text);
+            return Optional.of(response);
+        }
+
+        if (text.contains(config.getStatisticsCommand)) {
+            String response = getGetStatisticsResponse();
+            return Optional.of(response);
+        }
+
+        if (text.contains(config.getFailedRequestsCommand)) {
+            String response = getGetFailedRequestsResponse();
+            return Optional.of(response);
+        }
+
+        if (text.contains(config.clearFailedRequestsCommand)) {
+            String response = getClearFailedRequestsResponse();
             return Optional.of(response);
         }
 
@@ -364,6 +397,50 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private String unknownSettingResponse() {
         return "Неизвестное имя настройки.";
+    }
+
+    private String getGetStatisticsResponse() {
+        List<String> statisticsLines = List.of(
+            getStatisticsLine("Время старта бота", statistics.startTime),
+            getStatisticsLine("Успешных запросов", statistics.successfulRequestsCount),
+            getStatisticsLine("Неуспешных запросов", statistics.failedRequestsCount),
+            getStatisticsLine("Всего запросов", statistics.getTotalCalls()),
+            getStatisticsLine("Вызовов специальных команд", statistics.specialCommandsCount),
+            getStatisticsLine("Всего запросов (вместе со специальными командами)", statistics.getTotalCallsWithSpecialCommands())
+        );
+
+        return StringUtils.join(statisticsLines, "\n");
+    }
+
+    private String getStatisticsLine(String name, long count) {
+        return String.format("— %s: %d", name, count);
+    }
+
+    private String getStatisticsLine(String name, ZonedDateTime time) {
+        return String.format("— %s: %s", name, dateTimeFormatter.format(time));
+    }
+
+    private String getGetFailedRequestsResponse() {
+        List<String> failedRequestsLines = statistics
+            .getFailedRequests()
+            .stream()
+            .map(failedRequest -> String.format("— %s", failedRequest))
+            .toList();
+
+
+        String totalLine = String.format("Разных неудачных запросов: %d", failedRequestsLines.size());
+
+        List<String> responseLines = new ArrayList<>();
+        responseLines.add(totalLine);
+        responseLines.addAll(failedRequestsLines);
+
+        return StringUtils.join(responseLines, "\n");
+    }
+
+    private String getClearFailedRequestsResponse() {
+        int clearedFailedRequestsCount = statistics.failedRequests.size();
+        statistics.clearFailedRequests();
+        return String.format("Список из %d неудачных запросов к боту очищен.", clearedFailedRequestsCount);
     }
 
     private Optional<String> reloadBotDataFromGoogleSheet() {
