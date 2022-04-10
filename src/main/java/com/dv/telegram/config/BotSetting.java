@@ -13,7 +13,9 @@ public interface BotSetting<T> {
         return List.of(
             new StartMessage(),
             new DeleteBotCallMessageOnMessageReply(),
-            new BotTriggerMode()
+            new BotTriggerMode(),
+            new ReplyWhenNoAnswer(),
+            new NoAnswerReply()
         );
     }
 }

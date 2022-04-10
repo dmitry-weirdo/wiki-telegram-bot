@@ -21,7 +21,10 @@
     // settings that can be changed in runtime
     "settings": {
       "StartMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!",
-      "DeleteBotCallMessageOnMessageReply": "true"
+      "DeleteBotCallMessageOnMessageReply": "true",
+      "BotTriggerMode": "FULL_WORD",
+      "ReplyWhenNoAnswer": "true",
+      "NoAnswerReply": "{0} ничего не знает про ваш запрос «{1}» :("
     }
   }
 }

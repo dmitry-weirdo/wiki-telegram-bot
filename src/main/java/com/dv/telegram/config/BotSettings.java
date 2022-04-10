@@ -11,6 +11,8 @@ public class BotSettings {
     public String startMessage;
     public boolean deleteBotCallMessageOnMessageReply;
     public BotTriggerMode.Mode triggerMode;
+    public boolean replyWhenNoAnswer;
+    public String noAnswerReply;
 
     public static BotSettings create(WikiBotConfig config) {
         Map<String, BotSetting<?>> settingsMap = BotSettingUtils.fillSettingsMap(config);
@@ -26,6 +28,8 @@ public class BotSettings {
         this.startMessage = getStartMessage();
         this.deleteBotCallMessageOnMessageReply = getDeleteBotCallMessageOnMessageReply();
         this.triggerMode = getBotTriggerMode();
+        this.replyWhenNoAnswer = getReplyWhenNoAnswer();
+        this.noAnswerReply = getNoAnswerReply();
     }
 
     public BotSetting<?> getBotSetting(String settingName) {
@@ -43,6 +47,14 @@ public class BotSettings {
     private BotTriggerMode.Mode getBotTriggerMode() {
         BotSetting<?> setting = getSetting(BotTriggerMode.NAME);
         return (BotTriggerMode.Mode) setting.getValue();
+    }
+
+    private boolean getReplyWhenNoAnswer() {
+        return getBooleanSetting(ReplyWhenNoAnswer.NAME);
+    }
+
+    private String getNoAnswerReply() {
+        return getStringSetting(NoAnswerReply.NAME);
     }
 
     private String getStringSetting(String settingName) {

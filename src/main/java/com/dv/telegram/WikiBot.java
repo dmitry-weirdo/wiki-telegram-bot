@@ -214,9 +214,7 @@ public class WikiBot extends TelegramLongPollingBot {
             return cityChatsAnswerText;
         }
         else { // neither wiki pages nor city chats present -> return "No result" response
-            log.info("Unknown command for the bot: {}", text);
-            String noResultAnswer = getNoResultAnswer(text);
-            return Optional.of(noResultAnswer);
+            return getNoResultResponse(text);
         }
     }
 
@@ -408,11 +406,6 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private String getCommandAnswerText(String text, List<WikiBotCommandData> matchingCommands) {
-        if (matchingCommands.isEmpty()) {
-            log.info("Unknown command for the bot: {}", text);
-            return getNoResultAnswer(text);
-        }
-
         if (matchingCommands.size() == 1) {
             return matchingCommands.get(0).getOneLineAnswer();
         }
@@ -458,7 +451,19 @@ public class WikiBot extends TelegramLongPollingBot {
         return Optional.of(answer);
     }
 
-    private String getNoResultAnswer(String text) { // todo: think about redirecting to the root wiki page
-        return String.format("%s ничего не знает про ваш запрос «%s» :(", botName, text); // todo: make this text a setting
+    private Optional<String> getNoResultResponse(String text) {
+        log.info("Unknown command for the bot: {}", text);
+
+        if (settings.replyWhenNoAnswer) { // reply on no answer
+            String noResultAnswer = getNoResultAnswer(text);
+            return Optional.of(noResultAnswer);
+        }
+
+        // no reply on no answer
+        return Optional.empty();
+    }
+
+    private String getNoResultAnswer(String text) {
+        return MessageFormat.format(settings.noAnswerReply, botName, text);
     }
 }
