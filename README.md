@@ -99,3 +99,20 @@ screen -r wiki-bot
 ```
 
 And press `Ctrl + C` to stop the bot.
+
+
+# How to add a new bot instance
+
+* Define the bot name and whether the bot should be male/female.
+* Define the bot default settings. 
+* Create the new bot, `/newbot` in the [@BotFather](https://t.me/BotFather).
+* Set bot name via `/setname` in the [@BotFather](https://t.me/BotFather).
+* Disable bot privacy using `/setprivacy` in the [@BotFather](https://t.me/BotFather).
+* Set male or female bot avatar via `/setuserpic`in the [@BotFather](https://t.me/BotFather).
+* Add bot config to the prod json config file.
+* Build the maven artifact `mvn install`.
+* Connect to EC2 via PuTTY.
+* Resume the `screen` session running the bot.
+* Stop the running bot instances with `Ctrl + C`.
+* Deploy the new bot configuration with `copy-to-ec2.sh`.
+* Start bot instances with `run-ec2.sh`.
