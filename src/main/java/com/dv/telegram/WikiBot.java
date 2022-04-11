@@ -402,9 +402,9 @@ public class WikiBot extends TelegramLongPollingBot {
     private String getGetStatisticsResponse() {
         List<String> statisticsLines = List.of(
             getStatisticsLine("Время старта бота", statistics.startTime),
-            getStatisticsLine("Успешных запросов", statistics.successfulRequestsCount),
-            getStatisticsLine("Неуспешных запросов", statistics.failedRequestsCount),
-            getStatisticsLine("Всего запросов", statistics.getTotalCalls()),
+            getStatisticsLine("Успешных запросов", statistics.getSuccessfulRequestsCountWithPercentage()),
+            getStatisticsLine("Неуспешных запросов", statistics.getFailedRequestsCountWithPercentage()),
+            getStatisticsLine("Всего запросов", statistics.getTotalCallsWithPercentage()),
             getStatisticsLine("Вызовов специальных команд", statistics.specialCommandsCount),
             getStatisticsLine("Всего запросов (вместе со специальными командами)", statistics.getTotalCallsWithSpecialCommands())
         );
@@ -414,6 +414,10 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private String getStatisticsLine(String name, long count) {
         return String.format("— %s: %d", name, count);
+    }
+
+    private String getStatisticsLine(String name, String value) {
+        return String.format("— %s: %s", name, value);
     }
 
     private String getStatisticsLine(String name, ZonedDateTime time) {
