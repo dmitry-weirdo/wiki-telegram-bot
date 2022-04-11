@@ -20,16 +20,20 @@ public class BotStatistics {
 
     public Set<String> failedRequests = new LinkedHashSet<>(); // todo: add String -> count map if required
 
+    private static final String COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)";
+
     public String getSuccessfulRequestsCountWithPercentage() {
-        return String.format("%d (%.02f %%)", successfulRequestsCount, getSuccessfulRequestsPercentage());
+        double successfulRequestsPercentage = (getTotalCalls() == 0) ? 0d : getSuccessfulRequestsPercentage();
+        return String.format(COUNT_PERCENTAGE_FORMAT, successfulRequestsCount, successfulRequestsPercentage);
     }
 
     public String getFailedRequestsCountWithPercentage() {
-        return String.format("%d (%.02f %%)", failedRequestsCount, 100 - getSuccessfulRequestsPercentage());
+        double failedRequestPercentage = (getTotalCalls() == 0) ? 0d : (100 - getSuccessfulRequestsPercentage());
+        return String.format(COUNT_PERCENTAGE_FORMAT, failedRequestsCount, failedRequestPercentage);
     }
 
     public String getTotalCallsWithPercentage() {
-        return String.format("%d (%.02f %%)", getTotalCalls(), 100d);
+        return String.format(COUNT_PERCENTAGE_FORMAT, getTotalCalls(), 100d);
     }
 
     private double getSuccessfulRequestsPercentage() {
