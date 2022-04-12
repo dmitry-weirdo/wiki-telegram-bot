@@ -14,8 +14,12 @@ public class GetFailedRequests extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("%s — получить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.", getCommandText());
+    public String getDescription(String botName) {
+        return String.format(
+            "`%s %s` — получить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.",
+            botName,
+            getCommandText()
+        );
     }
 
     @Override

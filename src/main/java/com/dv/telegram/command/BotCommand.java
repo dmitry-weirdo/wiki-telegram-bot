@@ -8,7 +8,7 @@ import java.util.List;
 public interface BotCommand {
 
     String getName(); // english name, no spaces
-    String getDescription(); // description, in russian
+    String getDescription(String botName); // description, in Russian
     boolean useMarkdownInResponse();
 
     String getDefaultCommandName(); // default command when it is not overridden by config
@@ -33,11 +33,14 @@ public interface BotCommand {
 
     static List<BotCommand> getAllCommands() {
         return List.of(
+            // commands
+            new HelpCommand(), // first command to be found since it documents the other commands
+            new ListCommands(),
+
+            // basic commands
             new Start(),
             new GetEnvironment(),
             new ReloadFromGoogleSheet(),
-
-            // todo: commands (ListCommands, HelpCommand)
 
             // settings
             new ListSettings(),

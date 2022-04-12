@@ -9,6 +9,7 @@ import java.util.Optional;
 public class BotSpecialCommands {
 
     private final List<BotCommand> commands;
+    private HelpCommand helpCommand;
 
     public static BotSpecialCommands create(WikiBotConfig config) {
         List<BotCommand> botCommands = BotCommandUtils.fillCommands(config);
@@ -17,6 +18,27 @@ public class BotSpecialCommands {
 
     public BotSpecialCommands(List<BotCommand> commands) {
         this.commands = commands;
+
+        this.helpCommand = (HelpCommand) commands
+            .stream()
+            .filter(HelpCommand.class::isInstance)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No HelpCommand in the list of commands."));
+    }
+
+    public List<BotCommand> getCommands() {
+        return commands;
+    }
+
+    public HelpCommand getHelpCommand() {
+        return helpCommand;
+    }
+
+    public Optional<BotCommand> getCommand(String commandText) {
+        return commands
+            .stream()
+            .filter(command -> command.getCommandText().equals(commandText))
+            .findFirst();
     }
 
     public boolean useMarkdownInResponse(String text) {

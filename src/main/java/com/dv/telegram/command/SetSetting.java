@@ -11,8 +11,12 @@ public class SetSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("%s <settingName> <settingValue> — установить значение настройки с названием <settingName> в значение <settingValue>.", getCommandText());
+    public String getDescription(String botName) {
+        return String.format(
+            "`%s %s <settingName> <settingValue>` — установить значение настройки с названием `<settingName>` в значение `<settingValue>`.",
+            botName,
+            getCommandText()
+        );
     }
 
     @Override

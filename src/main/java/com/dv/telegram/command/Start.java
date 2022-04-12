@@ -13,11 +13,13 @@ public class Start extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(String botName) {
         return String.format(
-            "%s — выдать приветственное сообщение бота. Сообщение определяется настройкой *%s*",
+            "`%s %s` — выдать приветственное сообщение бота. Сообщение определяется настройкой *%s*.%n%nКоманда также работает без имени бота: `%s`.",
+            botName,
             getCommandText(),
-            StartMessage.NAME
+            StartMessage.NAME,
+            getCommandText()
         );
     }
 

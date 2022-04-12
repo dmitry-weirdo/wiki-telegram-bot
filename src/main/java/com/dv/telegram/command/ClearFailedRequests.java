@@ -10,8 +10,12 @@ public class ClearFailedRequests extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("%s — очистить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.", getCommandText());
+    public String getDescription(String botName) {
+        return String.format(
+            "`%s %s` — очистить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.",
+            botName,
+            getCommandText()
+        );
     }
 
     @Override

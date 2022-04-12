@@ -18,8 +18,12 @@ public class GetStatistics extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("%s — получить статистику по работе бота с момента текущего запуска инстанса.", getCommandText());
+    public String getDescription(String botName) {
+        return String.format(
+            "`%s %s` — получить статистику по работе бота с момента текущего запуска инстанса.",
+            botName,
+            getCommandText()
+        );
     }
 
     @Override

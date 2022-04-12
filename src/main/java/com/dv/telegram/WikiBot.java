@@ -54,8 +54,8 @@ public class WikiBot extends TelegramLongPollingBot {
         this.botName = config.getBotName();
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
 
-        String regex = String.format("(?i).*\\b%s\\b.*", botName);
-        this.botNameWordPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); // see https://stackoverflow.com/a/43738714/8534088
+        String botNameRegex = String.format("(?i).*\\b%s\\b.*", botName);
+        this.botNameWordPattern = Pattern.compile(botNameRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); // see https://stackoverflow.com/a/43738714/8534088
 
         this.environmentName = config.getEnvironmentName();
 
@@ -79,6 +79,10 @@ public class WikiBot extends TelegramLongPollingBot {
 
     public String getEnvironmentName() {
         return environmentName;
+    }
+
+    public BotSpecialCommands getSpecialCommands() {
+        return specialCommands;
     }
 
     public BotSettings getSettings() {

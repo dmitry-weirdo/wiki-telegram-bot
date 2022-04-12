@@ -11,8 +11,12 @@ public class HelpSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("%s <settingName> — получить помощь по настройки с названием <settingName>.", getCommandText());
+    public String getDescription(String botName) {
+        return String.format(
+            "`%s %s <settingName>` — получить помощь по настройке с названием `<settingName>`.",
+            botName,
+            getCommandText()
+        );
     }
 
     @Override

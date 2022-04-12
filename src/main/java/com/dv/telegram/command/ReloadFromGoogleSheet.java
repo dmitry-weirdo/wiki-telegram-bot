@@ -10,8 +10,12 @@ public class ReloadFromGoogleSheet extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("%s — перезагрузить конфигурацию бота из Google Sheet.", getCommandText());
+    public String getDescription(String botName) {
+        return String.format(
+            "`%s %s` — перезагрузить конфигурацию бота из Google Sheet.",
+            botName,
+            getCommandText()
+        );
     }
 
     @Override

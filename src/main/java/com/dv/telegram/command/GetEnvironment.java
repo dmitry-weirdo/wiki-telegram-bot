@@ -10,9 +10,10 @@ public class GetEnvironment extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(String botName) {
         return String.format(
-            "%s — выдать окружение в которой запущен инстанс бота.",
+            "`%s %s` — выдать окружение, в котором запущен инстанс бота.",
+            botName,
             getCommandText()
         );
     }
