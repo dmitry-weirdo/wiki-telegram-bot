@@ -35,6 +35,7 @@ public interface BotCommand {
         return List.of(
             new Start(),
             new GetEnvironment(),
+            new ReloadFromGoogleSheet(),
 
             // todo: commands (ListCommands, HelpCommand)
 

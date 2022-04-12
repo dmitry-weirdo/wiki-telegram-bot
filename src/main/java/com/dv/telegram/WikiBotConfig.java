@@ -21,9 +21,6 @@ public class WikiBotConfig {
     public String cityChatsSheetName;
     public String commandsSheetName;
 
-    // special commands // todo: remove these settings, only use commands
-    public String reloadFromGoogleSheetCommand;
-
-    public Map<String, String> commands;
+    public Map<String, String> commands; // special commands
     public Map<String, String> settings;
 }

@@ -31,7 +31,6 @@ public class WikiBot extends TelegramLongPollingBot {
     private final String botNameLowerCase;
     private final Pattern botNameWordPattern;
     private final String environmentName;
-    private final String reloadFromGoogleSheetCommandLowerCase;
 
     private final BotSpecialCommands specialCommands;
 
@@ -59,7 +58,6 @@ public class WikiBot extends TelegramLongPollingBot {
         this.botNameWordPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); // see https://stackoverflow.com/a/43738714/8534088
 
         this.environmentName = config.getEnvironmentName();
-        this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
 
         this.specialCommands = BotSpecialCommands.create(config);
         this.settings = BotSettings.create(config);
@@ -196,7 +194,7 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         // special commands - not configured in the Google Sheet
-        Optional<String> specialCommandResponseOptional = handleSpecialCommands(text, lowerText);
+        Optional<String> specialCommandResponseOptional = specialCommands.getResponse(text, this);
         if (specialCommandResponseOptional.isPresent()) { // special command received -> return response for the special command
             statistics.specialCommandsCount++;
             return specialCommandResponseOptional;
@@ -241,22 +239,7 @@ public class WikiBot extends TelegramLongPollingBot {
         }
     }
 
-    private Optional<String> handleSpecialCommands(String text, String lowerText) {
-        // todo: make this a nicer code instead a chain of "ifs"
-
-        Optional<String> specialCommandResponse = specialCommands.getResponse(text, this);
-        if (specialCommandResponse.isPresent()) { // todo: after all commands moved, just return specialCommandResponse
-            return specialCommandResponse;
-        }
-
-        if (lowerText.contains(reloadFromGoogleSheetCommandLowerCase)) {
-            return reloadBotDataFromGoogleSheet();
-        }
-
-        return Optional.empty();
-    }
-
-    private Optional<String> reloadBotDataFromGoogleSheet() {
+    public boolean reloadBotDataFromGoogleSheet() {
         try {
             log.info("Reloading bot data from the Google Sheet...");
             GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
@@ -265,12 +248,11 @@ public class WikiBot extends TelegramLongPollingBot {
             this.commands = botData.getCommands();
             log.info("Bot data successfully reloaded from the Google Sheet.");
 
-            return Optional.of("Данные бота успешно загружены из Google Sheet.");
+            return true;
         }
         catch (Exception e) {
             log.error("Error when loading bot data from the Google Sheet", e);
-
-            return Optional.of("При загрузке данных из Google Sheet произошла ошибка.");
+            return false;
         }
     }
 

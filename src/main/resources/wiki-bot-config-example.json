@@ -11,13 +11,10 @@
     "cityChatsSheetName": "Список чатов по городам",
     "commandsSheetName": "Список болталки",
 
-    // special commands // todo: remove this
-    "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
-
     // special commands
     "commands": {
 //      "GetEnvironment": "/getEnvironment",
-      "ReloadFromGoogleSheet": "/gs-reload-5150",
+      "ReloadFromGoogleSheet": "/gs-reload-666-5150",
 
       // settings
 //      "ListSettings": "/listSettings",
