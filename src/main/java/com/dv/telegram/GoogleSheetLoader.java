@@ -8,7 +8,10 @@ import com.dv.telegram.google.WikiBotGoogleSheet;
 
 import java.util.List;
 
-public class GoogleSheetLoader {
+public final class GoogleSheetLoader {
+
+    private GoogleSheetLoader() {
+    }
 
     public static GoogleSheetBotData readGoogleSheet(WikiBotConfig config) {
         WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);

@@ -1,8 +1,7 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
+import com.dv.telegram.WikiBot;
 import com.dv.telegram.WikiBotConfig;
-import com.dv.telegram.config.BotSettings;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +28,7 @@ public class BotSpecialCommands {
             );
     }
 
-    public Optional<String> getResponse(String text, BotSettings settings, BotStatistics statistics) {
+    public Optional<String> getResponse(String text, WikiBot bot) {
         Optional<BotCommand> matchingCommandOptional = commands
             .stream()
             .filter(command -> command.textContainsCommand(text))
@@ -41,7 +40,7 @@ public class BotSpecialCommands {
 
         String response = matchingCommandOptional
             .get()
-            .getResponse(text, settings, statistics);
+            .getResponse(text, bot);
 
         return Optional.of(response);
     }

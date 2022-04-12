@@ -75,8 +75,20 @@ public class WikiBot extends TelegramLongPollingBot {
         return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by what is set by "/setname" in the @BotFather
     }
 
+    public String getBotName() {
+        return botName;
+    }
+
     public String getEnvironmentName() {
         return environmentName;
+    }
+
+    public BotSettings getSettings() {
+        return settings;
+    }
+
+    public BotStatistics getStatistics() {
+        return statistics;
     }
 
     public void onUpdateReceived(Update update) {
@@ -232,13 +244,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private Optional<String> handleSpecialCommands(String text, String lowerText) {
         // todo: make this a nicer code instead a chain of "ifs"
 
-        // todo: start is also a special command!
-        if (lowerText.equals(START_COMMAND)) {
-            String response = MessageFormat.format(settings.startMessage, botName);
-            return Optional.of(response);
-        }
-
-        Optional<String> specialCommandResponse = specialCommands.getResponse(text, settings, statistics);
+        Optional<String> specialCommandResponse = specialCommands.getResponse(text, this);
         if (specialCommandResponse.isPresent()) { // todo: after all commands moved, just return specialCommandResponse
             return specialCommandResponse;
         }

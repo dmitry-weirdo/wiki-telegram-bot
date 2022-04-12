@@ -1,8 +1,7 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
+import com.dv.telegram.WikiBot;
 import com.dv.telegram.config.BotSetting;
-import com.dv.telegram.config.BotSettings;
 
 public class SetSetting extends BasicBotCommand {
 
@@ -27,7 +26,7 @@ public class SetSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
+    public String getResponse(String text, WikiBot bot) {
         int commandStartIndex = text.indexOf(getCommandText());
         if (commandStartIndex < 0) {
             return unknownSettingResponse();
@@ -50,14 +49,14 @@ public class SetSetting extends BasicBotCommand {
         String settingName = settingNameAndValue.substring(0, separatorIndex).trim();
         String settingValue = settingNameAndValue.substring(separatorIndex).trim();
 
-        BotSetting<?> botSetting = settings.getBotSetting(settingName);
+        BotSetting<?> botSetting = bot.getSettings().getBotSetting(settingName);
         if (botSetting == null) {
             return unknownSettingResponse();
         }
 
         try {
             botSetting.setValue(settingValue);
-            settings.fillSettingCacheFields();
+            bot.getSettings().fillSettingCacheFields();
         }
         catch (Exception e) {
             return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, BasicBotCommand.getSettingValueForMarkdown(settingValue));

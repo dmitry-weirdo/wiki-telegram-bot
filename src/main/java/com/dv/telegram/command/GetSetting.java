@@ -1,8 +1,7 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
+import com.dv.telegram.WikiBot;
 import com.dv.telegram.config.BotSetting;
-import com.dv.telegram.config.BotSettings;
 
 public class GetSetting extends BasicBotCommand {
 
@@ -27,7 +26,7 @@ public class GetSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
+    public String getResponse(String text, WikiBot bot) {
         int commandStartIndex = text.indexOf(getCommandText());
         if (commandStartIndex < 0) {
             return unknownSettingResponse();
@@ -40,7 +39,7 @@ public class GetSetting extends BasicBotCommand {
 
         String settingName = text.substring(commandEndIndex).trim();
 
-        BotSetting<?> botSetting = settings.getBotSetting(settingName);
+        BotSetting<?> botSetting = bot.getSettings().getBotSetting(settingName);
         if (botSetting == null) {
             return unknownSettingResponse();
         }

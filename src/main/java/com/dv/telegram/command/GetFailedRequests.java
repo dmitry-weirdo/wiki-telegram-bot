@@ -1,7 +1,6 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
-import com.dv.telegram.config.BotSettings;
+import com.dv.telegram.WikiBot;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -25,8 +24,9 @@ public class GetFailedRequests extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
-        List<String> failedRequestsLines = statistics
+    public String getResponse(String text, WikiBot bot) {
+        List<String> failedRequestsLines = bot
+            .getStatistics()
             .getFailedRequests()
             .stream()
             .map(failedRequest -> String.format("— %s", failedRequest))

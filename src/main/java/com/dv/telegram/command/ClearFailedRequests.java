@@ -1,7 +1,6 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
-import com.dv.telegram.config.BotSettings;
+import com.dv.telegram.WikiBot;
 
 public class ClearFailedRequests extends BasicBotCommand {
 
@@ -21,9 +20,9 @@ public class ClearFailedRequests extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
-        int clearedFailedRequestsCount = statistics.failedRequests.size();
-        statistics.clearFailedRequests();
+    public String getResponse(String text, WikiBot bot) {
+        int clearedFailedRequestsCount = bot.getStatistics().failedRequests.size();
+        bot.getStatistics().clearFailedRequests();
         return String.format("Список из %d неудачных запросов к боту очищен.", clearedFailedRequestsCount);
     }
 }

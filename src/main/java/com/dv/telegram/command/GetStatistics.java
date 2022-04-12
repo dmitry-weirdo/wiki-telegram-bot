@@ -1,7 +1,7 @@
 package com.dv.telegram.command;
 
 import com.dv.telegram.BotStatistics;
-import com.dv.telegram.config.BotSettings;
+import com.dv.telegram.WikiBot;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;
@@ -28,7 +28,9 @@ public class GetStatistics extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
+    public String getResponse(String text, WikiBot bot) {
+        BotStatistics statistics = bot.getStatistics();
+
         List<String> statisticsLines = List.of(
             getStatisticsLine("Время старта бота", statistics.startTime),
             getStatisticsLine("Успешных запросов", statistics.getSuccessfulRequestsCountWithPercentage()),

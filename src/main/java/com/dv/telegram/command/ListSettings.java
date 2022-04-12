@@ -1,8 +1,7 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
+import com.dv.telegram.WikiBot;
 import com.dv.telegram.config.BotSetting;
-import com.dv.telegram.config.BotSettings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -31,10 +30,10 @@ public class ListSettings extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
+    public String getResponse(String text, WikiBot bot) {
         List<String> settingsLines = new ArrayList<>();
 
-        for (BotSetting<?> setting : settings.settings.values()) {
+        for (BotSetting<?> setting : bot.getSettings().settings.values()) {
             settingsLines.add(String.format(
                 "— *%s*:%n%s",
                 setting.getName(),

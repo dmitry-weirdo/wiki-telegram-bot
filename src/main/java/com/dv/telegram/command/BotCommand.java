@@ -1,7 +1,6 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
-import com.dv.telegram.config.BotSettings;
+import com.dv.telegram.WikiBot;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public interface BotCommand {
         return getCommandName();
     }
 
-    String getResponse(String text, BotSettings settings, BotStatistics statistics);
+    String getResponse(String text, WikiBot bot);
 
     default boolean textContainsCommand(String text) {
         return text.contains(
@@ -34,6 +33,8 @@ public interface BotCommand {
 
     static List<BotCommand> getAllCommands() {
         return List.of(
+            new Start(),
+
             // todo: commands (ListCommands, HelpCommand)
 
             // settings
