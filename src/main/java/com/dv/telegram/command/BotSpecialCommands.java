@@ -40,7 +40,7 @@ public class BotSpecialCommands {
 
         String response = matchingCommandOptional
             .get()
-            .getResponse(settings);
+            .getResponse(text, settings);
 
         return Optional.of(response);
     }

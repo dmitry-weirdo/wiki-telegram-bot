@@ -16,7 +16,7 @@ public class ListSettings extends BasicBotCommand {
 
     @Override
     public String getDescription() {
-        return "Выводит список изменяемых в рантайме настроек бота.";
+        return "Вывести список изменяемых в рантайме настроек бота.";
     }
 
     @Override
@@ -30,7 +30,7 @@ public class ListSettings extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(BotSettings settings) {
+    public String getResponse(String text, BotSettings settings) {
         List<String> settingsLines = new ArrayList<>();
 
         for (BotSetting<?> setting : settings.settings.values()) {

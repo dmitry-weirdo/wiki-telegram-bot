@@ -23,7 +23,7 @@ public interface BotCommand {
         return getCommandName();
     }
 
-    String getResponse(BotSettings settings);
+    String getResponse(String text, BotSettings settings);
 
     default boolean textContainsCommand(String text) {
         return text.contains(
@@ -33,7 +33,8 @@ public interface BotCommand {
 
     static List<BotCommand> getAllCommands() {
         return List.of(
-            new ListSettings()
+            new ListSettings(),
+            new HelpSetting()
         );
     }
 }
