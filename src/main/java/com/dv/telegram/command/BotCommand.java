@@ -1,5 +1,6 @@
 package com.dv.telegram.command;
 
+import com.dv.telegram.BotStatistics;
 import com.dv.telegram.config.BotSettings;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +24,7 @@ public interface BotCommand {
         return getCommandName();
     }
 
-    String getResponse(String text, BotSettings settings);
+    String getResponse(String text, BotSettings settings, BotStatistics statistics);
 
     default boolean textContainsCommand(String text) {
         return text.contains(
@@ -33,10 +34,16 @@ public interface BotCommand {
 
     static List<BotCommand> getAllCommands() {
         return List.of(
+            // todo: commands (ListCommands, HelpCommand)
+
+            // settings
             new ListSettings(),
             new HelpSetting(),
             new GetSetting(),
-            new SetSetting()
+            new SetSetting(),
+
+            // statistics
+            new GetStatistics()
         );
     }
 }

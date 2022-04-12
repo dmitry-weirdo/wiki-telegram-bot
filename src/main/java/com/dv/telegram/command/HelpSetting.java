@@ -1,5 +1,6 @@
 package com.dv.telegram.command;
 
+import com.dv.telegram.BotStatistics;
 import com.dv.telegram.config.BotSetting;
 import com.dv.telegram.config.BotSettings;
 
@@ -26,7 +27,7 @@ public class HelpSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings) {
+    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
         int commandStartIndex = text.indexOf(getCommandText());
         if (commandStartIndex < 0) {
             return unknownSettingResponse();

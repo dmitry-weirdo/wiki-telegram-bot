@@ -1,5 +1,6 @@
 package com.dv.telegram.command;
 
+import com.dv.telegram.BotStatistics;
 import com.dv.telegram.config.BotSetting;
 import com.dv.telegram.config.BotSettings;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,7 @@ public class ListSettings extends BasicBotCommand {
     }
 
     @Override
-    public String getResponse(String text, BotSettings settings) {
+    public String getResponse(String text, BotSettings settings, BotStatistics statistics) {
         List<String> settingsLines = new ArrayList<>();
 
         for (BotSetting<?> setting : settings.settings.values()) {

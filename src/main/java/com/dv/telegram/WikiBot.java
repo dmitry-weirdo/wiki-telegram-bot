@@ -12,8 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.text.MessageFormat;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -41,8 +39,6 @@ public class WikiBot extends TelegramLongPollingBot {
     private final BotSettings settings; // settings cache in memory
 
     private final BotStatistics statistics;
-
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm:ss");
 
     public WikiBot(
         WikiBotConfig config,
@@ -201,7 +197,7 @@ public class WikiBot extends TelegramLongPollingBot {
         // normal commands - configured in the Google Sheet
         List<WikiBotCommandData> matchingCommands = findMatchingCommands(lowerText);
         if (!matchingCommands.isEmpty()) { // matching command found -> only handle the command
-            String commandAnswerText = getCommandAnswerText(text, matchingCommands);
+            String commandAnswerText = getCommandAnswerText(matchingCommands);
             return Optional.of(commandAnswerText);
         }
 
@@ -243,14 +239,9 @@ public class WikiBot extends TelegramLongPollingBot {
             return Optional.of(response);
         }
 
-        Optional<String> specialCommandResponse = specialCommands.getResponse(text, settings);
+        Optional<String> specialCommandResponse = specialCommands.getResponse(text, settings, statistics);
         if (specialCommandResponse.isPresent()) { // todo: after all commands moved, just return specialCommandResponse
             return specialCommandResponse;
-        }
-
-        if (text.contains(config.getStatisticsCommand)) {
-            String response = getGetStatisticsResponse();
-            return Optional.of(response);
         }
 
         if (text.contains(config.getFailedRequestsCommand)) {
@@ -273,31 +264,6 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return Optional.empty();
-    }
-
-    private String getGetStatisticsResponse() {
-        List<String> statisticsLines = List.of(
-            getStatisticsLine("Время старта бота", statistics.startTime),
-            getStatisticsLine("Успешных запросов", statistics.getSuccessfulRequestsCountWithPercentage()),
-            getStatisticsLine("Неуспешных запросов", statistics.getFailedRequestsCountWithPercentage()),
-            getStatisticsLine("Всего запросов", statistics.getTotalCallsWithPercentage()),
-            getStatisticsLine("Вызовов специальных команд", statistics.specialCommandsCount),
-            getStatisticsLine("Всего запросов (вместе со специальными командами)", statistics.getTotalCallsWithSpecialCommands())
-        );
-
-        return StringUtils.join(statisticsLines, "\n");
-    }
-
-    private String getStatisticsLine(String name, long count) {
-        return String.format("— %s: %d", name, count);
-    }
-
-    private String getStatisticsLine(String name, String value) {
-        return String.format("— %s: %s", name, value);
-    }
-
-    private String getStatisticsLine(String name, ZonedDateTime time) {
-        return String.format("— %s: %s", name, dateTimeFormatter.format(time));
     }
 
     private String getGetFailedRequestsResponse() {
@@ -362,7 +328,7 @@ public class WikiBot extends TelegramLongPollingBot {
             .toList();
     }
 
-    private String getCommandAnswerText(String text, List<WikiBotCommandData> matchingCommands) {
+    private String getCommandAnswerText(List<WikiBotCommandData> matchingCommands) {
         if (matchingCommands.size() == 1) {
             return matchingCommands.get(0).getOneLineAnswer();
         }
