@@ -1,8 +1,6 @@
 package com.dv.telegram;
 
-import com.dv.telegram.command.BasicBotCommand;
 import com.dv.telegram.command.BotSpecialCommands;
-import com.dv.telegram.config.BotSetting;
 import com.dv.telegram.config.BotSettings;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -177,11 +175,6 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return specialCommands.useMarkdownInResponse(text);
-
-        // todo: use markdown: true in other special commands
-/*
-        return text.contains(config.setSettingCommand);
-*/
     }
 
     private Optional<String> getResponseText(String text) {
@@ -255,11 +248,6 @@ public class WikiBot extends TelegramLongPollingBot {
             return specialCommandResponse;
         }
 
-        if (text.contains(config.setSettingCommand)) {
-            String response = getSetSettingResponse(text);
-            return Optional.of(response);
-        }
-
         if (text.contains(config.getStatisticsCommand)) {
             String response = getGetStatisticsResponse();
             return Optional.of(response);
@@ -285,49 +273,6 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return Optional.empty();
-    }
-
-    private String getSetSettingResponse(String text) {
-        int commandStartIndex = text.indexOf(config.setSettingCommand);
-        if (commandStartIndex < 0) {
-            return unknownSettingResponse();
-        }
-
-        int commandEndIndex = commandStartIndex + config.setSettingCommand.length();
-        if (commandEndIndex >= text.length()) {
-            return unknownSettingResponse();
-        }
-
-        String settingNameAndValue = text.substring(commandEndIndex).trim();
-
-        String nameValueSeparator = " ";
-        int separatorIndex = settingNameAndValue.indexOf(nameValueSeparator);
-
-        if (separatorIndex < 0 || separatorIndex >= settingNameAndValue.length()) {
-            return unknownSettingResponse(); // todo: probably another more concrete response
-        }
-
-        String settingName = settingNameAndValue.substring(0, separatorIndex).trim();
-        String settingValue = settingNameAndValue.substring(separatorIndex).trim();
-
-        BotSetting<?> botSetting = settings.getBotSetting(settingName);
-        if (botSetting == null) {
-            return unknownSettingResponse();
-        }
-
-        try {
-            botSetting.setValue(settingValue);
-            settings.fillSettingCacheFields();
-        }
-        catch (Exception e) {
-            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, BasicBotCommand.getSettingValueForMarkdown(settingValue));
-        }
-
-        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), BasicBotCommand.getSettingValueForMarkdown(botSetting));
-    }
-
-    private String unknownSettingResponse() {
-        return "Неизвестное имя настройки.";
     }
 
     private String getGetStatisticsResponse() {

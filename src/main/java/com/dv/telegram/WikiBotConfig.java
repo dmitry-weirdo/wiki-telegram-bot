@@ -23,7 +23,6 @@ public class WikiBotConfig {
 
     // special commands // todo: remove these settings, only use commands
     public String reloadFromGoogleSheetCommand;
-    public String setSettingCommand;
 
     // special commands - statistics
     public String getStatisticsCommand;

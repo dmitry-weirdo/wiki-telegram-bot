@@ -13,7 +13,6 @@
 
     // special commands // todo: remove this
     "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
-    "setSettingCommand": "/setSetting",
 
     // -- stats // todo: remove this
     "getStatisticsCommand": "/getStats",
@@ -25,7 +24,7 @@
       "ReloadFromGoogleSheet": "/gs-reload-5150",
 //      "ListSettings": "/listSettings",
 //      "GetSetting": "/getSetting",
-      "SetSetting": "/setSetting",
+//      "SetSetting": "/setSetting",
 //      "HelpSetting": "/helpSetting",
 
       // stats
