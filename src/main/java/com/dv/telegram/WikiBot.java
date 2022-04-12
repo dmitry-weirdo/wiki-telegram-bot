@@ -180,8 +180,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
         // todo: use markdown: true in other special commands
 /*
-        return text.contains(config.getSettingCommand)
-            || text.contains(config.setSettingCommand);
+        return text.contains(config.setSettingCommand);
 */
     }
 
@@ -256,11 +255,6 @@ public class WikiBot extends TelegramLongPollingBot {
             return specialCommandResponse;
         }
 
-        if (text.contains(config.getSettingCommand)) {
-            String response = getGetSettingResponse(text);
-            return Optional.of(response);
-        }
-
         if (text.contains(config.setSettingCommand)) {
             String response = getSetSettingResponse(text);
             return Optional.of(response);
@@ -291,28 +285,6 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return Optional.empty();
-    }
-
-    private String getGetSettingResponse(String text) {
-        int commandStartIndex = text.indexOf(config.getSettingCommand);
-        if (commandStartIndex < 0) {
-            return unknownSettingResponse();
-        }
-
-        int commandEndIndex = commandStartIndex + config.getSettingCommand.length();
-        if (commandEndIndex >= text.length()) {
-            return unknownSettingResponse();
-        }
-
-        String settingName = text.substring(commandEndIndex).trim();
-
-        BotSetting<?> botSetting = settings.getBotSetting(settingName);
-        if (botSetting == null) {
-            return unknownSettingResponse();
-        }
-
-        String value = BasicBotCommand.getSettingValueForMarkdown(botSetting);
-        return String.format("*%s*%n%s", botSetting.getName(), value);
     }
 
     private String getSetSettingResponse(String text) {

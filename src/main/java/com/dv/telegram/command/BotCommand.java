@@ -34,7 +34,8 @@ public interface BotCommand {
     static List<BotCommand> getAllCommands() {
         return List.of(
             new ListSettings(),
-            new HelpSetting()
+            new HelpSetting(),
+            new GetSetting()
         );
     }
 }
