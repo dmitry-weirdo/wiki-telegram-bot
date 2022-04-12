@@ -65,6 +65,10 @@ public class Main {
                 log.error("Settings validation error when starting the WikiBot", e);
                 throw new RuntimeException(e);
             }
+            catch (Exception e) {
+                log.error("Unknown exception when starting the WikiBot", e);
+                throw new RuntimeException(e);
+            }
         };
     }
 

@@ -1,5 +1,7 @@
 package com.dv.telegram;
 
+import com.dv.telegram.command.BasicBotCommand;
+import com.dv.telegram.command.BotSpecialCommands;
 import com.dv.telegram.config.BotSetting;
 import com.dv.telegram.config.BotSettings;
 import lombok.extern.log4j.Log4j2;
@@ -36,6 +38,8 @@ public class WikiBot extends TelegramLongPollingBot {
     private final String environmentName;
     private final String reloadFromGoogleSheetCommandLowerCase;
 
+    private final BotSpecialCommands specialCommands;
+
     private final BotSettings settings; // settings cache in memory
 
     private final BotStatistics statistics;
@@ -64,6 +68,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.environmentName = config.getEnvironmentName();
         this.reloadFromGoogleSheetCommandLowerCase = config.reloadFromGoogleSheetCommand.toLowerCase(Locale.ROOT);
 
+        this.specialCommands = BotSpecialCommands.create(config);
         this.settings = BotSettings.create(config);
 
         this.statistics = new BotStatistics();
@@ -93,7 +98,7 @@ public class WikiBot extends TelegramLongPollingBot {
         String chatId = updateMessage.getChatId().toString();
 
         Optional<String> responseTextOptional = getResponseText(text);
-        if (responseTextOptional.isEmpty()) { // command is not for the bot
+        if (responseTextOptional.isEmpty()) { // command is not for the bot or there is no answer and ReplyWhenNoAnswer is false
             return;
         }
 
@@ -149,11 +154,11 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private boolean messageIsForTheBot(String lowerText) {
-        if (lowerText.equals(START_COMMAND)) {
+        if (lowerText.equals(START_COMMAND)) { // special case: /start command without bot name
             return true;
         }
 
-        return switch (settings.triggerMode) {
+        return switch (settings.triggerMode) { // check whether the message contains the bot name
             case ANY_SUBSTRING -> lowerText.contains(botNameLowerCase);
             case STRING_START -> lowerText.startsWith(botNameLowerCase);
             case FULL_WORD -> botNameWordPattern.matcher(lowerText).matches();
@@ -171,10 +176,15 @@ public class WikiBot extends TelegramLongPollingBot {
             return false;
         }
 
+        return specialCommands.useMarkdownInResponse(text);
+
+        // todo: use markdown: true in other special commands
+/*
         return text.contains(config.listSettingsCommand)
             || text.contains(config.helpSettingCommand)
             || text.contains(config.getSettingCommand)
             || text.contains(config.setSettingCommand);
+*/
     }
 
     private Optional<String> getResponseText(String text) {
@@ -237,14 +247,15 @@ public class WikiBot extends TelegramLongPollingBot {
     private Optional<String> handleSpecialCommands(String text, String lowerText) {
         // todo: make this a nicer code instead a chain of "ifs"
 
+        // todo: start is also a special command!
         if (lowerText.equals(START_COMMAND)) {
             String response = MessageFormat.format(settings.startMessage, botName);
             return Optional.of(response);
         }
 
-        if (text.contains(config.listSettingsCommand)) {
-            String response = getListSettingsResponse();
-            return Optional.of(response);
+        Optional<String> specialCommandResponse = specialCommands.getResponse(text, settings);
+        if (specialCommandResponse.isPresent()) { // todo: after all commands moved, just return specialCommandResponse
+            return specialCommandResponse;
         }
 
         if (text.contains(config.helpSettingCommand)) {
@@ -289,20 +300,6 @@ public class WikiBot extends TelegramLongPollingBot {
         return Optional.empty();
     }
 
-    private String getListSettingsResponse() {
-        List<String> settingsLines = new ArrayList<>();
-
-        for (BotSetting<?> setting : settings.settings.values()) {
-            settingsLines.add(String.format(
-                "— *%s*:%n%s",
-                setting.getName(),
-                getSettingValueForMarkdown(setting)
-            ));
-        }
-
-        return StringUtils.join(settingsLines, "\n\n");
-    }
-
     private String getHelpSettingResponse(String text) {
         int commandStartIndex = text.indexOf(config.helpSettingCommand);
         if (commandStartIndex < 0) {
@@ -342,18 +339,8 @@ public class WikiBot extends TelegramLongPollingBot {
             return unknownSettingResponse();
         }
 
-        String value = getSettingValueForMarkdown(botSetting);
+        String value = BasicBotCommand.getSettingValueForMarkdown(botSetting);
         return String.format("*%s*%n%s", botSetting.getName(), value);
-    }
-
-    private String getSettingValueForMarkdown(BotSetting<?> botSetting) {
-        return getSettingValueForMarkdown(
-            botSetting.getValue().toString()
-        );
-    }
-
-    private String getSettingValueForMarkdown(String settingValue) {
-        return settingValue.replaceAll("\\_", "\\\\_"); // for Markdown, escape "_" as "\_" to not fail sending the Telegram message
     }
 
     private String getSetSettingResponse(String text) {
@@ -389,10 +376,10 @@ public class WikiBot extends TelegramLongPollingBot {
             settings.fillSettingCacheFields();
         }
         catch (Exception e) {
-            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, getSettingValueForMarkdown(settingValue));
+            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, BasicBotCommand.getSettingValueForMarkdown(settingValue));
         }
 
-        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), getSettingValueForMarkdown(botSetting));
+        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), BasicBotCommand.getSettingValueForMarkdown(botSetting));
     }
 
     private String unknownSettingResponse() {
