@@ -15,7 +15,6 @@
     "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
 
     // -- stats // todo: remove this
-    "getFailedRequestsCommand": "/getFailedRequests",
     "clearFailedRequestsCommand": "/clearFailedRequests",
 
     // special commands
@@ -26,9 +25,9 @@
 //      "SetSetting": "/setSetting",
 //      "HelpSetting": "/helpSetting",
 
-      // stats
+      // statistics
 //      "GetStatistics": "/getStats",
-      "GetFailedRequests": "/getFailedRequests",
+//      "GetFailedRequests": "/getFailedRequests",
       "ClearFailedRequests": "/clearFailedRequests"
     },
 

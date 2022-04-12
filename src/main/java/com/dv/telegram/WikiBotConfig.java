@@ -25,7 +25,6 @@ public class WikiBotConfig {
     public String reloadFromGoogleSheetCommand;
 
     // special commands - statistics
-    public String getFailedRequestsCommand;
     public String clearFailedRequestsCommand;
 
     public Map<String, String> commands;

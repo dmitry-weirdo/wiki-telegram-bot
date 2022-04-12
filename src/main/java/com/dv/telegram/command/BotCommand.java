@@ -43,7 +43,8 @@ public interface BotCommand {
             new SetSetting(),
 
             // statistics
-            new GetStatistics()
+            new GetStatistics(),
+            new GetFailedRequests()
         );
     }
 }

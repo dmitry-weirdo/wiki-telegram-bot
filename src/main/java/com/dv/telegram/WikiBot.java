@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -244,11 +243,6 @@ public class WikiBot extends TelegramLongPollingBot {
             return specialCommandResponse;
         }
 
-        if (text.contains(config.getFailedRequestsCommand)) {
-            String response = getGetFailedRequestsResponse();
-            return Optional.of(response);
-        }
-
         if (text.contains(config.clearFailedRequestsCommand)) {
             String response = getClearFailedRequestsResponse();
             return Optional.of(response);
@@ -264,23 +258,6 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return Optional.empty();
-    }
-
-    private String getGetFailedRequestsResponse() {
-        List<String> failedRequestsLines = statistics
-            .getFailedRequests()
-            .stream()
-            .map(failedRequest -> String.format("— %s", failedRequest))
-            .toList();
-
-
-        String totalLine = String.format("Разных неудачных запросов: %d", failedRequestsLines.size());
-
-        List<String> responseLines = new ArrayList<>();
-        responseLines.add(totalLine);
-        responseLines.addAll(failedRequestsLines);
-
-        return StringUtils.join(responseLines, "\n");
     }
 
     private String getClearFailedRequestsResponse() {
