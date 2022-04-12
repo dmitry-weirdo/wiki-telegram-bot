@@ -44,7 +44,8 @@ public interface BotCommand {
 
             // statistics
             new GetStatistics(),
-            new GetFailedRequests()
+            new GetFailedRequests(),
+            new ClearFailedRequests()
         );
     }
 }

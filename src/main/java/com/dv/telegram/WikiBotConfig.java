@@ -24,9 +24,6 @@ public class WikiBotConfig {
     // special commands // todo: remove these settings, only use commands
     public String reloadFromGoogleSheetCommand;
 
-    // special commands - statistics
-    public String clearFailedRequestsCommand;
-
     public Map<String, String> commands;
     public Map<String, String> settings;
 }

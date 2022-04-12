@@ -14,9 +14,6 @@
     // special commands // todo: remove this
     "reloadFromGoogleSheetCommand": "gs-reload 666-5150",
 
-    // -- stats // todo: remove this
-    "clearFailedRequestsCommand": "/clearFailedRequests",
-
     // special commands
     "commands": {
       "ReloadFromGoogleSheet": "/gs-reload-5150",
@@ -28,7 +25,7 @@
       // statistics
 //      "GetStatistics": "/getStats",
 //      "GetFailedRequests": "/getFailedRequests",
-      "ClearFailedRequests": "/clearFailedRequests"
+//      "ClearFailedRequests": "/clearFailedRequests"
     },
 
     // settings that can be changed in runtime

@@ -243,11 +243,6 @@ public class WikiBot extends TelegramLongPollingBot {
             return specialCommandResponse;
         }
 
-        if (text.contains(config.clearFailedRequestsCommand)) {
-            String response = getClearFailedRequestsResponse();
-            return Optional.of(response);
-        }
-
         if (lowerText.contains("ты где") || lowerText.contains("где ты")) { // todo: extract to config commands
             String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
             return Optional.of(response);
@@ -258,12 +253,6 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         return Optional.empty();
-    }
-
-    private String getClearFailedRequestsResponse() {
-        int clearedFailedRequestsCount = statistics.failedRequests.size();
-        statistics.clearFailedRequests();
-        return String.format("Список из %d неудачных запросов к боту очищен.", clearedFailedRequestsCount);
     }
 
     private Optional<String> reloadBotDataFromGoogleSheet() {
