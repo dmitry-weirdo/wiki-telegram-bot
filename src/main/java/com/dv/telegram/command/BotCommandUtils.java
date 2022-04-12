@@ -1,6 +1,7 @@
 package com.dv.telegram.command;
 
 import com.dv.telegram.WikiBotConfig;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -15,6 +16,9 @@ public final class BotCommandUtils {
         List<BotCommand> allCommands = BotCommand.getAllCommands();
 
         Map<String, String> commandNames = config.getCommands();
+        if (MapUtils.isEmpty(commandNames)) {
+            return allCommands;
+        }
 
         for (BotCommand command : allCommands) {
             String name = command.getName();
