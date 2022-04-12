@@ -16,7 +16,10 @@
 
     // special commands
     "commands": {
+//      "GetEnvironment": "/getEnvironment",
       "ReloadFromGoogleSheet": "/gs-reload-5150",
+
+      // settings
 //      "ListSettings": "/listSettings",
 //      "GetSetting": "/getSetting",
 //      "SetSetting": "/setSetting",

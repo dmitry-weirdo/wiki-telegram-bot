@@ -249,11 +249,6 @@ public class WikiBot extends TelegramLongPollingBot {
             return specialCommandResponse;
         }
 
-        if (lowerText.contains("ты где") || lowerText.contains("где ты")) { // todo: extract to config commands
-            String response = String.format("%s живёт здесь: %s.", botName, getEnvironmentName());
-            return Optional.of(response);
-        }
-
         if (lowerText.contains(reloadFromGoogleSheetCommandLowerCase)) {
             return reloadBotDataFromGoogleSheet();
         }

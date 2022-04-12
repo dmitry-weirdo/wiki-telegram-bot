@@ -34,6 +34,7 @@ public interface BotCommand {
     static List<BotCommand> getAllCommands() {
         return List.of(
             new Start(),
+            new GetEnvironment(),
 
             // todo: commands (ListCommands, HelpCommand)
 
