@@ -9,7 +9,7 @@ import java.util.Optional;
 public class BotSpecialCommands {
 
     private final List<BotCommand> commands;
-    private HelpCommand helpCommand;
+    private final HelpCommand helpCommand;
 
     public static BotSpecialCommands create(WikiBotConfig config) {
         List<BotCommand> botCommands = BotCommandUtils.fillCommands(config);
@@ -50,20 +50,20 @@ public class BotSpecialCommands {
             );
     }
 
-    public Optional<String> getResponse(String text, WikiBot bot) {
+    public SpecialCommandResponse getResponse(String text, WikiBot bot) {
         Optional<BotCommand> matchingCommandOptional = commands
             .stream()
             .filter(command -> command.textContainsCommand(text))
             .findFirst();
 
         if (matchingCommandOptional.isEmpty()) {
-            return Optional.empty();
+            return SpecialCommandResponse.noResponse();
         }
 
-        String response = matchingCommandOptional
-            .get()
-            .getResponse(text, bot);
+        BotCommand command = matchingCommandOptional.get();
+        String response = command.getResponse(text, bot);
+        boolean useMarkdownInResponse = command.useMarkdownInResponse();
 
-        return Optional.of(response);
+        return SpecialCommandResponse.withResponse(response, useMarkdownInResponse);
     }
 }

@@ -1,6 +1,7 @@
 package com.dv.telegram;
 
 import com.dv.telegram.command.BotSpecialCommands;
+import com.dv.telegram.command.SpecialCommandResponse;
 import com.dv.telegram.config.BotSettings;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -102,13 +103,15 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         String text = updateMessage.getText();
-        String chatId = updateMessage.getChatId().toString();
 
-        Optional<String> responseTextOptional = getResponseText(text);
-        if (responseTextOptional.isEmpty()) { // command is not for the bot or there is no answer and ReplyWhenNoAnswer is false
+        MessageProcessingResult processingResult = getResponseText(text);
+        statistics.update(text, processingResult);
+
+        if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
             return;
         }
 
+        // if the message is a reply, is for the bot and ReplyWhenNoAnswer is false, we still have to delete it
         Message replyToMessage = updateMessage.getReplyToMessage();
         boolean updateMessageIsReply = (replyToMessage != null);
 
@@ -117,33 +120,46 @@ public class WikiBot extends TelegramLongPollingBot {
             deleteBotCallMessage(updateMessage);
         }
 
-        // command is for the bot -> send the answer
-        String responseText = responseTextOptional.get();
-
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(responseText);
-
-        if (useMarkdown(text)) {
-            sendMessage.setParseMode("Markdown");
+        if (processingResult.hasNoResponse()) { // no response -> nothing to return
+            return;
         }
 
-        sendMessage.disableWebPagePreview();
+        // command is for the bot and has the response -> send the response message
+        try {
+            SendMessage sendMessage = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult);
+            execute(sendMessage); // Call method to send the message
+        }
+        catch (TelegramApiException e) {
+            log.error("TelegramApiException occurred on sending the bot response message", e); // todo: add which message has failed the bot
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SendMessage createSendMessage(
+        Message updateMessage,
+        Message replyToMessage,
+        boolean deleteBotCallMessage,
+        MessageProcessingResult processingResult
+    ) {
+        String chatId = updateMessage.getChatId().toString();
+        String responseText = processingResult.getResponse();
 
         Integer replyToMessageId = deleteBotCallMessage
             ? replyToMessage.getMessageId() // reply to the original message
             : updateMessage.getMessageId() // reply to the "call bot" message
         ;
 
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
         sendMessage.setReplyToMessageId(replyToMessageId);
+        sendMessage.setText(responseText);
+        sendMessage.disableWebPagePreview();
 
-        try {
-            execute(sendMessage); // Call method to send the message
+        if (processingResult.useMarkdown) {
+            sendMessage.setParseMode("Markdown");
         }
-        catch (TelegramApiException e) {
-            log.error("TelegramApiException occurred", e); // todo: add which message has failed the bot
-            throw new RuntimeException(e);
-        }
+
+        return sendMessage;
     }
 
     private void deleteBotCallMessage(Message updateMessage) {
@@ -172,46 +188,29 @@ public class WikiBot extends TelegramLongPollingBot {
         };
     }
 
-    private boolean useMarkdown(String text) {
+    private MessageProcessingResult getResponseText(String text) {
         if (StringUtils.isBlank(text)) {
-            return false;
-        }
-
-        String lowerText = text.toLowerCase(Locale.ROOT).trim();
-
-        if (!messageIsForTheBot(lowerText)) {
-            return false;
-        }
-
-        return specialCommands.useMarkdownInResponse(text);
-    }
-
-    private Optional<String> getResponseText(String text) {
-        if (StringUtils.isBlank(text)) {
-            return Optional.empty();
+            return MessageProcessingResult.notForTheBot();
         }
 
         String lowerText = text.toLowerCase(Locale.ROOT);
 
         if (!messageIsForTheBot(lowerText)) { // only work when bot is mentioned by name
-            return Optional.empty();
+            return MessageProcessingResult.notForTheBot();
         }
 
         // special commands - not configured in the Google Sheet
-        Optional<String> specialCommandResponseOptional = specialCommands.getResponse(text, this);
-        if (specialCommandResponseOptional.isPresent()) { // special command received -> return response for the special command
-            statistics.specialCommandsCount++;
-            return specialCommandResponseOptional;
+        SpecialCommandResponse specialCommandResponse = specialCommands.getResponse(text, this);
+        if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
+            return MessageProcessingResult.specialCommand(specialCommandResponse.response, specialCommandResponse.useMarkdownInResponse);
         }
-
-        // todo: nicer straightforward success/no success code instead of ++/-- on "no answer"
-        statistics.successfulRequestsCount++;
 
         // normal commands - configured in the Google Sheet
         List<WikiBotCommandData> matchingCommands = findMatchingCommands(lowerText);
         if (!matchingCommands.isEmpty()) { // matching command found -> only handle the command
             String commandAnswerText = getCommandAnswerText(matchingCommands);
-            return Optional.of(commandAnswerText);
+
+            return MessageProcessingResult.answerFound(commandAnswerText);
         }
 
         // wiki pages - configured in the Google Sheet
@@ -225,21 +224,19 @@ public class WikiBot extends TelegramLongPollingBot {
         if (wikiPageAnswerText.isPresent()) { // wiki pages answer is present
             if (cityChatsAnswerText.isPresent()) { // both wiki pages and city chats present -> return "No result" response
                 String combinedAnswers = String.format("%s%n%n%s", wikiPageAnswerText.get(), cityChatsAnswerText.get());
-                return Optional.of(combinedAnswers);
+
+                return MessageProcessingResult.answerFound(combinedAnswers);
             }
             else { // only wiki pages answer is present
-                return wikiPageAnswerText;
+                return MessageProcessingResult.answerFound(wikiPageAnswerText);
             }
         }
         else if (cityChatsAnswerText.isPresent()) { // only city chats answer is present
-            return cityChatsAnswerText;
+            return MessageProcessingResult.answerFound(cityChatsAnswerText);
         }
         else { // neither wiki pages nor city chats present -> return "No result" response
-            statistics.successfulRequestsCount--;
-            statistics.failedRequestsCount++;
-            statistics.addFailedRequest(text);
-
-            return getNoResultResponse(text);
+            Optional<String> noResultResponse = getNoResultResponse(text);
+            return MessageProcessingResult.answerNotFound(noResultResponse);
         }
     }
 

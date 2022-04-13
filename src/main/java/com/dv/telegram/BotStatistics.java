@@ -22,6 +22,23 @@ public class BotStatistics {
 
     private static final String COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)";
 
+    public void update(String text, MessageProcessingResult processingResult) {
+        if (!processingResult.messageIsForTheBot) {
+            return;
+        }
+
+        if (processingResult.isSpecialCommand) {
+            specialCommandsCount++;
+        }
+        else if (processingResult.answerIsFound) {
+            successfulRequestsCount++;
+        }
+        else {
+            failedRequestsCount++;
+            addFailedRequest(text);
+        }
+    }
+
     public String getSuccessfulRequestsCountWithPercentage() {
         double successfulRequestsPercentage = (getTotalCalls() == 0) ? 0d : getSuccessfulRequestsPercentage();
         return String.format(COUNT_PERCENTAGE_FORMAT, successfulRequestsCount, successfulRequestsPercentage);
