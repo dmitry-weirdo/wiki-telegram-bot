@@ -1,7 +1,6 @@
 package com.dv.telegram;
 
-//import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
@@ -30,24 +29,14 @@ class BotNameRegexTest {
     }
 
     private void assertMatches(Pattern pattern, String s) {
-        Assertions.assertTrue(
-            pattern.matcher(s).matches()
-        );
-/*
         Assertions.assertThat(
             pattern.matcher(s).matches()
         ).isTrue();
-*/
     }
 
     private void assertDoesNotMatch(Pattern pattern, String s) {
-        Assertions.assertFalse(
-            pattern.matcher(s).matches()
-        );
-/*
         Assertions.assertThat(
             pattern.matcher(s).matches()
         ).isFalse();
-*/
     }
 }

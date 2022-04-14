@@ -104,21 +104,13 @@
             <scope>test</scope>
         </dependency>
 
-        <!--
-            todo: use AssertJ when IntelliJ bug with
-            java.lang.ClassCastException: class org.jetbrains.jps.builders.java.dependencyView.TypeRepr$PrimitiveType cannot be cast to class org.jetbrains.jps.builders.java.dependencyView.TypeRepr$ClassType (org.jetbrains.jps.builders.java.dependencyView.TypeRepr$PrimitiveType and org.jetbrains.jps.builders.java.dependencyView.TypeRepr$ClassType are in unnamed module of loader java.net.
-            is fixed
-            see https://youtrack.jetbrains.com/issue/IDEA-260926
-        -->
         <!-- AssertJ -->
-<!--
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.22.0</version>
             <scope>test</scope>
         </dependency>
--->
 
     </dependencies>
 
