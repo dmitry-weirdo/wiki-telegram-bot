@@ -15,6 +15,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <log4j2.version>2.17.2</log4j2.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
     </properties>
 
     <dependencies>
@@ -95,6 +96,30 @@
             <version>2.13.2</version>
         </dependency>
 
+        <!-- junit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+            todo: use AssertJ when IntelliJ bug with
+            java.lang.ClassCastException: class org.jetbrains.jps.builders.java.dependencyView.TypeRepr$PrimitiveType cannot be cast to class org.jetbrains.jps.builders.java.dependencyView.TypeRepr$ClassType (org.jetbrains.jps.builders.java.dependencyView.TypeRepr$PrimitiveType and org.jetbrains.jps.builders.java.dependencyView.TypeRepr$ClassType are in unnamed module of loader java.net.
+            is fixed
+            see https://youtrack.jetbrains.com/issue/IDEA-260926
+        -->
+        <!-- AssertJ -->
+<!--
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.22.0</version>
+            <scope>test</scope>
+        </dependency>
+-->
+
     </dependencies>
 
     <build>
@@ -107,6 +132,12 @@
                     <source>17</source>
                     <target>17</target>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M6</version>
             </plugin>
 
             <plugin>
