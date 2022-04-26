@@ -9,6 +9,7 @@
     "googleSpreadsheetId": "...",
     "wikiPagesSheetName": "Страницы вики и ключевые слова",
     "cityChatsSheetName": "Список чатов по городам",
+    "countryChatsSheetName": "Список чатов по странам",
     "commandsSheetName": "Список болталки",
 
     // special commands

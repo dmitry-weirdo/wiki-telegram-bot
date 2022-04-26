@@ -8,5 +8,6 @@ import lombok.Data;
 public class WikiBotGoogleSheet { // only contains strings from the Google Sheet, not semantically parsed
     private SheetData wikiPagesSheet;
     private SheetData cityChatsSheet;
+    private SheetData countryChatsSheet;
     private SheetData commandsSheet;
 }

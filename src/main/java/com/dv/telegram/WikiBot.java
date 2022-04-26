@@ -26,6 +26,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private final WikiBotConfig config;
     private List<WikiPageData> pages;
     private List<CityChatData> cityChats;
+    private List<CountryChatData> countryChats;
     private List<WikiBotCommandData> commands;
 
     private final String botName;
@@ -41,8 +42,22 @@ public class WikiBot extends TelegramLongPollingBot {
 
     public WikiBot(
         WikiBotConfig config,
+        GoogleSheetBotData botData
+    ) {
+        this(
+            config,
+            botData.getPages(),
+            botData.getCityChats(),
+            botData.getCountryChats(),
+            botData.getCommands()
+        );
+    }
+
+    public WikiBot(
+        WikiBotConfig config,
         List<WikiPageData> wikiPagesData,
         List<CityChatData> cityChatsData,
+        List<CountryChatData> countryChatsData,
         List<WikiBotCommandData> commands
     ) {
         super();
@@ -50,6 +65,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.config = config;
         this.pages = wikiPagesData;
         this.cityChats = cityChatsData;
+        this.countryChats = countryChatsData;
         this.commands = commands;
 
         this.botName = config.getBotName();
@@ -221,9 +237,15 @@ public class WikiBot extends TelegramLongPollingBot {
         List<WikiPageData> matchingPages = findMatchingPages(lowerText);
         Optional<String> wikiPageAnswerText = getWikiPageAnswerText(matchingPages);
 
-        // city pages - configured in the Google Sheet
+        // city chats - configured in the Google Sheet
         List<CityChatData> matchingCityChats = findMatchingCityChats(lowerText);
         Optional<String> cityChatsAnswerText = getCityChatsAnswerText(matchingCityChats);
+
+        // country chats - configured in the Google Sheet
+        List<CountryChatData> matchingCountryChats = findMatchingCountryChats(lowerText);
+        Optional<String> countryChatsAnswerText = getCountryChatsAnswerText(matchingCountryChats);
+
+        // todo: use the countryAnswers
 
         if (wikiPageAnswerText.isPresent()) { // wiki pages answer is present
             if (cityChatsAnswerText.isPresent()) { // both wiki pages and city chats present -> return "No result" response
@@ -246,17 +268,15 @@ public class WikiBot extends TelegramLongPollingBot {
 
     public boolean reloadBotDataFromGoogleSheet() {
         try {
-            log.info("Reloading bot data from the Google Sheet...");
             GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
             this.pages = botData.getPages();
             this.cityChats = botData.getCityChats();
+            this.countryChats = botData.getCountryChats();
             this.commands = botData.getCommands();
-            log.info("Bot data successfully reloaded from the Google Sheet.");
 
             return true;
         }
         catch (Exception e) {
-            log.error("Error when loading bot data from the Google Sheet", e);
             return false;
         }
     }
@@ -279,6 +299,13 @@ public class WikiBot extends TelegramLongPollingBot {
         return cityChats
             .stream()
             .filter(cityChat -> cityChat.isPresentIn(text))
+            .toList();
+    }
+
+    private List<CountryChatData> findMatchingCountryChats(String text) {
+        return countryChats
+            .stream()
+            .filter(countryChat -> countryChat.isPresentIn(text))
             .toList();
     }
 
@@ -322,6 +349,20 @@ public class WikiBot extends TelegramLongPollingBot {
         List<String> multilineAnswers = matchingCityChats
             .stream()
             .map(CityChatData::getChatsAnswer)
+            .toList();
+
+        String answer = StringUtils.join(multilineAnswers, "\n\n");
+        return Optional.of(answer);
+    }
+
+    private Optional<String> getCountryChatsAnswerText(List<CountryChatData> matchingCityChats) {
+        if (matchingCityChats.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<String> multilineAnswers = matchingCityChats
+            .stream()
+            .map(CountryChatData::getChatsAnswer)
             .toList();
 
         String answer = StringUtils.join(multilineAnswers, "\n\n");

@@ -10,5 +10,6 @@ import java.util.List;
 public class GoogleSheetBotData {
     private final List<WikiPageData> pages;
     private final List<CityChatData> cityChats;
+    private final List<CountryChatData> countryChats;
     private final List<WikiBotCommandData> commands;
 }

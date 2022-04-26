@@ -19,6 +19,7 @@ public class WikiBotConfig {
     // todo: use sheets by number instead if it is possible with A1 or R1C1 notation
     public String wikiPagesSheetName;
     public String cityChatsSheetName;
+    public String countryChatsSheetName;
     public String commandsSheetName;
 
     public Map<String, String> commands; // special commands

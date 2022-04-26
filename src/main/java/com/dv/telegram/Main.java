@@ -1,11 +1,6 @@
 package com.dv.telegram;
 
 import com.dv.telegram.config.SettingValidationException;
-import com.dv.telegram.data.CityChatsParser;
-import com.dv.telegram.data.CommandsParser;
-import com.dv.telegram.data.WikiPagesParser;
-import com.dv.telegram.google.GoogleSheetReader;
-import com.dv.telegram.google.WikiBotGoogleSheet;
 import com.dv.telegram.util.WikiBotUtils;
 import lombok.extern.log4j.Log4j2;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -46,11 +41,9 @@ public class Main {
     private static Callable<String> createCallableTask(WikiBotConfig config) {
         return () -> {
             try {
-                List<WikiPageData> wikiPagesData = getWikiPagesData(config);
-                List<CityChatData> cityChatsData = getCityChatsData(config);
-                List<WikiBotCommandData> commandsData = getCommandsData(config);
+                GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
 
-                WikiBot wikiBot = new WikiBot(config, wikiPagesData, cityChatsData, commandsData);
+                WikiBot wikiBot = new WikiBot(config, botData);
 
                 TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
                 botsApi.registerBot(wikiBot);
@@ -70,48 +63,5 @@ public class Main {
                 throw new RuntimeException(e);
             }
         };
-    }
-
-    private static List<WikiPageData> getWikiPagesData(WikiBotConfig config) {
-        try {
-            WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
-            return WikiPagesParser.parseWikiPages(wikiBotGoogleSheet);
-        }
-        catch (Exception e) {
-            log.error("Failed to parse wiki pages from Google Sheet.", e);
-
-            log.warn("Loading wiki pages from the XLSX file");
-            return XlsxParser.parseWikiPagesDataSafe();
-        }
-    }
-
-    private static List<CityChatData> getCityChatsData(WikiBotConfig config) {
-        try {
-            WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
-            return CityChatsParser.parseCityChats(wikiBotGoogleSheet);
-        }
-        catch (Exception e) {
-            log.error("Failed to parse city chats from Google Sheet.", e);
-
-            // todo: parse from XLS in worst case
-            throw new RuntimeException(e);
-//            log.warn("Loading commands from the XLSX file");
-//            return XlsxParser.parseWikiPagesDataSafe();
-        }
-    }
-
-    private static List<WikiBotCommandData> getCommandsData(WikiBotConfig config) {
-        try {
-            WikiBotGoogleSheet wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config);
-            return CommandsParser.parseWikiBotCommands(wikiBotGoogleSheet);
-        }
-        catch (Exception e) {
-            log.error("Failed to parse commands from Google Sheet.", e);
-
-            // todo: parse from XLS in worst case
-            throw new RuntimeException(e);
-//            log.warn("Loading commands from the XLSX file");
-//            return XlsxParser.parseWikiPagesDataSafe();
-        }
     }
 }

@@ -39,6 +39,7 @@ public class GoogleSheetReader {
         List<String> ranges = List.of(
             wrapSheetName(config.wikiPagesSheetName),
             wrapSheetName(config.cityChatsSheetName),
+            wrapSheetName(config.countryChatsSheetName),
             wrapSheetName(config.commandsSheetName)
         );
 
@@ -53,9 +54,15 @@ public class GoogleSheetReader {
 
         SheetData wikiPagesSheet = parseSheetData(valueRanges.get(0), config.wikiPagesSheetName);
         SheetData cityChatsSheet = parseSheetData(valueRanges.get(1), config.cityChatsSheetName);
-        SheetData commandsSheet = parseSheetData(valueRanges.get(2), config.commandsSheetName);
+        SheetData countryChatsSheet = parseSheetData(valueRanges.get(2), config.countryChatsSheetName);
+        SheetData commandsSheet = parseSheetData(valueRanges.get(3), config.commandsSheetName);
 
-        return new WikiBotGoogleSheet(wikiPagesSheet, cityChatsSheet, commandsSheet);
+        return new WikiBotGoogleSheet(
+            wikiPagesSheet,
+            cityChatsSheet,
+            countryChatsSheet,
+            commandsSheet
+        );
     }
 
     private static String wrapSheetName(String sheetName) {
