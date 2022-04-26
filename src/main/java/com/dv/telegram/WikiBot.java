@@ -245,25 +245,29 @@ public class WikiBot extends TelegramLongPollingBot {
         List<CountryChatData> matchingCountryChats = findMatchingCountryChats(lowerText);
         Optional<String> countryChatsAnswerText = getCountryChatsAnswerText(matchingCountryChats);
 
-        // todo: use the countryAnswers
+        List<Optional<String>> answers = List.of(
+            wikiPageAnswerText,
+            cityChatsAnswerText,
+            countryChatsAnswerText
+        );
 
-        if (wikiPageAnswerText.isPresent()) { // wiki pages answer is present
-            if (cityChatsAnswerText.isPresent()) { // both wiki pages and city chats present -> return "No result" response
-                String combinedAnswers = String.format("%s%n%n%s", wikiPageAnswerText.get(), cityChatsAnswerText.get());
+        return getResponseText(text, answers);
+    }
 
-                return MessageProcessingResult.answerFound(combinedAnswers);
-            }
-            else { // only wiki pages answer is present
-                return MessageProcessingResult.answerFound(wikiPageAnswerText);
-            }
-        }
-        else if (cityChatsAnswerText.isPresent()) { // only city chats answer is present
-            return MessageProcessingResult.answerFound(cityChatsAnswerText);
-        }
-        else { // neither wiki pages nor city chats present -> return "No result" response
+    private MessageProcessingResult getResponseText(String text, List<Optional<String>> answerOptionals) {
+        List<String> answers = answerOptionals
+            .stream()
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .toList();
+
+        if (answers.isEmpty()) { // no answers found
             Optional<String> noResultResponse = getNoResultResponse(text);
             return MessageProcessingResult.answerNotFound(noResultResponse);
         }
+
+        String combinedAnswers = StringUtils.join(answers, "\n\n");
+        return MessageProcessingResult.answerFound(combinedAnswers);
     }
 
     public boolean reloadBotDataFromGoogleSheet() {
