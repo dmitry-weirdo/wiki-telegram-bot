@@ -123,8 +123,9 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         String text = updateMessage.getText();
+        String userName = updateMessage.getFrom().getUserName();
 
-        MessageProcessingResult processingResult = getResponseText(text);
+        MessageProcessingResult processingResult = getResponseText(text, userName);
         statistics.update(text, processingResult);
 
         if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
@@ -208,7 +209,7 @@ public class WikiBot extends TelegramLongPollingBot {
         };
     }
 
-    private MessageProcessingResult getResponseText(String text) {
+    private MessageProcessingResult getResponseText(String text, String userName) {
         if (StringUtils.isBlank(text)) {
             return MessageProcessingResult.notForTheBot();
         }
@@ -220,7 +221,7 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         // special commands - not configured in the Google Sheet
-        SpecialCommandResponse specialCommandResponse = specialCommands.getResponse(text, this);
+        SpecialCommandResponse specialCommandResponse = specialCommands.getResponse(text, userName, this);
         if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
             return MessageProcessingResult.specialCommand(specialCommandResponse.response, specialCommandResponse.useMarkdownInResponse);
         }

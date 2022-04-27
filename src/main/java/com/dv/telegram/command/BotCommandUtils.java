@@ -6,8 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class BotCommandUtils {
+
+    private static final String USER_NAME_PREFIX = "@";
 
     private BotCommandUtils() {
     }
@@ -30,5 +34,26 @@ public final class BotCommandUtils {
         }
 
         return allCommands;
+    }
+
+    public static Set<String> getBotAdmins(WikiBotConfig config) {
+        List<String> botAdmins = config.getBotAdmins();
+
+        return botAdmins
+            .stream()
+            .map(BotCommandUtils::normalizeUserName) // cut off "@" if it is present
+            .collect(Collectors.toSet());
+    }
+
+    private static String normalizeUserName(String userName) {
+        if (StringUtils.isBlank(userName)) {
+            throw new IllegalArgumentException("userName cannot be null or blank.");
+        }
+
+        if (userName.startsWith(USER_NAME_PREFIX)) { // cut off "@" if it is present
+            return userName.substring(USER_NAME_PREFIX.length());
+        }
+
+        return userName;
     }
 }

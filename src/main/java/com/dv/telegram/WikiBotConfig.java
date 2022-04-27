@@ -3,6 +3,7 @@ package com.dv.telegram;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -22,6 +23,8 @@ public class WikiBotConfig {
     public String cityChatsSheetName;
     public String countryChatsSheetName;
     public String commandsSheetName;
+
+    public List<String> botAdmins; // Telegram users that are allowed to execute the special commands
 
     public Map<String, String> commands; // special commands
     public Map<String, String> settings;

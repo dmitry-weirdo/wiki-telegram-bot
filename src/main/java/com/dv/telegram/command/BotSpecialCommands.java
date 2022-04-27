@@ -5,18 +5,23 @@ import com.dv.telegram.WikiBotConfig;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class BotSpecialCommands {
 
+    private final Set<String> botAdmins;
     private final List<BotCommand> commands;
     private final HelpCommand helpCommand;
 
     public static BotSpecialCommands create(WikiBotConfig config) {
+        Set<String> botAdmins = BotCommandUtils.getBotAdmins(config);
+
         List<BotCommand> botCommands = BotCommandUtils.fillCommands(config);
-        return new BotSpecialCommands(botCommands);
+        return new BotSpecialCommands(botAdmins, botCommands);
     }
 
-    public BotSpecialCommands(List<BotCommand> commands) {
+    public BotSpecialCommands(Set<String> botAdmins, List<BotCommand> commands) {
+        this.botAdmins = botAdmins;
         this.commands = commands;
 
         this.helpCommand = (HelpCommand) commands
@@ -50,7 +55,12 @@ public class BotSpecialCommands {
             );
     }
 
-    public SpecialCommandResponse getResponse(String text, WikiBot bot) {
+    public SpecialCommandResponse getResponse(String text, String userName, WikiBot bot) {
+        if (!userHasRightsToExecuteSpecialCommands(userName)) {
+            // todo: probably the custom "user has no rights" response
+            return SpecialCommandResponse.noResponse();
+        }
+
         Optional<BotCommand> matchingCommandOptional = commands
             .stream()
             .filter(command -> command.textContainsCommand(text))
@@ -65,5 +75,9 @@ public class BotSpecialCommands {
         boolean useMarkdownInResponse = command.useMarkdownInResponse();
 
         return SpecialCommandResponse.withResponse(response, useMarkdownInResponse);
+    }
+
+    private boolean userHasRightsToExecuteSpecialCommands(String userName) {
+        return botAdmins.contains(userName);
     }
 }
