@@ -13,10 +13,10 @@ public class Start extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — выдать приветственное сообщение бота. Сообщение определяется настройкой *%s*.%n%nКоманда также работает без имени бота: `%s`.",
-            botName,
+            bot.getBotName(),
             getCommandText(),
             StartMessage.NAME,
             getCommandText()

@@ -14,10 +14,10 @@ public class GetFailedRequests extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — получить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

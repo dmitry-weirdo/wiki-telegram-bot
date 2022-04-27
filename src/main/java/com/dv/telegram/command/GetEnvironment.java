@@ -10,10 +10,10 @@ public class GetEnvironment extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — выдать окружение, в котором запущен инстанс бота.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

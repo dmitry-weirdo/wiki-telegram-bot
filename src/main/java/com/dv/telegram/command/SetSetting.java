@@ -11,10 +11,10 @@ public class SetSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s <settingName> <settingValue>` — установить значение настройки с названием `<settingName>` в значение `<settingValue>`.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

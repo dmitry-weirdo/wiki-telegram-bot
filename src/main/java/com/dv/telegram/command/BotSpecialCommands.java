@@ -11,7 +11,9 @@ public class BotSpecialCommands {
 
     private final Set<String> botAdmins;
     private final List<BotCommand> commands;
+    private final Start startCommand;
     private final HelpCommand helpCommand;
+    private final ListCommands listCommands;
 
     public static BotSpecialCommands create(WikiBotConfig config) {
         Set<String> botAdmins = BotCommandUtils.getBotAdmins(config);
@@ -24,19 +26,41 @@ public class BotSpecialCommands {
         this.botAdmins = botAdmins;
         this.commands = commands;
 
-        this.helpCommand = (HelpCommand) commands
+        this.startCommand = getCommand(commands, Start.class);
+        this.helpCommand = getCommand(commands, HelpCommand.class);
+        this.listCommands = getCommand(commands, ListCommands.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T getCommand(List<BotCommand> commands, Class<T> commandClass) {
+        return (T) commands
             .stream()
-            .filter(HelpCommand.class::isInstance)
+            .filter(commandClass::isInstance)
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No HelpCommand in the list of commands."));
+            .orElseThrow(() -> new IllegalStateException(String.format(
+                "No %s in the list of commands.",
+                commandClass.getSimpleName()
+            )));
+    }
+
+    public Set<String> getBotAdmins() {
+        return botAdmins;
     }
 
     public List<BotCommand> getCommands() {
         return commands;
     }
 
+    public Start getStartCommand() {
+        return startCommand;
+    }
+
     public HelpCommand getHelpCommand() {
         return helpCommand;
+    }
+
+    public ListCommands getListCommands() {
+        return listCommands;
     }
 
     public Optional<BotCommand> getCommand(String commandText) {

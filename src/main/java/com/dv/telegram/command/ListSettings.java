@@ -15,10 +15,10 @@ public class ListSettings extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — вывести список изменяемых в рантайме настроек бота.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

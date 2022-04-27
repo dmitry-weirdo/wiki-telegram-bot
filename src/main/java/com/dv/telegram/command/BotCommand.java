@@ -8,7 +8,7 @@ import java.util.List;
 public interface BotCommand {
 
     String getName(); // english name, no spaces
-    String getDescription(String botName); // description, in Russian
+    String getDescription(WikiBot bot); // description, in Russian
     boolean useMarkdownInResponse();
 
     String getDefaultCommandName(); // default command when it is not overridden by config
@@ -40,6 +40,7 @@ public interface BotCommand {
             // commands
             new HelpCommand(), // first command to be found since it documents the other commands
             new ListCommands(),
+            new ListAdmins(),
 
             // basic commands
             new Start(),

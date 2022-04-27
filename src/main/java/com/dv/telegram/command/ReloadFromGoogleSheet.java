@@ -10,10 +10,10 @@ public class ReloadFromGoogleSheet extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — перезагрузить конфигурацию бота из Google Sheet.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

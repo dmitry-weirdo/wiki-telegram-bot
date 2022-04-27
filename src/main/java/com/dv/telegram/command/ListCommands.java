@@ -14,10 +14,10 @@ public class ListCommands extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — получить список команд бота.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

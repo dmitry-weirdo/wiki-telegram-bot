@@ -4,9 +4,7 @@ import com.dv.telegram.WikiBotConfig;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class BotCommandUtils {
@@ -42,7 +40,8 @@ public final class BotCommandUtils {
         return botAdmins
             .stream()
             .map(BotCommandUtils::normalizeUserName) // cut off "@" if it is present
-            .collect(Collectors.toSet());
+            .sorted(Comparator.comparing(s -> s.toLowerCase(Locale.ROOT))) // prevent java's "big letters first" sorting
+            .collect(Collectors.toCollection(LinkedHashSet::new)); // sort admins set by userName
     }
 
     private static String normalizeUserName(String userName) {
@@ -55,5 +54,17 @@ public final class BotCommandUtils {
         }
 
         return userName;
+    }
+
+    public static String getClickableUserName(String userName) {
+        if (StringUtils.isBlank(userName)) {
+            throw new IllegalArgumentException("userName cannot be null or blank.");
+        }
+
+        if (userName.startsWith(USER_NAME_PREFIX)) {
+            return userName;
+        }
+
+        return String.format("%s%s", USER_NAME_PREFIX, userName); // append "@" if it is NOT present
     }
 }

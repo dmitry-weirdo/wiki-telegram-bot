@@ -11,10 +11,10 @@ public class HelpSetting extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s <settingName>` — получить помощь по настройке с названием `<settingName>`.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

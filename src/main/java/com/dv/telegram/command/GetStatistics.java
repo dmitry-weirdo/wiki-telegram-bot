@@ -18,10 +18,10 @@ public class GetStatistics extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s` — получить статистику по работе бота с момента текущего запуска инстанса.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }

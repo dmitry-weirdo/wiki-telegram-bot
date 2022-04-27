@@ -12,10 +12,10 @@ public class HelpCommand extends BasicBotCommand {
     }
 
     @Override
-    public String getDescription(String botName) {
+    public String getDescription(WikiBot bot) {
         return String.format(
             "`%s %s <commandName>` — получить помощь по команде с названием `<commandName>`.",
-            botName,
+            bot.getBotName(),
             getCommandText()
         );
     }
@@ -57,7 +57,7 @@ public class HelpCommand extends BasicBotCommand {
         return String.format(
             "*%s*%n%s",
             botCommand.getCommandText(),
-            botCommand.getDescription(bot.getBotName())
+            botCommand.getDescription(bot)
         );
     }
 
