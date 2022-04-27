@@ -37,6 +37,11 @@ public class Start extends BasicBotCommand {
     }
 
     @Override
+    public boolean requiresBotAdminRights() {
+        return false; // /start command should be available for non-admin users too
+    }
+
+    @Override
     public String getResponse(String text, WikiBot bot) {
         return MessageFormat.format(
             bot.getSettings().startMessage,

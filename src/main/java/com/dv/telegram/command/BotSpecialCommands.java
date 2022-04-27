@@ -56,14 +56,14 @@ public class BotSpecialCommands {
     }
 
     public SpecialCommandResponse getResponse(String text, String userName, WikiBot bot) {
-        if (!userHasRightsToExecuteSpecialCommands(userName)) {
-            // todo: probably the custom "user has no rights" response
-            return SpecialCommandResponse.noResponse();
-        }
+        boolean userHasBotAdminRights = userHasRightsToExecuteSpecialCommands(userName);
 
         Optional<BotCommand> matchingCommandOptional = commands
             .stream()
-            .filter(command -> command.textContainsCommand(text))
+            .filter(command ->
+                   (userHasBotAdminRights || !command.requiresBotAdminRights())
+                && command.textContainsCommand(text)
+            )
             .findFirst();
 
         if (matchingCommandOptional.isEmpty()) {

@@ -23,6 +23,10 @@ public interface BotCommand {
         return getCommandName();
     }
 
+    default boolean requiresBotAdminRights() {
+        return true;
+    }
+
     String getResponse(String text, WikiBot bot);
 
     default boolean textContainsCommand(String text) {
