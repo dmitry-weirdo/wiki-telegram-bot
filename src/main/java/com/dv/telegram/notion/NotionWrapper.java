@@ -9,6 +9,7 @@ import notion.api.v1.model.common.RichTextLinkType;
 import notion.api.v1.model.common.RichTextType;
 import notion.api.v1.model.pages.Page;
 import notion.api.v1.model.pages.PageProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ public class NotionWrapper {
     private static final String NOTION_TOKEN_ENV_NAME = "NOTION_TOKEN";
 
     private static final String CHAT_LINK_AND_NAME_SEPARATOR = " — ";
+    private static final String TOGGLE_HEADER_1_TO_APPEND_TEXT = "Чаты по землям и городам Германии (Telegram, WhatsApp)";
 
     public static void main(String[] args) {
         String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
@@ -40,14 +42,18 @@ public class NotionWrapper {
             Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
             log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
 
+            deleteToggleHeadingContent(client, blocks, TOGGLE_HEADER_1_TO_APPEND_TEXT);
+
             HeadingOneBlock toggleHeading = blocks.getResults().get(2).asHeadingOne();
             log.info("Toggle heading has children: {}", toggleHeading.getHasChildren());
 
+/*
             Block paragraphInToggleHeading = createParagraph("Paragraph text within toggle heading 1 (try)");
 
             List<Block> blocksInToggleHeader = List.of(paragraphInToggleHeading);
             client.appendBlockChildren(toggleHeading.getId(), blocksInToggleHeader);
             log.info("Appended paragraph to toggle-heading1 with id = {}", toggleHeading.getId());
+*/
 
 /*
             if (true) {
@@ -119,6 +125,63 @@ public class NotionWrapper {
             .get(0)
             .getText()
             .getContent();
+    }
+
+    private static void deleteToggleHeadingContent(NotionClient client, Blocks blocks, String heading1Text) {
+        HeadingOneBlock heading1ToAppend = getToggleHeading1Content(blocks, heading1Text);
+        Blocks blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, 999999);
+        for (Block result : blockChildren.getResults()) {
+            client.deleteBlock(result.getId());
+        }
+
+        log.info("Removed {} child blocks from heading one with text \"{}\".", blockChildren.getResults().size(), TOGGLE_HEADER_1_TO_APPEND_TEXT);
+    }
+
+    private static HeadingOneBlock getToggleHeading1Content(Blocks blocks, String heading1Text) {
+        List<Block> headersWithText = blocks
+            .getResults()
+            .stream()
+            .filter(
+                block ->
+                    (block.getType() == BlockType.HeadingOne)
+                        && headingHasText(block.asHeadingOne(), heading1Text)
+            )
+            .toList();
+
+        if (headersWithText.isEmpty()) {
+            throw new IllegalStateException(String.format("No header 1 with text = \"%s\" found.", heading1Text));
+        }
+
+        if (headersWithText.size() > 1) {
+            throw new IllegalStateException(String.format("More than one header 1 with text = \"%s\" found. Total headers found: %d.", heading1Text, headersWithText.size()));
+        }
+
+        return headersWithText.get(0).asHeadingOne();
+    }
+
+    private static boolean headingHasText(HeadingOneBlock heading1, String text) {
+        List<PageProperty.RichText> richTexts = heading1
+            .getHeading1()
+            .getRichText();
+
+        if (richTexts.isEmpty()) {
+            return false;
+        }
+
+        PageProperty.RichText.Text richText = richTexts
+            .get(0)
+            .getText();
+
+        if (richText == null) {
+            return false;
+        }
+
+        String content = richText.getContent();
+        if (StringUtils.isBlank(content)) {
+            return false;
+        }
+
+        return content.equals(text);
     }
 
     private static List<PageProperty.RichText> createRichTextList(String text) {
