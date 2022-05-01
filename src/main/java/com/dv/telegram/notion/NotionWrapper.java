@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import notion.api.v1.NotionClient;
 import notion.api.v1.http.OkHttp4Client;
 import notion.api.v1.model.blocks.*;
+import notion.api.v1.model.common.RichTextLinkType;
 import notion.api.v1.model.common.RichTextType;
 import notion.api.v1.model.pages.Page;
 import notion.api.v1.model.pages.PageProperty;
@@ -15,6 +16,8 @@ import java.util.UUID;
 @Log4j2
 public class NotionWrapper {
     private static final String NOTION_TOKEN_ENV_NAME = "NOTION_TOKEN";
+
+    private static final String CHAT_LINK_AND_NAME_SEPARATOR = " — ";
 
     public static void main(String[] args) {
         String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
@@ -53,7 +56,7 @@ public class NotionWrapper {
 */
 
             HeadingOneBlock.Element heading1Element = new HeadingOneBlock.Element(
-                createRichText("Heading 1 created with Notion API, hasChildren = true try")
+                createRichTextList("Heading 1 created with Notion API, hasChildren = true try")
             );
 
             Block heading1 = new HeadingOneBlock(
@@ -76,17 +79,30 @@ public class NotionWrapper {
             // see https://developers.notion.com/reference/patch-block-children - we allow _up to two levels_ of nesting in a single request.
 
             //            BulletedListItemBlock bullet1 = createBullet("Bullet 1 in toggle (by API)", List.of(bullet1_1, bullet1_2));
-            BulletedListItemBlock bullet1 = createBullet("Bullet 1 in toggle (by API)");
+//            BulletedListItemBlock bullet1 = createBullet("Bullet 1 in toggle (by API)");
+            BulletedListItemBlock bullet1 = createBulletWithChatLink(
+                "https://t.me/+QQ9lx56QjYU1ZjZi",
+                "Ansbach/Landkreis Ansbach \uD83C\uDDE9\uD83C\uDDEA/Ukraine \uD83C\uDDFA\uD83C\uDDE6"
+            );
 
             BulletedListItemBlock bullet2 = createBullet("Bullet 2 in toggle (by API)");
 
 //            ToggleBlock toggle = createToggle("Toggle created from API", List.of(bullet1, bullet2));
             ToggleBlock toggle = createToggle("Toggle created from API", List.of(bullet1, bullet2));
 
+            PageProperty.RichText link = createRichTextLink("Link test", "https://google.com");
+
+            ParagraphBlock linkParagraph = new ParagraphBlock(
+                new ParagraphBlock.Element(
+                    List.of(link)
+                )
+            );
+
             List<Block> blocksToAppend = List.of(
                 heading1,
                 paragraph,
-                toggle
+                toggle,
+                linkParagraph
             );
 
             Blocks appendedBlocks = client.appendBlockChildren(pageId, blocksToAppend);
@@ -105,19 +121,37 @@ public class NotionWrapper {
             .getContent();
     }
 
-    private static List<PageProperty.RichText> createRichText(String text) {
+    private static List<PageProperty.RichText> createRichTextList(String text) {
         return List.of(
-            new PageProperty.RichText(
-                RichTextType.Text,
-                new PageProperty.RichText.Text(text)
-            )
+            createRichText(text)
+        );
+    }
+
+    private static PageProperty.RichText createRichText(String text) {
+        return new PageProperty.RichText(
+            RichTextType.Text,
+            new PageProperty.RichText.Text(text)
+        );
+    }
+
+    private static PageProperty.RichText createRichTextLink(String text, String url) {
+        PageProperty.RichText.Link link = new PageProperty.RichText.Link(RichTextLinkType.Url, url);
+
+        return new PageProperty.RichText(
+            RichTextType.Text,
+            new PageProperty.RichText.Text(text, link)
         );
     }
 
     private static ParagraphBlock createParagraph(String text) {
+        return createParagraph(text, List.of());
+    }
+
+    private static ParagraphBlock createParagraph(String text, List<? extends Block> children) {
         return new ParagraphBlock(
             new ParagraphBlock.Element(
-                createRichText(text)
+                createRichTextList(text),
+                children
             )
         );
     }
@@ -129,7 +163,7 @@ public class NotionWrapper {
     private static ToggleBlock createToggle(String text, List<? extends Block> children) {
         return new ToggleBlock(
             new ToggleBlock.Element(
-                createRichText(text),
+                createRichTextList(text),
                 children
             )
         );
@@ -142,8 +176,19 @@ public class NotionWrapper {
     private static BulletedListItemBlock createBullet(String text, List<? extends Block> children) {
         return new BulletedListItemBlock(
             new BulletedListItemBlock.Element(
-                createRichText(text),
+                createRichTextList(text),
                 children
+            )
+        );
+    }
+
+    private static BulletedListItemBlock createBulletWithChatLink(String chatLink, String chatName) {
+        return new BulletedListItemBlock(
+            new BulletedListItemBlock.Element(
+                List.of(
+                    createRichTextLink(chatLink, chatLink),
+                    createRichText(String.format("%s%s", CHAT_LINK_AND_NAME_SEPARATOR, chatName))
+                )
             )
         );
     }
