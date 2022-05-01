@@ -11,6 +11,10 @@ import notion.api.v1.model.pages.Page;
 import notion.api.v1.model.pages.PageProperty;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,15 +25,17 @@ public class NotionWrapper {
     private static final String CHAT_LINK_AND_NAME_SEPARATOR = " — ";
     private static final String TOGGLE_HEADER_1_TO_APPEND_TEXT = "Чаты по землям и городам Германии (Telegram, WhatsApp)";
 
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+
     public static void main(String[] args) {
         String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
 
-        try (NotionClient client = new NotionClient(notionToken)) {
-            client.setHttpClient(new OkHttp4Client());
-
 //            String pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
 //            String pageId = "9a0effe48cf34cd49c849a9e05c61fb9"; // список чатов по городам
-            String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
+        String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
+
+        try (NotionClient client = new NotionClient(notionToken)) {
+            client.setHttpClient(new OkHttp4Client());
 
             Page page = client.retrievePage(pageId);
             String title = getPageTitle(page);
@@ -42,7 +48,21 @@ public class NotionWrapper {
             Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
             log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
 
-            deleteToggleHeadingContent(client, blocks, TOGGLE_HEADER_1_TO_APPEND_TEXT);
+            HeadingOneBlock rootBlock = deleteToggleHeadingContent(client, blocks, TOGGLE_HEADER_1_TO_APPEND_TEXT);
+
+            // append paragraph with refresh time
+            String refreshTimeText = String.format("Список чатов обновлён: %s", ZonedDateTime.now().format(dateTimeFormatter));
+            ParagraphBlock refreshTimeParagraph = createParagraph(refreshTimeText);
+            client.appendBlockChildren(rootBlock.getId(), List.of(refreshTimeParagraph));
+
+            // append toggles with city chats
+            List<NotionCityChats> cityChats = getCityChats(); // todo: read chats from Google Sheets
+            List<ToggleBlock> cityChatToggles = getCityChatToggles(cityChats);
+            client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
+
+            if (true) {
+                return;
+            }
 
             HeadingOneBlock toggleHeading = blocks.getResults().get(2).asHeadingOne();
             log.info("Toggle heading has children: {}", toggleHeading.getHasChildren());
@@ -117,6 +137,54 @@ public class NotionWrapper {
         }
     }
 
+    private static List<NotionCityChats> getCityChats() {
+        // city 1
+        NotionCityChats city1 = new NotionCityChats();
+        city1.setCityName("Ansbach");
+        city1.addChat(
+            "https://t.me/+QQ9lx56QjYU1ZjZi",
+            "Ansbach/Landkreis Ansbach \uD83C\uDDE9\uD83C\uDDEA/Ukraine \uD83C\uDDFA\uD83C\uDDE6"
+        );
+
+        // city 2
+        NotionCityChats city2 = new NotionCityChats();
+        city2.setCityName("Bottrop");
+
+        city2.addChat(
+            "https://t.me/+lWmTWIFgAI9iN2Qy",
+            "Помощь Украинцам \uD83C\uDDFA\uD83C\uDDE6Bottrop\uD83C\uDDE9\uD83C\uDDEA Кто знает что?"
+        );
+
+        city2.addChat(
+            "https://t.me/uahelp_ruhrgebiet",
+            "UA Help Ruhrgebiet"
+        );
+
+        List<NotionCityChats> cities = new ArrayList<>(List.of(city1, city2)); // make mutable
+        cities.sort(Comparator.comparing(NotionCityChats::getCityName)); // sort by city name
+        return cities;
+    }
+
+    private static List<ToggleBlock> getCityChatToggles(List<NotionCityChats> cityChats) {
+        return cityChats
+            .stream()
+            .map(NotionWrapper::createToggle)
+            .toList();
+    }
+
+    private static ToggleBlock createToggle(NotionCityChats city) {
+        List<NotionCityChat> chats = city.getChats();
+        List<BulletedListItemBlock> bullets = chats
+            .stream()
+            .map(NotionWrapper::createBulletWithChatLink)
+            .toList();
+
+        return createToggle(
+            city.getCityName(),
+            bullets
+        );
+    }
+
     private static String getPageTitle(Page page) {
         return page
             .getProperties()
@@ -127,7 +195,7 @@ public class NotionWrapper {
             .getContent();
     }
 
-    private static void deleteToggleHeadingContent(NotionClient client, Blocks blocks, String heading1Text) {
+    private static HeadingOneBlock deleteToggleHeadingContent(NotionClient client, Blocks blocks, String heading1Text) {
         HeadingOneBlock heading1ToAppend = getToggleHeading1Content(blocks, heading1Text);
         Blocks blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, 999999);
         for (Block result : blockChildren.getResults()) {
@@ -135,6 +203,8 @@ public class NotionWrapper {
         }
 
         log.info("Removed {} child blocks from heading one with text \"{}\".", blockChildren.getResults().size(), TOGGLE_HEADER_1_TO_APPEND_TEXT);
+
+        return heading1ToAppend;
     }
 
     private static HeadingOneBlock getToggleHeading1Content(Blocks blocks, String heading1Text) {
@@ -242,6 +312,13 @@ public class NotionWrapper {
                 createRichTextList(text),
                 children
             )
+        );
+    }
+
+    private static BulletedListItemBlock createBulletWithChatLink(NotionCityChat chat) {
+        return createBulletWithChatLink(
+            chat.getUrl(),
+            chat.getName()
         );
     }
 
