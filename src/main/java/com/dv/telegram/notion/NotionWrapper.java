@@ -1,5 +1,6 @@
 package com.dv.telegram.notion;
 
+import com.dv.telegram.*;
 import com.dv.telegram.util.WikiBotUtils;
 import lombok.extern.log4j.Log4j2;
 import notion.api.v1.NotionClient;
@@ -27,7 +28,27 @@ public class NotionWrapper {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
+    private static final int MAX_PAGE_SIZE = 100; // setting more also returns 100
+
     public static void main(String[] args) {
+        WikiBotConfigs wikiBotConfigs = WikiBotUtils.readConfigs();
+
+        int threadsCount = wikiBotConfigs.getConfigs().size();
+        log.info("Total bot configs: {}", threadsCount);
+
+        WikiBotConfig config = wikiBotConfigs.configs.get(0);
+        GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
+
+        List<CityChatData> cityChatsData = botData.getCityChats();
+        List<NotionCityChats> cityChats = NotionCityChats.from(cityChatsData);
+//        List<NotionCityChats> cityChats = getCityChats();
+
+        log.info("{} city chats read from Google Sheet.", cityChats.size());
+
+        appendCityChats(cityChats);
+    }
+
+    public static void appendCityChats(List<NotionCityChats> cityChats) {
         String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
 
 //            String pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
@@ -35,15 +56,15 @@ public class NotionWrapper {
         String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
 
         try (NotionClient client = new NotionClient(notionToken)) {
-            client.setHttpClient(new OkHttp4Client());
+            client.setHttpClient(new OkHttp4Client(60_000, 60_000, 60_000)); // increase timeouts since writing a lot of toggles at once can lead to connection timeout
 
             Page page = client.retrievePage(pageId);
-            String title = getPageTitle(page);
+            String pageTitle = getPageTitle(page);
 
             log.info("Page with id = {} successfully retrieved.", pageId);
             log.info("Page url: {}", page.getUrl());
             log.info("Page created by: {}", page.getCreatedBy().getName());
-            log.info("Page title: {}", title);
+            log.info("Page title: {}", pageTitle);
 
             Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
             log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
@@ -56,9 +77,10 @@ public class NotionWrapper {
             client.appendBlockChildren(rootBlock.getId(), List.of(refreshTimeParagraph));
 
             // append toggles with city chats
-            List<NotionCityChats> cityChats = getCityChats(); // todo: read chats from Google Sheets
             List<ToggleBlock> cityChatToggles = getCityChatToggles(cityChats);
             client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
+
+            log.info("Chats for {} cities appended to page {} (\"{}\").", cityChats.size(), pageId, pageTitle);
 
             if (true) {
                 return;
@@ -197,12 +219,21 @@ public class NotionWrapper {
 
     private static HeadingOneBlock deleteToggleHeadingContent(NotionClient client, Blocks blocks, String heading1Text) {
         HeadingOneBlock heading1ToAppend = getToggleHeading1Content(blocks, heading1Text);
-        Blocks blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, 999999);
-        for (Block result : blockChildren.getResults()) {
-            client.deleteBlock(result.getId());
+
+        int deletedBlocksCount = 0;
+        Blocks blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, MAX_PAGE_SIZE); // max pageSize is 100
+
+        while (!blockChildren.getResults().isEmpty()) {
+            for (Block result : blockChildren.getResults()) {
+                client.deleteBlock(result.getId());
+            }
+
+            deletedBlocksCount += blockChildren.getResults().size();
+
+            blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, MAX_PAGE_SIZE); // max pageSize is 100
         }
 
-        log.info("Removed {} child blocks from heading one with text \"{}\".", blockChildren.getResults().size(), TOGGLE_HEADER_1_TO_APPEND_TEXT);
+        log.info("Removed {} child blocks from heading one with text \"{}\".", deletedBlocksCount, TOGGLE_HEADER_1_TO_APPEND_TEXT);
 
         return heading1ToAppend;
     }
