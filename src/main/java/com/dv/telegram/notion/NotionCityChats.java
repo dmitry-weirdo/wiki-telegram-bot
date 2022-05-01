@@ -15,6 +15,7 @@ import java.util.Optional;
 public class NotionCityChats {
     private static final String CHAT_LINK_AND_NAME_SEPARATOR_1 = " — ";
     private static final String CHAT_LINK_AND_NAME_SEPARATOR_2 = " - ";
+    private static final String EXPECTED_URL_START = "https://";
 
     private String cityName;
     private List<NotionCityChat> chats = new ArrayList<>();
@@ -83,14 +84,19 @@ public class NotionCityChats {
             return Optional.empty();
         }
 
-        var url = split[0];
-        var name = split[1];
+        var url = split[0].trim();
+        var name = split[1].trim();
 
         if (StringUtils.isBlank(url)) {
             return Optional.empty();
         }
 
+        if (!url.startsWith(EXPECTED_URL_START)) {
+            log.warn("Url \"{}\" does not start with \"{}\".", url, EXPECTED_URL_START);
+        }
+
         if (StringUtils.isBlank(name)) {
+            log.warn("Chat name for chat with url \"{}\" is empty. Please check that the chat exists and add its name.", url);
             return Optional.empty();
         }
 
