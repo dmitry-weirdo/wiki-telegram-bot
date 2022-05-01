@@ -27,19 +27,12 @@ public class NotionWrapper {
             String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
 
             Page page = client.retrievePage(pageId);
-            String title = page
-                .getProperties()
-                .get("title")
-                .getTitle()
-                .get(0)
-                .getText()
-                .getContent();
+            String title = getPageTitle(page);
 
             log.info("Page with id = {} successfully retrieved.", pageId);
             log.info("Page url: {}", page.getUrl());
             log.info("Page created by: {}", page.getCreatedBy().getName());
             log.info("Page title: {}", title);
-
 
             Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
             log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
@@ -47,17 +40,7 @@ public class NotionWrapper {
             HeadingOneBlock toggleHeading = blocks.getResults().get(2).asHeadingOne();
             log.info("Toggle heading has children: {}", toggleHeading.getHasChildren());
 
-            Block paragraphInToggleHeading = new ParagraphBlock(
-                new ParagraphBlock.Element(
-                    List.of(
-                        new PageProperty.RichText(
-                            RichTextType.Text,
-                            new PageProperty.RichText.Text("Paragraph text within toggle heading 1 (try)")
-                        )
-                    )
-                )
-            );
-
+            Block paragraphInToggleHeading = createParagraph("Paragraph text within toggle heading 1 (try)");
 
             List<Block> blocksInToggleHeader = List.of(paragraphInToggleHeading);
             client.appendBlockChildren(toggleHeading.getId(), blocksInToggleHeader);
@@ -70,12 +53,7 @@ public class NotionWrapper {
 */
 
             HeadingOneBlock.Element heading1Element = new HeadingOneBlock.Element(
-                List.of(
-                    new PageProperty.RichText(
-                        RichTextType.Text,
-                        new PageProperty.RichText.Text("Heading 1 created with Notion API, hasChildren = true try")
-                    )
-                )
+                createRichText("Heading 1 created with Notion API, hasChildren = true try")
             );
 
             Block heading1 = new HeadingOneBlock(
@@ -88,57 +66,73 @@ public class NotionWrapper {
                 null
             );
 
-            Block paragraph = new ParagraphBlock(
-                new ParagraphBlock.Element(
-                    List.of(
-                        new PageProperty.RichText(
-                            RichTextType.Text,
-                            new PageProperty.RichText.Text("Paragraph text created with Notion API")
-                        )
-                    )
-                )
+            Block paragraph = createParagraph("Paragraph text created with Notion API");
+
+            BulletedListItemBlock bullet1_1 = createBullet("Bullet 1.1 (by API)");
+            BulletedListItemBlock bullet1_2 = createBullet("Bullet 1.2 (by API)");
+
+            // toggle -> bullet 1 - works (2 levels created in one call)
+            // toggle -> bullet 1 -> bullet 1.1 - fails (3 levels created in one call)
+            // see https://developers.notion.com/reference/patch-block-children - we allow _up to two levels_ of nesting in a single request.
+
+            //            BulletedListItemBlock bullet1 = createBullet("Bullet 1 in toggle (by API)", List.of(bullet1_1, bullet1_2));
+            BulletedListItemBlock bullet1 = createBullet("Bullet 1 in toggle (by API)");
+
+            BulletedListItemBlock bullet2 = createBullet("Bullet 2 in toggle (by API)");
+
+//            ToggleBlock toggle = createToggle("Toggle created from API", List.of(bullet1, bullet2));
+            ToggleBlock toggle = createToggle("Toggle created from API", List.of(bullet1, bullet2));
+
+            List<Block> blocksToAppend = List.of(
+                heading1,
+                paragraph,
+                toggle
             );
 
-            BulletedListItemBlock bullet1_1 = createBullet("Bullet 1.1 + (by API)");
-            BulletedListItemBlock bullet1_2 = createBullet("Bullet 1.2 + (by API)");
-            BulletedListItemBlock bullet1 = createBullet("Bullet 1 (by API)", List.of(bullet1_1, bullet1_2));
-
-            BulletedListItemBlock bullet2 = createBullet("Bullet 2 (by API)");
-
-            List<Block> blocksToAppend = List.of(heading1, paragraph, bullet1, bullet2);
             Blocks appendedBlocks = client.appendBlockChildren(pageId, blocksToAppend);
 
-            int index = 0;
-            HeadingOneBlock appendedHeader1 = appendedBlocks.getResults().get(index++).asHeadingOne();
-            ParagraphBlock appendedParagraph = appendedBlocks.getResults().get(index++).asParagraph();
-            BulletedListItemBlock appendedBullet1 = appendedBlocks.getResults().get(index++).asBulletedListItem();
-            BulletedListItemBlock appendedBullet2 = appendedBlocks.getResults().get(index).asBulletedListItem();
-
-            log.info("Appended heading1 and paragraph to page {}.", pageId);
-            log.info("Heading1 id: {}.", appendedHeader1.getId());
-            log.info("Paragraph id: {}.", appendedParagraph.getId());
-            log.info("Bullet 1 id: {}.", appendedBullet1.getId());
-            log.info("Bullet 2 id: {}.", appendedBullet2.getId());
-
-/*
-            Appending to non-block header does not work :(
-
-            Block paragraphInHeading = new ParagraphBlock(
-                new ParagraphBlock.Element(
-                    List.of(
-                        new PageProperty.RichText(
-                            RichTextType.Text,
-                            new PageProperty.RichText.Text("Paragraph text within heading 1 (try)")
-                        )
-                    )
-                )
-            );
-
-            List<Block> blocksInHeader = List.of(paragraphInHeading);
-            client.appendBlockChildren(appendedHeader1.getId(), blocksInHeader);
-            log.info("Appended paragraph to heading1 with id = {}", heading1.getId());
-*/
+            log.info("Total blocks appended: {}", appendedBlocks.getResults().size());
         }
+    }
+
+    private static String getPageTitle(Page page) {
+        return page
+            .getProperties()
+            .get("title")
+            .getTitle()
+            .get(0)
+            .getText()
+            .getContent();
+    }
+
+    private static List<PageProperty.RichText> createRichText(String text) {
+        return List.of(
+            new PageProperty.RichText(
+                RichTextType.Text,
+                new PageProperty.RichText.Text(text)
+            )
+        );
+    }
+
+    private static ParagraphBlock createParagraph(String text) {
+        return new ParagraphBlock(
+            new ParagraphBlock.Element(
+                createRichText(text)
+            )
+        );
+    }
+
+    private static ToggleBlock createToggle(String text) {
+        return createToggle(text, List.of());
+    }
+
+    private static ToggleBlock createToggle(String text, List<? extends Block> children) {
+        return new ToggleBlock(
+            new ToggleBlock.Element(
+                createRichText(text),
+                children
+            )
+        );
     }
 
     private static BulletedListItemBlock createBullet(String text) {
@@ -148,12 +142,7 @@ public class NotionWrapper {
     private static BulletedListItemBlock createBullet(String text, List<? extends Block> children) {
         return new BulletedListItemBlock(
             new BulletedListItemBlock.Element(
-                List.of(
-                    new PageProperty.RichText(
-                        RichTextType.Text,
-                        new PageProperty.RichText.Text(text)
-                    )
-                ),
+                createRichText(text),
                 children
             )
         );
