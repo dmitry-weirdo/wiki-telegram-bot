@@ -99,7 +99,10 @@ public class NotionWrapper {
                 )
             );
 
-            BulletedListItemBlock bullet1 = createBullet("Bullet 1 (by API)");
+            BulletedListItemBlock bullet1_1 = createBullet("Bullet 1.1 + (by API)");
+            BulletedListItemBlock bullet1_2 = createBullet("Bullet 1.2 + (by API)");
+            BulletedListItemBlock bullet1 = createBullet("Bullet 1 (by API)", List.of(bullet1_1, bullet1_2));
+
             BulletedListItemBlock bullet2 = createBullet("Bullet 2 (by API)");
 
             List<Block> blocksToAppend = List.of(heading1, paragraph, bullet1, bullet2);
@@ -116,14 +119,6 @@ public class NotionWrapper {
             log.info("Paragraph id: {}.", appendedParagraph.getId());
             log.info("Bullet 1 id: {}.", appendedBullet1.getId());
             log.info("Bullet 2 id: {}.", appendedBullet2.getId());
-
-
-            BulletedListItemBlock bullet1_1 = createBullet("Bullet 1.1 (by API)");
-
-            BulletedListItemBlock bullet1_2 = createBullet("Bullet 1.2 (by API)");
-
-            client.appendBlockChildren(appendedBullet1.getId(), List.of(bullet1_1, bullet1_2));
-            log.info("Appended bullet 1.1 and bullet 1.2 to bullet 1 {}.", appendedBullet1.getId());
 
 /*
             Appending to non-block header does not work :(
@@ -147,6 +142,10 @@ public class NotionWrapper {
     }
 
     private static BulletedListItemBlock createBullet(String text) {
+        return createBullet(text, List.of());
+    }
+
+    private static BulletedListItemBlock createBullet(String text, List<? extends Block> children) {
         return new BulletedListItemBlock(
             new BulletedListItemBlock.Element(
                 List.of(
@@ -154,7 +153,8 @@ public class NotionWrapper {
                         RichTextType.Text,
                         new PageProperty.RichText.Text(text)
                     )
-                )
+                ),
+                children
             )
         );
     }
