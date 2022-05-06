@@ -14,6 +14,8 @@ public class BotSpecialCommands {
     private final Start startCommand;
     private final HelpCommand helpCommand;
     private final ListCommands listCommands;
+    private final ReloadFromGoogleSheet reloadFromGoogleSheetCommand;
+    private final CityChatsValidate cityChatsValidateCommand;
 
     public static BotSpecialCommands create(WikiBotConfig config) {
         Set<String> botAdmins = BotCommandUtils.getBotAdmins(config);
@@ -29,6 +31,8 @@ public class BotSpecialCommands {
         this.startCommand = getCommand(commands, Start.class);
         this.helpCommand = getCommand(commands, HelpCommand.class);
         this.listCommands = getCommand(commands, ListCommands.class);
+        this.reloadFromGoogleSheetCommand = getCommand(commands, ReloadFromGoogleSheet.class);
+        this.cityChatsValidateCommand = getCommand(commands, CityChatsValidate.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -61,6 +65,14 @@ public class BotSpecialCommands {
 
     public ListCommands getListCommands() {
         return listCommands;
+    }
+
+    public ReloadFromGoogleSheet getReloadFromGoogleSheetCommand() {
+        return reloadFromGoogleSheetCommand;
+    }
+
+    public CityChatsValidate getCityChatsValidateCommand() {
+        return cityChatsValidateCommand;
     }
 
     public Optional<BotCommand> getCommand(String commandText) {

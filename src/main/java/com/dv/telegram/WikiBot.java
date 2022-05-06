@@ -96,6 +96,18 @@ public class WikiBot extends TelegramLongPollingBot {
         return environmentName;
     }
 
+    public String getNotionToken() {
+        return config.notionToken;
+    }
+
+    public String getNotionCityPageId() {
+        return config.cityChatsPageId;
+    }
+
+    public String getNotionCityChatsToggleHeading1Text() {
+        return config.cityChatsToggleHeading1Text;
+    }
+
     public BotSpecialCommands getSpecialCommands() {
         return specialCommands;
     }
@@ -269,6 +281,10 @@ public class WikiBot extends TelegramLongPollingBot {
 
         String combinedAnswers = StringUtils.join(answers, "\n\n");
         return MessageProcessingResult.answerFound(combinedAnswers);
+    }
+
+    public GoogleSheetBotData loadBotDataFromGoogleSheet() { // does NOT reload the bot data itself
+        return GoogleSheetLoader.readGoogleSheet(config);
     }
 
     public boolean reloadBotDataFromGoogleSheet() {

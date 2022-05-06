@@ -1,8 +1,10 @@
 package com.dv.telegram.command;
 
 import com.dv.telegram.WikiBot;
+import com.dv.telegram.exception.CommandException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface BotCommand {
@@ -35,6 +37,25 @@ public interface BotCommand {
         );
     }
 
+    default String errorResponse(CommandException e) {
+        List<String> allErrors = new ArrayList<>();
+
+        // no bold markdown in the header, because we can return the user input data in the error messages
+        allErrors.add("При выполнении команды возникли следующие ошибки:");
+
+        e.getErrorMessages().forEach(error ->
+            allErrors.add(
+                String.format("— %s%n", error)
+            )
+        );
+
+        return StringUtils.join(allErrors, "\n");
+    }
+
+    default String unknownErrorResponse(Exception e) {
+        return "При выполнении команды произошла неизвестная ошибка";
+    }
+
     static List<BotCommand> getAllCommands() {
         return List.of(
             // commands
@@ -46,6 +67,10 @@ public interface BotCommand {
             new Start(),
             new GetEnvironment(),
             new ReloadFromGoogleSheet(),
+
+            // Notion
+            new CityChatsValidate(),
+            new CityChatsExportToNotion(),
 
             // settings
             new ListSettings(),
