@@ -40,8 +40,9 @@ public class NotionWrapper {
         String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
 
 //        String pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
-        String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
+//        String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
 //        String pageId = "9a0effe48cf34cd49c849a9e05c61fb9"; // список чатов по городам (german-city-chats)
+        String pageId = "67sadfsadfjlkfdsaj"; // incorrect page
 
 /*
         if (true) {
@@ -61,7 +62,7 @@ public class NotionWrapper {
     }
 
     private static void appendToggleHeadingOne(NotionClient client, String pageId) {
-        Page page = client.retrievePage(pageId);
+        Page page = NotionPageUtils.retrievePage(client, pageId);
 
         Block paragraphInHeader = NotionPageUtils.createParagraph("Paragraph as heading 1 child");
 
@@ -84,7 +85,7 @@ public class NotionWrapper {
     }
 
     public static void appendCityChats(NotionClient client, String pageId, List<NotionCityChats> cityChats) {
-        Page page = client.retrievePage(pageId);
+        Page page = NotionPageUtils.retrievePage(client, pageId);
         String pageTitle = NotionPageUtils.getPageTitle(page);
 
         log.info("Page with id = {} successfully retrieved.", pageId);

@@ -1,5 +1,6 @@
 package com.dv.telegram.notion;
 
+import com.dv.telegram.exception.CommandException;
 import lombok.extern.log4j.Log4j2;
 import notion.api.v1.NotionClient;
 import notion.api.v1.http.OkHttp4Client;
@@ -46,6 +47,15 @@ public final class NotionPageUtils {
         client.setHttpClient(httpClient);
     }
 
+    public static Page retrievePage(NotionClient client, String pageId) {
+        try {
+            return client.retrievePage(pageId);
+        }
+        catch(Exception e) {
+            throw new CommandException(String.format("Ошибка при получении страницы Notion с pageId = \"%s\".", pageId), e);
+        }
+    }
+
     public static String getPageTitle(Page page) {
         return page
             .getProperties()
@@ -88,12 +98,12 @@ public final class NotionPageUtils {
             )
             .toList();
 
-        if (headersWithText.isEmpty()) { // todo: return as a special error
-            throw new IllegalStateException(String.format("No header 1 with text = \"%s\" found.", heading1Text));
+        if (headersWithText.isEmpty()) {
+            throw new CommandException(String.format("Header 1 с текстом \"%s\" не найден.", heading1Text));
         }
 
-        if (headersWithText.size() > 1) { // todo: return as a special error
-            throw new IllegalStateException(String.format("More than one header 1 with text = \"%s\" found. Total headers found: %d.", heading1Text, headersWithText.size()));
+        if (headersWithText.size() > 1) {
+            throw new CommandException(String.format("Найден более чем один header 1 с текстом \"%s\". Всего заголовков: %d.", heading1Text, headersWithText.size()));
         }
 
         return headersWithText.get(0).asHeadingOne();
