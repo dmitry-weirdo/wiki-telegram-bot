@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @Log4j2
 public class NotionWrapper {
@@ -31,6 +30,11 @@ public class NotionWrapper {
     private static final int MAX_PAGE_SIZE = 100; // setting more also returns 100
 
     public static void main(String[] args) {
+//        if (true) {
+//            appendToggleHeadingOne();
+//            return;
+//        }
+
         WikiBotConfigs wikiBotConfigs = WikiBotUtils.readConfigs();
 
         int threadsCount = wikiBotConfigs.getConfigs().size();
@@ -46,6 +50,32 @@ public class NotionWrapper {
         log.info("{} city chats read from Google Sheet.", cityChats.size());
 
         appendCityChats(cityChats);
+    }
+
+    public static void appendToggleHeadingOne() {
+        String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
+
+//            String pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
+//            String pageId = "9a0effe48cf34cd49c849a9e05c61fb9"; // список чатов по городам
+        String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
+
+        try (NotionClient client = new NotionClient(notionToken)) {
+            client.setHttpClient(new OkHttp4Client(60_000, 60_000, 60_000)); // increase timeouts since writing a lot of toggles at once can lead to connection timeout
+
+            Page page = client.retrievePage(pageId);
+
+            Block paragraphInHeader = createParagraph("Paragraph as heading 1 child");
+
+            HeadingOneBlock.Element heading1Element = new HeadingOneBlock.Element(
+                createRichTextList("Heading 1 created with Notion API, hasChildren = true try"),
+                null,
+                List.of(paragraphInHeader)
+            );
+
+            Block heading1 = new HeadingOneBlock(heading1Element);
+
+            client.appendBlockChildren(pageId, List.of(heading1));
+        }
     }
 
     public static void appendCityChats(List<NotionCityChats> cityChats) {
@@ -76,11 +106,26 @@ public class NotionWrapper {
             ParagraphBlock refreshTimeParagraph = createParagraph(refreshTimeText);
             client.appendBlockChildren(rootBlock.getId(), List.of(refreshTimeParagraph));
 
+            // append paragraph with total cities count
+            String totalCitiesText = String.format("Всего городов: %s", cityChats.size());
+            ParagraphBlock totalCitiesParagraph = createParagraph(totalCitiesText);
+            client.appendBlockChildren(rootBlock.getId(), List.of(totalCitiesParagraph));
+
+            // append paragraph with total cities count
+            Integer totalChats = cityChats
+                .stream()
+                .map(chats -> chats.getChats().size())
+                .reduce(0, Integer::sum);
+
+            String totalChatsText = String.format("Всего чатов: %s", totalChats);
+            ParagraphBlock totalChatsParagraph = createParagraph(totalChatsText);
+            client.appendBlockChildren(rootBlock.getId(), List.of(totalChatsParagraph));
+
             // append toggles with city chats
             List<ToggleBlock> cityChatToggles = getCityChatToggles(cityChats);
             client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
 
-            log.info("Chats for {} cities appended to page {} (\"{}\").", cityChats.size(), pageId, pageTitle);
+            log.info("{} chats for {} cities appended to page {} (\"{}\").", totalChats, cityChats.size(), pageId, pageTitle);
 
             if (true) {
                 return;
@@ -103,19 +148,16 @@ public class NotionWrapper {
             }
 */
 
+
+            Block paragraphInHeader = createParagraph("Paragraph as heading 1 child");
+
             HeadingOneBlock.Element heading1Element = new HeadingOneBlock.Element(
-                createRichTextList("Heading 1 created with Notion API, hasChildren = true try")
+                createRichTextList("Heading 1 created with Notion API, hasChildren = true try"),
+                null,
+                List.of(paragraphInHeader)
             );
 
-            Block heading1 = new HeadingOneBlock(
-                heading1Element,
-                UUID.randomUUID().toString(),
-                true, // will it make it a toggle header?
-                null,
-                null,
-                null,
-                null
-            );
+            Block heading1 = new HeadingOneBlock(heading1Element);
 
             Block paragraph = createParagraph("Paragraph text created with Notion API");
 
