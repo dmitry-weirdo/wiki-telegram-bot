@@ -42,7 +42,7 @@ public class WikiBotConfig {
         commandsSheetName = getDefault(commandsSheetName, "Список болталки");
 
         cityChatsPageId = getDefault(cityChatsPageId, "9a0effe48cf34cd49c849a9e05c61fb9"); // список чатов по городам (https://uahelp.wiki/german-city-chats)
-        cityChatsToggleHeading1Text = getDefault(cityChatsPageId, "Чаты по землям и городам Германии (Telegram, WhatsApp)");
+        cityChatsToggleHeading1Text = getDefault(cityChatsToggleHeading1Text, "Чаты по землям и городам Германии (Telegram, WhatsApp)");
     }
 
     private static String getDefault(String value, String defaultValue) {

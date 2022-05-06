@@ -50,7 +50,21 @@ public class NotionWrapper {
         }
 */
 
-        appendCityChats(notionToken, pageId, cityChats);
+/*
+        appendCityChats(
+            config.getNotionToken(),
+            config.getCityChatsPageId(),
+            config.getCityChatsToggleHeading1Text(),
+            cityChats
+        );
+*/
+
+        appendCityChats(
+            notionToken,
+            pageId,
+            TOGGLE_HEADER_1_TO_APPEND_TEXT,
+            cityChats
+        );
     }
 
     private static void appendToggleHeadingOne(String notionToken, String pageId) {
@@ -76,14 +90,35 @@ public class NotionWrapper {
         client.appendBlockChildren(pageId, List.of(heading1));
     }
 
-    public static void appendCityChats(String notionToken, String pageId, List<NotionCityChats> cityChats) {
+    public static NotionCityChatsImportResult appendCityChats(
+        String notionToken,
+        String pageId,
+        String toggleHeading1Text,
+        List<NotionCityChats> cityChats
+    ) {
+        NotionOperationBlocker.getInstance().startOperation();
+
+        NotionCityChatsImportResult[] result = new NotionCityChatsImportResult[1]; // hack to be effectively final from lamda
+
         NotionPageUtils.execute(
             notionToken,
-            client -> appendCityChats(client, pageId, cityChats)
+            client -> {
+                NotionCityChatsImportResult importResult = appendCityChats(client, pageId, toggleHeading1Text, cityChats);
+                result[0] = importResult;
+            }
         );
+
+        NotionOperationBlocker.getInstance().stopOperation();
+
+        return result[0];
     }
 
-    public static void appendCityChats(NotionClient client, String pageId, List<NotionCityChats> cityChats) {
+    private static NotionCityChatsImportResult appendCityChats(
+        NotionClient client,
+        String pageId,
+        String toggleHeading1Text,
+        List<NotionCityChats> cityChats
+    ) {
         Page page = NotionPageUtils.retrievePage(client, pageId);
         String pageTitle = NotionPageUtils.getPageTitle(page);
 
@@ -95,7 +130,7 @@ public class NotionWrapper {
         Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
         log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
 
-        HeadingOneBlock rootBlock = NotionPageUtils.deleteToggleHeading1Content(client, blocks, TOGGLE_HEADER_1_TO_APPEND_TEXT);
+        HeadingOneBlock rootBlock = NotionPageUtils.deleteToggleHeading1Content(client, blocks, toggleHeading1Text);
 
         // append paragraph with refresh time
         String refreshTimeText = String.format("Список чатов обновлён: %s", ZonedDateTime.now().format(dateTimeFormatter));
@@ -103,13 +138,13 @@ public class NotionWrapper {
         client.appendBlockChildren(rootBlock.getId(), List.of(refreshTimeParagraph));
 
         // append paragraph with total cities count
-        String totalCitiesText = String.format("Всего городов: %s", cityChats.size());
+        int totalCities = cityChats.size();
+        String totalCitiesText = String.format("Всего городов: %s", totalCities);
         ParagraphBlock totalCitiesParagraph = NotionPageUtils.createParagraph(totalCitiesText);
         client.appendBlockChildren(rootBlock.getId(), List.of(totalCitiesParagraph));
 
         // append paragraph with total cities count
         Integer totalChats = NotionCityChats.countTotalChats(cityChats);
-
         String totalChatsText = String.format("Всего чатов: %s", totalChats);
         ParagraphBlock totalChatsParagraph = NotionPageUtils.createParagraph(totalChatsText);
         client.appendBlockChildren(rootBlock.getId(), List.of(totalChatsParagraph));
@@ -118,7 +153,15 @@ public class NotionWrapper {
         List<ToggleBlock> cityChatToggles = NotionPageUtils.getCityChatToggles(cityChats);
         client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
 
-        log.info("{} chats for {} cities appended to page {} (\"{}\").", totalChats, cityChats.size(), pageId, pageTitle);
+        log.info("{} chats for {} cities appended to Notion page {} (\"{}\").", totalChats, totalCities, pageId, pageTitle);
+
+        return new NotionCityChatsImportResult(
+            pageId,
+            pageTitle,
+            toggleHeading1Text,
+            totalCities,
+            totalChats
+        );
     }
 
     private static List<NotionCityChats> getTestCityChats() { // get test data

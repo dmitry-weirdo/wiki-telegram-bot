@@ -20,7 +20,13 @@ public class CityChatsValidate extends BasicBotCommand {
     @Override
     public String getDescription(WikiBot bot) {
         return String.format(
-            "`%s %s` — проверить формат списка чатов городов в Google Sheet.%n%nВыдастся либо список ошибок, либо сообщение об успешной проверке.%n%nЭта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `%s %s`.",
+            """
+            `%s %s` — проверить формат списка чатов городов в Google Sheet.
+            
+            Выдастся либо список ошибок, либо сообщение об успешной проверке.
+            
+            Эта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `%s %s`.
+            """,
             bot.getBotName(),
             getCommandText(),
             bot.getBotName(),

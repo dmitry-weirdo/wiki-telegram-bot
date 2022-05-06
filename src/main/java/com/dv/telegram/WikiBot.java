@@ -96,6 +96,18 @@ public class WikiBot extends TelegramLongPollingBot {
         return environmentName;
     }
 
+    public String getNotionToken() {
+        return config.notionToken;
+    }
+
+    public String getNotionCityPageId() {
+        return config.cityChatsPageId;
+    }
+
+    public String getNotionCityChatsToggleHeading1Text() {
+        return config.cityChatsToggleHeading1Text;
+    }
+
     public BotSpecialCommands getSpecialCommands() {
         return specialCommands;
     }

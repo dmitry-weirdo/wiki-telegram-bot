@@ -70,7 +70,7 @@ public interface BotCommand {
 
             // Notion
             new CityChatsValidate(),
-//            new CityChatsExportToNotion(),
+            new CityChatsExportToNotion(),
 
             // settings
             new ListSettings(),
