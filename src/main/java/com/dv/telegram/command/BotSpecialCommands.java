@@ -14,6 +14,7 @@ public class BotSpecialCommands {
     private final Start startCommand;
     private final HelpCommand helpCommand;
     private final ListCommands listCommands;
+    private final ReloadFromGoogleSheet reloadFromGoogleSheetCommand;
 
     public static BotSpecialCommands create(WikiBotConfig config) {
         Set<String> botAdmins = BotCommandUtils.getBotAdmins(config);
@@ -29,6 +30,7 @@ public class BotSpecialCommands {
         this.startCommand = getCommand(commands, Start.class);
         this.helpCommand = getCommand(commands, HelpCommand.class);
         this.listCommands = getCommand(commands, ListCommands.class);
+        this.reloadFromGoogleSheetCommand = getCommand(commands, ReloadFromGoogleSheet.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -61,6 +63,10 @@ public class BotSpecialCommands {
 
     public ListCommands getListCommands() {
         return listCommands;
+    }
+
+    public ReloadFromGoogleSheet getReloadFromGoogleSheetCommand() {
+        return reloadFromGoogleSheetCommand;
     }
 
     public Optional<BotCommand> getCommand(String commandText) {

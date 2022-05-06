@@ -12,6 +12,11 @@
     "countryChatsSheetName": "Список чатов по странам",
     "commandsSheetName": "Список болталки",
 
+    // Notion
+    "notionToken": "...",
+    "cityChatsPageId": "24ec680a988441698efe1003a304ded1",
+    "cityChatsToggleHeading1Text": "Чаты по землям и городам Германии (Telegram, WhatsApp)",
+
     // special commands
     "botAdmins": [
       "dmitry_weirdo"

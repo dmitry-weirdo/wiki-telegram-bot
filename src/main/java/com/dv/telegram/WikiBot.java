@@ -271,6 +271,10 @@ public class WikiBot extends TelegramLongPollingBot {
         return MessageProcessingResult.answerFound(combinedAnswers);
     }
 
+    public GoogleSheetBotData loadBotDataFromGoogleSheet() { // does NOT reload the bot data itself
+        return GoogleSheetLoader.readGoogleSheet(config);
+    }
+
     public boolean reloadBotDataFromGoogleSheet() {
         try {
             GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);

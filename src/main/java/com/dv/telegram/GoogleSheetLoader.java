@@ -4,6 +4,7 @@ import com.dv.telegram.data.CityChatsParser;
 import com.dv.telegram.data.CommandsParser;
 import com.dv.telegram.data.CountryChatsParser;
 import com.dv.telegram.data.WikiPagesParser;
+import com.dv.telegram.exception.CommandException;
 import com.dv.telegram.google.GoogleSheetReader;
 import com.dv.telegram.google.WikiBotGoogleSheet;
 import lombok.extern.log4j.Log4j2;
@@ -26,7 +27,7 @@ public final class GoogleSheetLoader {
         }
         catch (Exception e) {
             log.error("Error when loading bot data from the Google Sheet", e);
-            throw new RuntimeException(e);
+            throw new CommandException("При загрузке данных из Google Sheet произошла ошибка.");
         }
     }
 

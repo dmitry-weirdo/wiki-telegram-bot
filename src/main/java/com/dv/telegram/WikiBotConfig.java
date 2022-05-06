@@ -24,6 +24,12 @@ public class WikiBotConfig {
     public String countryChatsSheetName;
     public String commandsSheetName;
 
+    // Notion
+    public String notionToken;
+    public String cityChatsPageId;
+    public String cityChatsToggleHeading1Text;
+
+    // special commands
     public List<String> botAdmins; // Telegram users that are allowed to execute the special commands
 
     public Map<String, String> commands; // special commands
@@ -34,6 +40,9 @@ public class WikiBotConfig {
         cityChatsSheetName = getDefault(cityChatsSheetName, "Список чатов по городам");
         countryChatsSheetName = getDefault(countryChatsSheetName, "Список чатов по странам");
         commandsSheetName = getDefault(commandsSheetName, "Список болталки");
+
+        cityChatsPageId = getDefault(cityChatsPageId, "9a0effe48cf34cd49c849a9e05c61fb9"); // список чатов по городам (https://uahelp.wiki/german-city-chats)
+        cityChatsToggleHeading1Text = getDefault(cityChatsPageId, "Чаты по землям и городам Германии (Telegram, WhatsApp)");
     }
 
     private static String getDefault(String value, String defaultValue) {

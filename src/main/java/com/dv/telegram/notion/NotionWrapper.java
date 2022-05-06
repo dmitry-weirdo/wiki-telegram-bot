@@ -108,10 +108,7 @@ public class NotionWrapper {
         client.appendBlockChildren(rootBlock.getId(), List.of(totalCitiesParagraph));
 
         // append paragraph with total cities count
-        Integer totalChats = cityChats
-            .stream()
-            .map(chats -> chats.getChats().size())
-            .reduce(0, Integer::sum);
+        Integer totalChats = NotionCityChats.countTotalChats(cityChats);
 
         String totalChatsText = String.format("Всего чатов: %s", totalChats);
         ParagraphBlock totalChatsParagraph = NotionPageUtils.createParagraph(totalChatsText);

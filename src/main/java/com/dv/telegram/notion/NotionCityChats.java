@@ -31,6 +31,13 @@ public class NotionCityChats {
         );
     }
 
+    public static int countTotalChats(List<NotionCityChats> cityChats) {
+        return cityChats
+            .stream()
+            .map(chats -> chats.getChats().size())
+            .reduce(0, Integer::sum);
+    }
+
     public static List<NotionCityChats> from(List<CityChatData> cityChatsData) {
         List<String> errors = new ArrayList<>();
 
