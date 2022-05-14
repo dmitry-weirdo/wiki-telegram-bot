@@ -1,15 +1,8 @@
-package com.dv.telegram;
+package com.dv.telegram
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-import java.util.List;
-
-@Data
-@AllArgsConstructor
-public class GoogleSheetBotData {
-    private final List<WikiPageData> pages;
-    private final List<CityChatData> cityChats;
-    private final List<CountryChatData> countryChats;
-    private final List<WikiBotCommandData> commands;
-}
+data class GoogleSheetBotData (
+    val pages: List<WikiPageData>,
+    val cityChats: List<CityChatData>,
+    val countryChats: List<CountryChatData>,
+    val commands: List<WikiBotCommandData>
+)
