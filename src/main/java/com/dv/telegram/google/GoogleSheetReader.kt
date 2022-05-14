@@ -1,108 +1,104 @@
-package com.dv.telegram.google;
+package com.dv.telegram.google
 
-import com.dv.telegram.WikiBotConfig;
-import com.dv.telegram.util.WikiBotUtils;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.BatchGetValuesResponse;
-import com.google.api.services.sheets.v4.model.ValueRange;
-import lombok.extern.log4j.Log4j2;
+import com.dv.telegram.WikiBotConfig
+import com.dv.telegram.util.WikiBotUtils
+import com.google.api.client.http.HttpExecuteInterceptor
+import com.google.api.client.http.HttpRequest
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.sheets.v4.Sheets
+import com.google.api.services.sheets.v4.model.ValueRange
+import org.apache.logging.log4j.kotlin.Logging
+import java.io.IOException
 
-import java.io.IOException;
-import java.util.List;
+object GoogleSheetReader : Logging {
+    private const val APPLICATION_NAME = "Google Sheets Application Name"
 
-@Log4j2
-public class GoogleSheetReader {
-
-    private static final String APPLICATION_NAME = "Google Sheets Application Name";
-
-    public static void main(String[] args) {
-        WikiBotConfig config = WikiBotUtils.readConfig();
-        readGoogleSheetSafe(config);
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val config = WikiBotUtils.readConfig()
+        readGoogleSheetSafe(config)
     }
 
-    public static WikiBotGoogleSheet readGoogleSheetSafe(WikiBotConfig config) {
+    fun readGoogleSheetSafe(config: WikiBotConfig): WikiBotGoogleSheet {
         try {
-            return readGoogleSheet(config);
+            return readGoogleSheet(config)
         }
-        catch (IOException e) {
-            throw new RuntimeException(e);
+        catch (e: IOException) {
+            throw RuntimeException(e)
         }
     }
 
-    public static WikiBotGoogleSheet readGoogleSheet(WikiBotConfig config) throws IOException {
-        Sheets sheetsService = getSheets(config.googleSheetsApiKey);
+    @Throws(IOException::class)
+    fun readGoogleSheet(config: WikiBotConfig): WikiBotGoogleSheet {
+        val sheetsService = getSheets(config.googleSheetsApiKey)
 
-        List<String> ranges = List.of(
+        val ranges = listOf(
             wrapSheetName(config.wikiPagesSheetName),
             wrapSheetName(config.cityChatsSheetName),
             wrapSheetName(config.countryChatsSheetName),
             wrapSheetName(config.commandsSheetName)
-        );
+        )
 
-        BatchGetValuesResponse readResult = sheetsService
+        val readResult = sheetsService
             .spreadsheets()
             .values()
             .batchGet(config.googleSpreadsheetId)
             .setRanges(ranges)
-            .execute();
+            .execute()
 
-        List<ValueRange> valueRanges = readResult.getValueRanges();
+        val valueRanges = readResult.valueRanges
 
-        SheetData wikiPagesSheet = parseSheetData(valueRanges.get(0), config.wikiPagesSheetName);
-        SheetData cityChatsSheet = parseSheetData(valueRanges.get(1), config.cityChatsSheetName);
-        SheetData countryChatsSheet = parseSheetData(valueRanges.get(2), config.countryChatsSheetName);
-        SheetData commandsSheet = parseSheetData(valueRanges.get(3), config.commandsSheetName);
+        val wikiPagesSheet = parseSheetData(valueRanges[0], config.wikiPagesSheetName)
+        val cityChatsSheet = parseSheetData(valueRanges[1], config.cityChatsSheetName)
+        val countryChatsSheet = parseSheetData(valueRanges[2], config.countryChatsSheetName)
+        val commandsSheet = parseSheetData(valueRanges[3], config.commandsSheetName)
 
-        return new WikiBotGoogleSheet(
+        return WikiBotGoogleSheet(
             wikiPagesSheet,
             cityChatsSheet,
             countryChatsSheet,
             commandsSheet
-        );
+        )
     }
 
-    private static String wrapSheetName(String sheetName) {
-        return String.format("'%s'", sheetName);
-    }
+    private fun wrapSheetName(sheetName: String) = "'${sheetName}'"
 
-    private static SheetData parseSheetData(ValueRange sheet1, String sheetName) {
-        log.info("Parsing sheet {}...", sheetName);
+    private fun parseSheetData(sheet: ValueRange, sheetName: String): SheetData {
+        logger.info("Parsing sheet \"$sheetName\"...")
 
-        SheetData sheetData = new SheetData();
+        val sheetData = SheetData()
 
-        List<List<Object>> sheetValues = sheet1.getValues();
-        for (List<Object> sheetRow : sheetValues) {
-            RowData row = new RowData();
+        val sheetValues = sheet.getValues()
+        for (sheetRow in sheetValues) {
+            val row = RowData()
 
-            for (Object cellObject : sheetRow) {
-                String cellValue = (String) cellObject;
-                row.addCell(cellValue);
+            for (cellObject in sheetRow) {
+                val cellValue = cellObject as String
+                row.addCell(cellValue)
             }
 
-            sheetData.addRow(row);
+            sheetData.addRow(row)
         }
 
-        log.info("Sheet {} parsed. Total rows: {}.", sheetName, sheetData.getRows().size());
-        return sheetData;
+        logger.info("Sheet \"$sheetName\" parsed. Total rows: ${sheetData.rows.size}.")
+        return sheetData
     }
 
     // API-Key auth code copied from https://stackoverflow.com/a/63229676/8534088
-    private static Sheets getSheets(String apiKey) {
-        NetHttpTransport transport = new NetHttpTransport.Builder().build();
-        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        HttpRequestInitializer httpRequestInitializer = request ->
-            request.setInterceptor(intercepted ->
-                intercepted
-                    .getUrl()
-                    .set("key", apiKey)
-            );
+    private fun getSheets(apiKey: String): Sheets {
+        val transport = NetHttpTransport.Builder().build()
+        val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
 
-        return new Sheets.Builder(transport, jsonFactory, httpRequestInitializer)
+        val httpRequestInitializer = { request: HttpRequest ->
+            request.interceptor = HttpExecuteInterceptor { intercepted ->
+                intercepted.url["key"] = apiKey
+            }
+        }
+
+        return Sheets.Builder(transport, jsonFactory, httpRequestInitializer)
             .setApplicationName(APPLICATION_NAME)
-            .build();
+            .build()
     }
 }
