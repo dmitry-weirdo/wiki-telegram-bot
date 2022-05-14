@@ -1,38 +1,30 @@
-package com.dv.telegram.config;
+package com.dv.telegram.config
 
-import lombok.Data;
+class DeleteBotCallMessageOnMessageReply : BotSetting<Boolean> {
 
-@Data
-public class DeleteBotCallMessageOnMessageReply implements BotSetting<Boolean> {
-
-    public static final String NAME = DeleteBotCallMessageOnMessageReply.class.getSimpleName();
-
-    private boolean value;
-
-    @Override
-    public String getName() {
-        return NAME;
+    companion object {
+        // class simpleName cannot be const, see https://stackoverflow.com/questions/37182900/static-const-in-kotlin-from-java-class-name
+        const val NAME: String = "DeleteBotCallMessageOnMessageReply"
     }
 
-    @Override
-    public String getDescription() {
-        return """
-            *true* — Если сообщение к боту является реплаем, то оно будет удалено, и ответ бота будет реплаем на оригинальное сообщение.
-            ❗Для того, чтобы удаление сообщения ботом работало в группе, бот должен быть в группе админом с правом удалять сообщения.
+    private var value: Boolean = false
 
-            *false* — Если сообщение к боту является реплаем, то оно НЕ будет удалено, и ответ бота будет реплаем на сообщение к боту.
+    override val name = NAME
 
-            Если сообщение к боту не является реплаем, то это сообщение не будет удаляться вне зависимости от этой настройки.
-            """;
+    override val description = """
+        *${true}* — Если сообщение к боту является реплаем, то оно будет удалено, и ответ бота будет реплаем на оригинальное сообщение.
+        ❗Для того, чтобы удаление сообщения ботом работало в группе, бот должен быть в группе админом с правом удалять сообщения.
+
+        *${false}* — Если сообщение к боту является реплаем, то оно НЕ будет удалено, и ответ бота будет реплаем на сообщение к боту.
+
+        Если сообщение к боту не является реплаем, то это сообщение не будет удаляться вне зависимости от этой настройки.
+        """.trimIndent()
+
+    override fun getValue(): Boolean {
+        return value
     }
 
-    @Override
-    public Boolean getValue() {
-        return value;
-    }
-
-    @Override
-    public void setValue(String value) {
-        this.value = Boolean.parseBoolean(value);
+    override fun setValue(value: String) {
+        this.value = value.toBoolean()
     }
 }
