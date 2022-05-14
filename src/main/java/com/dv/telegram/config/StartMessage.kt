@@ -1,38 +1,29 @@
-package com.dv.telegram.config;
+package com.dv.telegram.config
 
-import org.apache.commons.lang3.StringUtils;
+class StartMessage : BotSetting<String> {
 
-public class StartMessage implements BotSetting<String> {
-
-    public static final String NAME = StartMessage.class.getSimpleName();
-
-    private String value;
-
-    @Override
-    public String getName() {
-        return NAME;
+    companion object {
+        // class simpleName cannot be const, see https://stackoverflow.com/questions/37182900/static-const-in-kotlin-from-java-class-name
+        const val NAME: String = "StartMessage"
     }
 
-    @Override
-    public String getDescription() {
-        return """
-            Стартовое сообщение бота, выдаётся по команде `/start`.
-            В параметр `{0}` будет заполняться имя бота.
-            Можно использовать `\\n` как символ переноса строки.
-            """;
-    }
+    private var value: String = ""
 
-    @Override
-    public String getValue() {
-        return value;
-    }
+    override val name = NAME
 
-    @Override
-    public void setValue(String value) {
-        if (StringUtils.isBlank(value)) {
-            throw new SettingValidationException("Стартовое сообщение бота не может быть пустым.");
+    override val description = """
+        Стартовое сообщение бота, выдаётся по команде `/start`.
+        В параметр `{0}` будет заполняться имя бота.
+        Можно использовать `\\n` как символ переноса строки.
+        """.trimIndent()
+
+    override fun getValue() = value
+
+    override fun setValue(value: String?) {
+        if (value.isNullOrBlank()) {
+            throw SettingValidationException("Стартовое сообщение бота не может быть пустым.")
         }
 
-        this.value = value;
+        this.value = value
     }
 }
