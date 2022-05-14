@@ -1,36 +1,22 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import org.apache.commons.lang3.StringUtils;
+object DataUtils {
+    private const val WORDS_SEPARATOR = ","
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
-public final class DataUtils {
-
-    private static final String WORDS_SEPARATOR = ",";
-
-    private DataUtils() {
-    }
-
-    public static List<String> parseWords(String wordsString) { // use default separator
-        return parseWords(wordsString, WORDS_SEPARATOR);
-    }
-
-    public static List<String> parseWords(String wordsString, String separator) {
-        if (StringUtils.isBlank(wordsString)) {
-            return List.of();
+    @JvmOverloads
+    @JvmStatic
+    fun parseWords(wordsString: String?, separator: String = WORDS_SEPARATOR): List<String> {
+        if (wordsString.isNullOrBlank()) {
+            return listOf()
         }
 
-        String[] wordsArray = wordsString
-            .toLowerCase(Locale.ROOT)
-            .split(separator);
+        val words = wordsString
+            .lowercase()
+            .split(separator)
 
-        List<String> words = Arrays.asList(wordsArray);
         return words
-            .stream()
-            .filter(StringUtils::isNotBlank) // prevent empty strings
-            .map(s -> s.toLowerCase(Locale.ROOT).trim())
-            .toList();
+            .filter { it.isNotBlank() } // prevent empty strings
+            .map { it.lowercase().trim() }
+            .toList()
     }
 }
