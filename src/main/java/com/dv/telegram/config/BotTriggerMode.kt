@@ -29,7 +29,11 @@ class BotTriggerMode : BotSetting<BotTriggerMode.Mode> {
 
     override fun getValue(): Mode = mode
 
-    override fun setValue(value: String) {
+    override fun setValue(value: String?) {
+        if (value.isNullOrBlank()) {
+            throw SettingValidationException("Mode value cannot be null or blank.")
+        }
+
         try {
             mode = Mode.valueOf(value)
         }

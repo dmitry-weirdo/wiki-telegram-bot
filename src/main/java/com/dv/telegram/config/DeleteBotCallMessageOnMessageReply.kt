@@ -20,11 +20,9 @@ class DeleteBotCallMessageOnMessageReply : BotSetting<Boolean> {
         Если сообщение к боту не является реплаем, то это сообщение не будет удаляться вне зависимости от этой настройки.
         """.trimIndent()
 
-    override fun getValue(): Boolean {
-        return value
-    }
+    override fun getValue() = value
 
-    override fun setValue(value: String) {
+    override fun setValue(value: String?) {
         this.value = value.toBoolean()
     }
 }

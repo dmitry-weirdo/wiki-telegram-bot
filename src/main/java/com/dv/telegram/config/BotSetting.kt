@@ -5,7 +5,7 @@ sealed interface BotSetting<T> {
     val description: String // description, in Russian
 
     fun getValue(): T
-    fun setValue(value: String)
+    fun setValue(value: String?)
 
     companion object {
         val allSettings = listOf(
