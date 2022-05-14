@@ -148,7 +148,7 @@ public class WikiBot extends TelegramLongPollingBot {
         Message replyToMessage = updateMessage.getReplyToMessage();
         boolean updateMessageIsReply = (replyToMessage != null);
 
-        boolean deleteBotCallMessage = settings.deleteBotCallMessageOnMessageReply && updateMessageIsReply;
+        boolean deleteBotCallMessage = settings.getDeleteBotCallMessageOnMessageReply() && updateMessageIsReply;
         if (deleteBotCallMessage) {
             deleteBotCallMessage(updateMessage);
         }
@@ -214,7 +214,7 @@ public class WikiBot extends TelegramLongPollingBot {
             return true;
         }
 
-        return switch (settings.triggerMode) { // check whether the message contains the bot name
+        return switch (settings.getTriggerMode()) { // check whether the message contains the bot name
             case ANY_SUBSTRING -> lowerText.contains(botNameLowerCase);
             case STRING_START -> lowerText.startsWith(botNameLowerCase);
             case FULL_WORD -> botNameWordPattern.matcher(lowerText).matches();
@@ -393,7 +393,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private Optional<String> getNoResultResponse(String text) {
         log.info("Unknown command for the bot: {}", text);
 
-        if (settings.replyWhenNoAnswer) { // reply on no answer
+        if (settings.getReplyWhenNoAnswer()) { // reply on no answer
             String noResultAnswer = getNoResultAnswer(text);
             return Optional.of(noResultAnswer);
         }
@@ -403,6 +403,6 @@ public class WikiBot extends TelegramLongPollingBot {
     }
 
     private String getNoResultAnswer(String text) {
-        return MessageFormat.format(settings.noAnswerReply, botName, text);
+        return MessageFormat.format(settings.getNoAnswerReply(), botName, text);
     }
 }

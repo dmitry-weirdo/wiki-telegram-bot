@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Log4j2
-public class Main {
+public class MainJava {
 
     public static void main(String[] args) {
         try {
@@ -25,7 +25,7 @@ public class Main {
             List<Callable<String>> callableTasks = wikiBotConfigs
                 .getConfigs()
                 .stream()
-                .map(Main::createCallableTask)
+                .map(MainJava::createCallableTask)
                 .toList();
 
             ExecutorService executorService = Executors.newFixedThreadPool(threadsCount);

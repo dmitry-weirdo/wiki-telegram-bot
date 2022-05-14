@@ -44,7 +44,7 @@ public class Start extends BasicBotCommand {
     @Override
     public String getResponse(String text, WikiBot bot) {
         return MessageFormat.format(
-            bot.getSettings().startMessage,
+            bot.getSettings().getStartMessage(),
             bot.getBotName()
         );
     }
