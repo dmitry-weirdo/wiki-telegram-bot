@@ -12,4 +12,8 @@ public class WikiBotConfigs {
     public void fillDefaults() {
         configs.forEach(WikiBotConfig::fillDefaults);
     }
+
+    public List<WikiBotConfig> getConfigs() { // Lombok-generated methods do not work in Kotlin in IntelliJ IDEA
+        return configs;
+    }
 }

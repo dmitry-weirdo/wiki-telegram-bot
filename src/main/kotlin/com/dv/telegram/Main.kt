@@ -1,67 +1,77 @@
-package com.dv.telegram;
+package com.dv.telegram
 
-import com.dv.telegram.config.SettingValidationException;
-import com.dv.telegram.util.WikiBotUtils;
-import lombok.extern.log4j.Log4j2;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import com.dv.telegram.config.SettingValidationException
+import com.dv.telegram.util.WikiBotUtils
+import org.apache.logging.log4j.kotlin.Logging
+import org.telegram.telegrambots.meta.TelegramBotsApi
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-@Log4j2
-public class Main {
-
-    public static void main(String[] args) {
-        try {
-            WikiBotConfigs wikiBotConfigs = WikiBotUtils.readConfigs();
-
-            int threadsCount = wikiBotConfigs.getConfigs().size();
-            log.info("Total bot configs: {}", threadsCount);
-
-            List<Callable<String>> callableTasks = wikiBotConfigs
-                .getConfigs()
-                .stream()
-                .map(Main::createCallableTask)
-                .toList();
-
-            ExecutorService executorService = Executors.newFixedThreadPool(threadsCount);
-            executorService.invokeAll(callableTasks); // todo: this currently does not stop Main on exception in the thread
-        }
-        catch (InterruptedException e) {
-            log.debug("============================================");
-            log.error("executorService.invokeAll was interrupted", e);
-            throw new RuntimeException(e);
+class TestKotlinMain {
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            println("Kotlin is Working from a class!")
         }
     }
+}
 
-    private static Callable<String> createCallableTask(WikiBotConfig config) {
-        return () -> {
+class Main : Logging {
+
+    companion object X: Logging {
+        @JvmStatic
+        fun main(args: Array<String>) {
             try {
-                GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
+                val wikiBotConfigs = WikiBotUtils.readConfigs()
 
-                WikiBot wikiBot = new WikiBot(config, botData);
+                val threadsCount = wikiBotConfigs.configs.size
+                logger.info("Total bot configs: $threadsCount.")
 
-                TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-                botsApi.registerBot(wikiBot);
-                log.info("The bot \"{}\" has started on \"{}\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
-                return String.format("The bot \"%s\" has started on \"%s\" environment!", wikiBot.getBotUsername(), wikiBot.getEnvironmentName());
+                val callableTasks = wikiBotConfigs
+                    .getConfigs()
+                    .map { this.createCallableTask(it) }
+                    .toList()
+
+                val executorService = Executors.newFixedThreadPool(threadsCount)
+                executorService.invokeAll(callableTasks) // todo: this currently does not stop Main on exception in the thread
             }
-            catch (TelegramApiException e) {
-                log.error("Error when starting the WikiBot", e);
-                throw new RuntimeException(e);
+            catch (e: InterruptedException) {
+                logger.debug("============================================")
+                logger.error("executorService.invokeAll was interrupted", e)
+                throw RuntimeException(e)
             }
-            catch (SettingValidationException e) {
-                log.error("Settings validation error when starting the WikiBot", e);
-                throw new RuntimeException(e);
+        }
+
+        private fun createCallableTask(config: WikiBotConfig): Callable<String> {
+            return Callable {
+                try {
+                    val botData = GoogleSheetLoader.readGoogleSheet(config)
+
+                    val wikiBot = WikiBot(config, botData)
+
+                    val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
+                    botsApi.registerBot(wikiBot)
+                    logger.info(
+                        "(Kotlin!) The bot \"${wikiBot.botUsername}\" has started on \"${wikiBot.environmentName}\" environment!",
+                    )
+
+                    "The bot ${wikiBot.botUsername} has started on \"${wikiBot.environmentName}\" environment!"
+                }
+                catch (e: TelegramApiException) {
+                    logger.error("Error when starting the WikiBot", e)
+                    throw RuntimeException(e)
+                }
+                catch (e: SettingValidationException) {
+                    logger.error("Settings validation error when starting the WikiBot", e)
+                    throw RuntimeException(e)
+                }
+                catch (e: Exception) {
+                    logger.error("Unknown exception when starting the WikiBot", e)
+                    throw RuntimeException(e)
+                }
             }
-            catch (Exception e) {
-                log.error("Unknown exception when starting the WikiBot", e);
-                throw new RuntimeException(e);
-            }
-        };
+        }
     }
 }
