@@ -1,24 +1,9 @@
-package com.dv.telegram.google;
+package com.dv.telegram.google
 
-import lombok.Data;
+class SheetData {
+    val rows: MutableList<RowData> = mutableListOf()
 
-import java.util.ArrayList;
-import java.util.List;
+    fun addRow(row: RowData) = rows.add(row)
 
-@Data
-public class SheetData {
-
-    private List<RowData> rows;
-
-    public SheetData() {
-        rows = new ArrayList<>();
-    }
-
-    public void addRow(RowData row) {
-        rows.add(row);
-    }
-
-    public List<RowData> getRowsWithoutFirstRow() {
-        return rows.subList(1, rows.size());
-    }
+    fun getRowsWithoutFirstRow() = rows.subList(1, rows.size)
 }
