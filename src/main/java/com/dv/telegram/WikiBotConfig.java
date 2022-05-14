@@ -48,4 +48,10 @@ public class WikiBotConfig {
     private static String getDefault(String value, String defaultValue) {
         return StringUtils.isNotBlank(value) ? value : defaultValue;
     }
+
+    // todo: remove when it is a Kotlin class
+    // getters that IntelliJ IDEA does not see from Lombok into Kotlin :(
+    public Map<String, String> getSettings() {
+        return settings;
+    }
 }
