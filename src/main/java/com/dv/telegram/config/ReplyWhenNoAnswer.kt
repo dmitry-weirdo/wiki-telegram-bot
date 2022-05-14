@@ -1,35 +1,25 @@
-package com.dv.telegram.config;
+package com.dv.telegram.config
 
-import lombok.Data;
+class ReplyWhenNoAnswer : BotSetting<Boolean> {
 
-@Data
-public class ReplyWhenNoAnswer implements BotSetting<Boolean> {
-
-    public static final String NAME = ReplyWhenNoAnswer.class.getSimpleName();
-
-    private boolean value;
-
-    @Override
-    public String getName() {
-        return NAME;
+    companion object {
+        // class simpleName cannot be const, see https://stackoverflow.com/questions/37182900/static-const-in-kotlin-from-java-class-name
+        const val NAME: String = "ReplyWhenNoAnswer"
     }
 
-    @Override
-    public String getDescription() {
-        return """
-            *true* — Если бот не нашёл ответа, он выдаст ответ, определённый настройкой *NoAnswerReply*.
+    private var value = false
 
-            *false* — Если бот не нашёл ответа, он не будет отвечать.
-            """;
-    }
+    override val name = NAME
 
-    @Override
-    public Boolean getValue() {
-        return value;
-    }
+    override val description = """
+        *${true}* — Если бот не нашёл ответа, он выдаст ответ, определённый настройкой *${NoAnswerReply.NAME}*.
 
-    @Override
-    public void setValue(String value) {
-        this.value = Boolean.parseBoolean(value);
+        *${false}* — Если бот не нашёл ответа, он не будет отвечать.
+        """.trimIndent()
+
+    override fun getValue() = value
+
+    override fun setValue(value: String?) {
+        this.value = value.toBoolean()
     }
 }

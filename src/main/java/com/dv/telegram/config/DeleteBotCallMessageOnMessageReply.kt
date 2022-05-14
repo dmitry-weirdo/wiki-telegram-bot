@@ -7,7 +7,7 @@ class DeleteBotCallMessageOnMessageReply : BotSetting<Boolean> {
         const val NAME: String = "DeleteBotCallMessageOnMessageReply"
     }
 
-    private var value: Boolean = false
+    private var value = false
 
     override val name = NAME
 
