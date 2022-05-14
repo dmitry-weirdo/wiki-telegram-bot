@@ -3,12 +3,10 @@ package com.dv.telegram.config
 import com.dv.telegram.WikiBotConfig
 
 object BotSettingUtils {
-    @JvmStatic
     fun fillSettingsMap(config: WikiBotConfig): Map<String, BotSetting<*>> {
         return fillSettingsMap(config.getSettings())
     }
 
-    @JvmStatic
     fun fillSettingsMap(settings: Map<String?, String?>): Map<String, BotSetting<*>> {
         val botSettings = mutableMapOf<String, BotSetting<*>>()
 

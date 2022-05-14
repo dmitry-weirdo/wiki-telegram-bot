@@ -1,79 +1,73 @@
-package com.dv.telegram.config;
+package com.dv.telegram.config
 
-import com.dv.telegram.WikiBotConfig;
+import com.dv.telegram.WikiBotConfig
 
-import java.util.Map;
+class BotSettings(val settings: Map<String, BotSetting<*>>) {
 
-public class BotSettings {
-
-    public final Map<String, BotSetting<?>> settings;
-
-    public String startMessage;
-    public boolean deleteBotCallMessageOnMessageReply;
-    public BotTriggerMode.Mode triggerMode;
-    public boolean replyWhenNoAnswer;
-    public String noAnswerReply;
-
-    public static BotSettings create(WikiBotConfig config) {
-        Map<String, BotSetting<?>> settingsMap = BotSettingUtils.fillSettingsMap(config);
-        return new BotSettings(settingsMap);
-    }
-
-    public BotSettings(Map<String, BotSetting<?>> settings) {
-        this.settings = settings;
-        fillSettingCacheFields();
-    }
-
-    public void fillSettingCacheFields() {
-        this.startMessage = getStartMessage();
-        this.deleteBotCallMessageOnMessageReply = getDeleteBotCallMessageOnMessageReply();
-        this.triggerMode = getBotTriggerMode();
-        this.replyWhenNoAnswer = getReplyWhenNoAnswer();
-        this.noAnswerReply = getNoAnswerReply();
-    }
-
-    public BotSetting<?> getBotSetting(String settingName) {
-        return settings.get(settingName);
-    }
-
-    private String getStartMessage() {
-        return getStringSetting(StartMessage.NAME);
-    }
-
-    private boolean getDeleteBotCallMessageOnMessageReply() {
-        return getBooleanSetting(DeleteBotCallMessageOnMessageReply.NAME);
-    }
-
-    private BotTriggerMode.Mode getBotTriggerMode() {
-        BotSetting<?> setting = getSetting(BotTriggerMode.NAME);
-        return (BotTriggerMode.Mode) setting.getValue();
-    }
-
-    private boolean getReplyWhenNoAnswer() {
-        return getBooleanSetting(ReplyWhenNoAnswer.NAME);
-    }
-
-    private String getNoAnswerReply() {
-        return getStringSetting(NoAnswerReply.NAME);
-    }
-
-    private String getStringSetting(String settingName) {
-        BotSetting<?> setting = getSetting(settingName);
-        return (String) setting.getValue();
-    }
-
-    private boolean getBooleanSetting(String settingName) {
-        BotSetting<?> setting = getSetting(settingName);
-        return (boolean) setting.getValue();
-    }
-
-    private BotSetting<?> getSetting(String settingName) {
-        BotSetting<?> setting = settings.get(settingName);
-
-        if (setting == null) {
-            throw new SettingValidationException(String.format("No value for setting \"%s\".", settingName));
+    companion object {
+        @JvmStatic
+        fun create(config: WikiBotConfig): BotSettings {
+            val settingsMap = BotSettingUtils.fillSettingsMap(config)
+            return BotSettings(settingsMap)
         }
+    }
 
-        return setting;
+    // todo: I had to set values because calling fillSettingCacheFields is not recognized by the compiler
+    var startMessage = ""
+    var deleteBotCallMessageOnMessageReply = false
+    var triggerMode: BotTriggerMode.Mode = BotTriggerMode.Mode.FULL_WORD
+    var replyWhenNoAnswer = true
+    var noAnswerReply = ""
+
+    init { // will override all fields on class construction
+        fillSettingCacheFields()
+    }
+
+    fun fillSettingCacheFields() {
+        startMessage = getStartMessageValue()
+        deleteBotCallMessageOnMessageReply = getDeleteBotCallMessageOnMessageReplyValue()
+        triggerMode = getBotTriggerModeValue()
+        replyWhenNoAnswer = getReplyWhenNoAnswerValue()
+        noAnswerReply = getNoAnswerReplyValue()
+    }
+
+    fun getBotSetting(settingName: String): BotSetting<*>? {
+        return settings[settingName]
+    }
+
+    private fun getStartMessageValue(): String {
+        return getStringSetting(StartMessage.NAME)
+    }
+
+    private fun getDeleteBotCallMessageOnMessageReplyValue(): Boolean {
+        return getBooleanSetting(DeleteBotCallMessageOnMessageReply.NAME)
+    }
+
+    private fun getBotTriggerModeValue(): BotTriggerMode.Mode {
+        val setting = getSetting(BotTriggerMode.NAME)
+        return setting.getValue() as BotTriggerMode.Mode
+    }
+
+    private fun getReplyWhenNoAnswerValue(): Boolean {
+        return getBooleanSetting(ReplyWhenNoAnswer.NAME)
+    }
+
+    private fun getNoAnswerReplyValue(): String {
+        return getStringSetting(NoAnswerReply.NAME)
+    }
+
+    private fun getStringSetting(settingName: String): String {
+        val setting = getSetting(settingName)
+        return setting.getValue() as String
+    }
+
+    private fun getBooleanSetting(settingName: String): Boolean {
+        val setting = getSetting(settingName)
+        return setting.getValue() as Boolean
+    }
+
+    private fun getSetting(settingName: String): BotSetting<*> {
+        return settings[settingName]
+            ?: throw SettingValidationException("No value for setting \"${settingName}\".")
     }
 }

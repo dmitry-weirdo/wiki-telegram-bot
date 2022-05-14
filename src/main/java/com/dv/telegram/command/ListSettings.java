@@ -37,7 +37,7 @@ public class ListSettings extends BasicBotCommand {
     public String getResponse(String text, WikiBot bot) {
         List<String> settingsLines = new ArrayList<>();
 
-        for (BotSetting<?> setting : bot.getSettings().settings.values()) {
+        for (BotSetting<?> setting : bot.getSettings().getSettings().values()) {
             settingsLines.add(String.format(
                 "— *%s*:%n%s",
                 setting.getName(),
