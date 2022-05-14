@@ -1,21 +1,19 @@
-package com.dv.telegram.config;
+package com.dv.telegram.config
 
-import java.util.List;
+sealed interface BotSetting<T> {
+    val name: String // English name, no spaces
 
-public interface BotSetting<T> {
-    String getName(); // english name, no spaces
-    String getDescription(); // description, in russian
+    val description: String // description, in Russian
+    fun getValue(): T
+    fun setValue(value: String)
 
-    T getValue();
-    void setValue(String value);
-
-    static List<BotSetting<?>> getAllSettings() {
-        return List.of(
-            new StartMessage(),
-            new DeleteBotCallMessageOnMessageReply(),
-            new BotTriggerMode(),
-            new ReplyWhenNoAnswer(),
-            new NoAnswerReply()
-        );
+    companion object {
+        val allSettings = listOf(
+            StartMessage(),
+            DeleteBotCallMessageOnMessageReply(),
+            BotTriggerMode(),
+            ReplyWhenNoAnswer(),
+            NoAnswerReply()
+        )
     }
 }

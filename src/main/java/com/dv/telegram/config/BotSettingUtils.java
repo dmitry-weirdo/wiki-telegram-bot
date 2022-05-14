@@ -17,7 +17,7 @@ public final class BotSettingUtils {
     }
 
     public static Map<String, BotSetting<?>> fillSettingsMap(Map<String, String> settings) {
-        List<BotSetting<?>> allSettings = BotSetting.getAllSettings();
+        List<BotSetting<?>> allSettings = BotSetting.Companion.getAllSettings();
 
         Map<String, BotSetting<?>> botSettings = new HashMap<>();
 
