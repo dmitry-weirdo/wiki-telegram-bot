@@ -1,8 +1,3 @@
-package com.dv.telegram.config;
+package com.dv.telegram.config
 
-public class SettingValidationException extends RuntimeException {
-
-    public SettingValidationException(String message) {
-        super(message);
-    }
-}
+class SettingValidationException(message: String) : RuntimeException(message)
