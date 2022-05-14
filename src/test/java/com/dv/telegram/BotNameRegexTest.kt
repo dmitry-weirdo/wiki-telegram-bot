@@ -1,42 +1,41 @@
-package com.dv.telegram;
+package com.dv.telegram
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
+import java.util.regex.Pattern
 
-import java.util.regex.Pattern;
-
-class BotNameRegexTest {
+internal class BotNameRegexTest {
 
     @Test
-    void testBotNameRegex() {
-        String botName = "Ника";
+    fun testBotNameRegex() {
+        val botName = "Ника"
 
-        Pattern pattern = WikiBot.getBotNameFullWordPattern(botName);
+        val pattern = WikiBot.getBotNameFullWordPattern(botName)
 
-        String s1 = "Привет, НикА дорогая!"; // true
-        String s2 = "КлубНика от купальНика."; // false
-        String s3 = "Эх ты моя любимая ника, ну ты даёшь!"; // true
-        String s4 = "строка раз\nника, работа"; // true
-        String s5 = "строка раз\nАлло, ника, работа"; // true
-        String s6 = "строка раз\nАлло, вероника, работа"; // false
+        val s1 = "Привет, НикА дорогая!" // true
+        val s2 = "КлубНика от купальНика." // false
+        val s3 = "Эх ты моя любимая ника, ну ты даёшь!" // true
+        val s4 = "строка раз\nника, работа" // true
+        val s5 = "строка раз\nАлло, ника, работа" // true
+        val s6 = "строка раз\nАлло, вероника, работа" // false
 
-        assertMatches(pattern, s1);
-        assertDoesNotMatch(pattern, s2);
-        assertMatches(pattern, s3);
-        assertMatches(pattern, s4);
-        assertMatches(pattern, s5);
-        assertDoesNotMatch(pattern, s6);
+        assertMatches(pattern, s1)
+        assertDoesNotMatch(pattern, s2)
+        assertMatches(pattern, s3)
+        assertMatches(pattern, s4)
+        assertMatches(pattern, s5)
+        assertDoesNotMatch(pattern, s6)
     }
 
-    private void assertMatches(Pattern pattern, String s) {
+    private fun assertMatches(pattern: Pattern, s: String) {
         Assertions.assertThat(
             pattern.matcher(s).matches()
-        ).isTrue();
+        ).isTrue
     }
 
-    private void assertDoesNotMatch(Pattern pattern, String s) {
+    private fun assertDoesNotMatch(pattern: Pattern, s: String) {
         Assertions.assertThat(
             pattern.matcher(s).matches()
-        ).isFalse();
+        ).isFalse
     }
 }
