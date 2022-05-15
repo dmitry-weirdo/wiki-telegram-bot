@@ -10,6 +10,8 @@ object BotSettingUtils {
     fun fillSettingsMap(settings: Map<String?, String?>): Map<String, BotSetting<*>> {
         val botSettings = mutableMapOf<String, BotSetting<*>>()
 
+        val allSettings = BotSetting.getAllSettings() // get new copy of all settings to fill
+
         for ((name, value) in settings) {
             if (name.isNullOrBlank()) {
                 throw SettingValidationException("Setting name cannot be empty.")
@@ -19,7 +21,7 @@ object BotSettingUtils {
                 throw SettingValidationException("Setting value cannot be empty.")
             }
 
-            val setting = getBotSetting(BotSetting.allSettings, name)
+            val setting = getBotSetting(allSettings, name)
             setting.setValue(value)
 
             if (botSettings.containsKey(name)) {

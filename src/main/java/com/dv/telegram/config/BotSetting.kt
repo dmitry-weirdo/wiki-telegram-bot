@@ -8,7 +8,7 @@ sealed interface BotSetting<T> {
     fun setValue(value: String?) // todo: probably use non-nullable String and don't check for null in the implementations
 
     companion object {
-        val allSettings = listOf(
+        fun getAllSettings() = listOf(
             StartMessage(),
             DeleteBotCallMessageOnMessageReply(),
             BotTriggerMode(),
