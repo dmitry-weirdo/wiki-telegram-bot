@@ -44,7 +44,7 @@ public final class BotCommandUtils {
             .collect(Collectors.toCollection(LinkedHashSet::new)); // sort admins set by userName
     }
 
-    private static String normalizeUserName(String userName) {
+    public static String normalizeUserName(String userName) {
         if (StringUtils.isBlank(userName)) {
             throw new IllegalArgumentException("userName cannot be null or blank.");
         }
