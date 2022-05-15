@@ -130,7 +130,7 @@ internal class BotCommandUtilsTest {
     }
 
     private fun <T : BotCommand> assertOverriddenCommandName(
-        filledCommands: MutableList<BotCommand>,
+        filledCommands: List<BotCommand>,
         commandClass: Class<T>,
         expectedOverriddenCommandName: String
     ) {

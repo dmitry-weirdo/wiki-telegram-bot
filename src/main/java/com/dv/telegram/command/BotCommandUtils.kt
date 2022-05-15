@@ -1,70 +1,59 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBotConfig;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBotConfig
 
-import java.util.*;
-import java.util.stream.Collectors;
+object BotCommandUtils {
+    private const val USER_NAME_PREFIX = "@"
 
-public final class BotCommandUtils {
+    @JvmStatic
+    fun fillCommands(config: WikiBotConfig): List<BotCommand> {
+        val allCommands = BotCommand.getAllCommands()
 
-    private static final String USER_NAME_PREFIX = "@";
-
-    private BotCommandUtils() {
-    }
-
-    public static List<BotCommand> fillCommands(WikiBotConfig config) {
-        List<BotCommand> allCommands = BotCommand.getAllCommands();
-
-        Map<String, String> commandNames = config.getCommands();
-        if (MapUtils.isEmpty(commandNames)) {
-            return allCommands;
+        val commandNames = config.commands
+        if (commandNames.isEmpty()) {
+            return allCommands
         }
 
-        for (BotCommand command : allCommands) {
-            String name = command.getName();
+        for (command in allCommands) {
+            val name = command.name
 
-            String overriddenCommandName = commandNames.get(name);
-            if (StringUtils.isNotBlank(overriddenCommandName)) {
-                command.setCommandName(overriddenCommandName);
+            val overriddenCommandName = commandNames[name]
+            if (!overriddenCommandName.isNullOrBlank()) {
+                command.commandName = overriddenCommandName
             }
         }
 
-        return allCommands;
+        return allCommands
     }
 
-    public static Set<String> getBotAdmins(WikiBotConfig config) {
-        List<String> botAdmins = config.getBotAdmins();
+    @JvmStatic
+    fun getBotAdmins(config: WikiBotConfig): Set<String> {
+        val botAdmins = config.botAdmins
 
         return botAdmins
-            .stream()
-            .map(BotCommandUtils::normalizeUserName) // cut off "@" if it is present
-            .sorted(Comparator.comparing(s -> s.toLowerCase(Locale.ROOT))) // prevent java's "big letters first" sorting
-            .collect(Collectors.toCollection(LinkedHashSet::new)); // sort admins set by userName
+            .map { normalizeUserName(it) } // cut off "@" if it is present
+            .toSortedSet(Comparator.comparing { it.lowercase() }) // sort admins set by userName, prevent java's "big letters first" sorting
     }
 
-    public static String normalizeUserName(String userName) {
-        if (StringUtils.isBlank(userName)) {
-            throw new IllegalArgumentException("userName cannot be null or blank.");
-        }
+    fun normalizeUserName(userName: String?): String {
+        require( !userName.isNullOrBlank() ) { "userName cannot be null or blank." }
 
         if (userName.startsWith(USER_NAME_PREFIX)) { // cut off "@" if it is present
-            return userName.substring(USER_NAME_PREFIX.length());
+            return userName.substring(USER_NAME_PREFIX.length)
         }
 
-        return userName;
+        return userName
     }
 
-    public static String getClickableUserName(String userName) {
-        if (StringUtils.isBlank(userName)) {
-            throw new IllegalArgumentException("userName cannot be null or blank.");
-        }
+    @JvmStatic
+    fun getClickableUserName(userName: String?): String {
+        require( !userName.isNullOrBlank() ) { "userName cannot be null or blank." }
 
         if (userName.startsWith(USER_NAME_PREFIX)) {
-            return userName;
+            return userName
         }
 
-        return String.format("%s%s", USER_NAME_PREFIX, userName); // append "@" if it is NOT present
+        // append "@" if it is NOT present
+        return "${USER_NAME_PREFIX}${userName}"
     }
 }
