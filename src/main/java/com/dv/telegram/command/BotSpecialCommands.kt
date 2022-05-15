@@ -1,119 +1,57 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.WikiBotConfig;
+import com.dv.telegram.WikiBot
+import com.dv.telegram.WikiBotConfig
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotCommand>) {
+    val startCommand: Start = getCommand(commands, Start::class.java)
+    val helpCommand: HelpCommand = getCommand(commands, HelpCommand::class.java)
+    val listCommands: ListCommands = getCommand(commands, ListCommands::class.java)
+    val reloadFromGoogleSheetCommand: ReloadFromGoogleSheet = getCommand(commands, ReloadFromGoogleSheet::class.java)
+    val cityChatsValidateCommand: CityChatsValidate = getCommand(commands, CityChatsValidate::class.java)
 
-public class BotSpecialCommands {
+    companion object {
+        @JvmStatic
+        fun create(config: WikiBotConfig): BotSpecialCommands {
+            val botAdmins = BotCommandUtils.getBotAdmins(config)
+            val botCommands = BotCommandUtils.fillCommands(config)
 
-    private final Set<String> botAdmins;
-    private final List<BotCommand> commands;
-    private final Start startCommand;
-    private final HelpCommand helpCommand;
-    private final ListCommands listCommands;
-    private final ReloadFromGoogleSheet reloadFromGoogleSheetCommand;
-    private final CityChatsValidate cityChatsValidateCommand;
-
-    public static BotSpecialCommands create(WikiBotConfig config) {
-        Set<String> botAdmins = BotCommandUtils.getBotAdmins(config);
-
-        List<BotCommand> botCommands = BotCommandUtils.fillCommands(config);
-        return new BotSpecialCommands(botAdmins, botCommands);
-    }
-
-    public BotSpecialCommands(Set<String> botAdmins, List<BotCommand> commands) {
-        this.botAdmins = botAdmins;
-        this.commands = commands;
-
-        this.startCommand = getCommand(commands, Start.class);
-        this.helpCommand = getCommand(commands, HelpCommand.class);
-        this.listCommands = getCommand(commands, ListCommands.class);
-        this.reloadFromGoogleSheetCommand = getCommand(commands, ReloadFromGoogleSheet.class);
-        this.cityChatsValidateCommand = getCommand(commands, CityChatsValidate.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T getCommand(List<BotCommand> commands, Class<T> commandClass) {
-        return (T) commands
-            .stream()
-            .filter(commandClass::isInstance)
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException(String.format(
-                "No %s in the list of commands.",
-                commandClass.getSimpleName()
-            )));
-    }
-
-    public Set<String> getBotAdmins() {
-        return botAdmins;
-    }
-
-    public List<BotCommand> getCommands() {
-        return commands;
-    }
-
-    public Start getStartCommand() {
-        return startCommand;
-    }
-
-    public HelpCommand getHelpCommand() {
-        return helpCommand;
-    }
-
-    public ListCommands getListCommands() {
-        return listCommands;
-    }
-
-    public ReloadFromGoogleSheet getReloadFromGoogleSheetCommand() {
-        return reloadFromGoogleSheetCommand;
-    }
-
-    public CityChatsValidate getCityChatsValidateCommand() {
-        return cityChatsValidateCommand;
-    }
-
-    public Optional<BotCommand> getCommand(String commandText) {
-        return commands
-            .stream()
-            .filter(command -> command.getCommandText().equals(commandText))
-            .findFirst();
-    }
-
-    public boolean useMarkdownInResponse(String text) {
-        return commands
-            .stream()
-            .anyMatch(command ->
-                command.textContainsCommand(text)
-                && command.useMarkdownInResponse()
-            );
-    }
-
-    public SpecialCommandResponse getResponse(String text, String userName, WikiBot bot) {
-        boolean userHasBotAdminRights = userHasRightsToExecuteSpecialCommands(userName);
-
-        Optional<BotCommand> matchingCommandOptional = commands
-            .stream()
-            .filter(command ->
-                   (userHasBotAdminRights || !command.requiresBotAdminRights())
-                && command.textContainsCommand(text)
-            )
-            .findFirst();
-
-        if (matchingCommandOptional.isEmpty()) {
-            return SpecialCommandResponse.noResponse();
+            return BotSpecialCommands(botAdmins, botCommands)
         }
 
-        BotCommand command = matchingCommandOptional.get();
-        String response = command.getResponse(text, bot);
-        boolean useMarkdownInResponse = command.useMarkdownInResponse();
-
-        return SpecialCommandResponse.withResponse(response, useMarkdownInResponse);
+        private fun <T> getCommand(commands: List<BotCommand>, commandClass: Class<T>): T {
+            return commands
+                .firstOrNull { commandClass.isInstance(it) }
+                .let { commandClass.cast(it) }
+                ?: throw IllegalStateException("No ${commandClass.simpleName} in the list of commands.")
+        }
     }
 
-    private boolean userHasRightsToExecuteSpecialCommands(String userName) {
-        return botAdmins.contains(userName);
+    fun getCommand(commandText: String): BotCommand? {
+        return commands
+            .firstOrNull { it.commandText == commandText }
     }
+
+    fun useMarkdownInResponse(text: String?) =
+        commands.any {
+            it.textContainsCommand(text) && it.useMarkdownInResponse()
+        }
+
+    fun getResponse(text: String?, userName: String, bot: WikiBot): SpecialCommandResponse {
+        val userHasBotAdminRights = userHasRightsToExecuteSpecialCommands(userName)
+
+        val command = commands
+            .firstOrNull {
+                (userHasBotAdminRights || !it.requiresBotAdminRights())
+                && it.textContainsCommand(text)
+            }
+            ?: return SpecialCommandResponse.noResponse() // no rights on command -> return "special command unknown" response
+
+        val response = command.getResponse(text, bot)
+        val useMarkdownInResponse = command.useMarkdownInResponse()
+
+        return SpecialCommandResponse.withResponse(response, useMarkdownInResponse)
+    }
+
+    private fun userHasRightsToExecuteSpecialCommands(userName: String) = botAdmins.contains(userName)
 }

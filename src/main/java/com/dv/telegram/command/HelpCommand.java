@@ -2,8 +2,6 @@ package com.dv.telegram.command;
 
 import com.dv.telegram.WikiBot;
 
-import java.util.Optional;
-
 public class HelpCommand extends BasicBotCommand {
 
     @Override
@@ -44,15 +42,13 @@ public class HelpCommand extends BasicBotCommand {
 
         String commandText = text.substring(commandEndIndex).trim();
 
-        Optional<BotCommand> botCommandOptional = bot
+        BotCommand botCommand = bot
             .getSpecialCommands()
             .getCommand(commandText);
 
-        if (botCommandOptional.isEmpty()) {
+        if (botCommand == null) {
             return unknownCommandResponse();
         }
-
-        BotCommand botCommand = botCommandOptional.get();
 
         return String.format(
             "*%s*%n%s",
