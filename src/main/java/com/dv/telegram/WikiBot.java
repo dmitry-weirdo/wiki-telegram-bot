@@ -26,7 +26,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     private final WikiBotConfig config;
     private WikiPagesDataList pages;
-    private List<CityChatData> cityChats;
+    private CityChatsDataList cityChats;
     private List<CountryChatData> countryChats;
     private WikiBotCommandsDataList commands;
 
@@ -65,7 +65,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
         this.config = config;
         this.pages = new WikiPagesDataList(wikiPagesData);
-        this.cityChats = cityChatsData;
+        this.cityChats = new CityChatsDataList(cityChatsData);
         this.countryChats = countryChatsData;
         this.commands = new WikiBotCommandsDataList(commands);
 
@@ -258,8 +258,9 @@ public class WikiBot extends TelegramLongPollingBot {
         );
 
         // city chats - configured in the Google Sheet
-        List<CityChatData> matchingCityChats = findMatchingCityChats(lowerText);
-        Optional<String> cityChatsAnswerText = getCityChatsAnswerText(matchingCityChats);
+        Optional<String> cityChatsAnswerText = Optional.ofNullable(
+            cityChats.getResponseText(lowerText)
+        );
 
         // country chats - configured in the Google Sheet
         List<CountryChatData> matchingCountryChats = findMatchingCountryChats(lowerText);
@@ -298,7 +299,7 @@ public class WikiBot extends TelegramLongPollingBot {
         try {
             GoogleSheetBotData botData = loadBotDataFromGoogleSheet();
             this.pages = new WikiPagesDataList(botData.getPages());
-            this.cityChats = botData.getCityChats();
+            this.cityChats = new CityChatsDataList(botData.getCityChats());
             this.countryChats = botData.getCountryChats();
             this.commands = new WikiBotCommandsDataList(botData.getCommands());
 
@@ -309,32 +310,11 @@ public class WikiBot extends TelegramLongPollingBot {
         }
     }
 
-    private List<CityChatData> findMatchingCityChats(String text) {
-        return cityChats
-            .stream()
-            .filter(cityChat -> cityChat.isPresentIn(text))
-            .toList();
-    }
-
     private List<CountryChatData> findMatchingCountryChats(String text) {
         return countryChats
             .stream()
             .filter(countryChat -> countryChat.isPresentIn(text))
             .toList();
-    }
-
-    private Optional<String> getCityChatsAnswerText(List<CityChatData> matchingCityChats) {
-        if (matchingCityChats.isEmpty()) {
-            return Optional.empty();
-        }
-
-        List<String> multilineAnswers = matchingCityChats
-            .stream()
-            .map(CityChatData::getChatsAnswer)
-            .toList();
-
-        String answer = StringUtils.join(multilineAnswers, "\n\n");
-        return Optional.of(answer);
     }
 
     private Optional<String> getCountryChatsAnswerText(List<CountryChatData> matchingCityChats) {

@@ -12,6 +12,6 @@ class WikiPagesDataList(answers: List<WikiPageData>) : BotAnswerDataList<WikiPag
         }
 
         return matches
-            .joinToString("\n") { it.getMultiLineAnswer() }  // passing transform parameter to joinToString
+            .joinToString("\n") { it.getMultiLineAnswer() } // passing transform parameter to joinToString
     }
 }
