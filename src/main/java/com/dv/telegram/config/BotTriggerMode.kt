@@ -8,8 +8,8 @@ class BotTriggerMode : BotSetting<BotTriggerMode.Mode> {
     }
 
     enum class Mode {
-        ANY_SUBSTRING,  // любая подстрока с именем бота, в том числе, внутри другого слова
-        STRING_START,  // только имя бота вначале сообщения
+        ANY_SUBSTRING, // любая подстрока с именем бота, в том числе, внутри другого слова
+        STRING_START, // только имя бота вначале сообщения
         FULL_WORD // только имя бота как отдельное слово
     }
 
