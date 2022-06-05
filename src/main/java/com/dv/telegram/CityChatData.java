@@ -40,7 +40,7 @@ public class CityChatData {
 
     public void fillChatsAnswer() {
         String chatsList = getChatLines();
-        chatsAnswer = String.format("%s чаты:%n%s", cityName, chatsList);
+        chatsAnswer = String.format("%s чаты:\n%s", cityName, chatsList); // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
     }
 
     private String getChatLines() {

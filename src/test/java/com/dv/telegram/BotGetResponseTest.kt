@@ -162,6 +162,43 @@ internal class BotGetResponseTest {
         assertThat(result).isEqualTo(expectedResult)
     }
 
+    @Test
+    @DisplayName("City chats single answer.")
+    fun testCityChatsSingleAnswer() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, АугсБург" // must be case-insensitive
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Augsburg чаты:\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    @DisplayName("City chats multiple answers.")
+    fun testCityChatsMultipleAnswers() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, Айзенах и АугсБург" // must be case-insensitive
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Augsburg чаты:\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg\n\nEisenach чаты:\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+
     private fun getWikiBot(): WikiBot {
         val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json").path
         val configs = JacksonUtils.parseConfigs(configFilePath)
@@ -194,8 +231,8 @@ internal class BotGetResponseTest {
         val cityChats = listOf(
             CityChatData(
                 "Augsburg",
-                "Аугсбург, Аугбург, Augburg, аугзбург",
-                listOf("аугсбург", "аугбург", "augburg", "аугзбург"),
+                "Augsburg, Аугсбург, Аугбург, Augburg, аугзбург",
+                listOf("аугсбург", "аугсбург", "аугбург", "augburg", "аугзбург"),
                 listOf(
                     "https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине",
                     "https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины",
