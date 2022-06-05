@@ -1,6 +1,10 @@
 package com.dv.telegram.data
 
+import com.dv.telegram.GoogleSheetBotData
+
 class WikiPagesDataList(answers: List<WikiPageData>) : BotAnswerDataList<WikiPageData>(answers) {
+
+    constructor(botData: GoogleSheetBotData) : this(botData.pages)
 
     override fun getResponseText(matches: List<WikiPageData>): String? {
         if (matches.isEmpty()) {

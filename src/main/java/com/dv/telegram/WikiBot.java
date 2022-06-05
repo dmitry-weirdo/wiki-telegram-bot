@@ -228,10 +228,10 @@ public class WikiBot extends TelegramLongPollingBot {
     public boolean reloadBotDataFromGoogleSheet() {
         try {
             GoogleSheetBotData botData = loadBotDataFromGoogleSheet();
-            this.pages = new WikiPagesDataList(botData.getPages());
-            this.cityChats = new CityChatsDataList(botData.getCityChats());
-            this.countryChats = new CountryChatsDataList(botData.getCountryChats());
-            this.commands = new WikiBotCommandsDataList(botData.getCommands());
+            this.pages = new WikiPagesDataList(botData);
+            this.cityChats = new CityChatsDataList(botData);
+            this.countryChats = new CountryChatsDataList(botData);
+            this.commands = new WikiBotCommandsDataList(botData);
 
             return true;
         }
