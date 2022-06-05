@@ -2,6 +2,7 @@ package com.dv.telegram
 
 import com.dv.telegram.command.GetEnvironment
 import com.dv.telegram.command.GetStatistics
+import com.dv.telegram.command.Start
 import com.dv.telegram.util.JacksonUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -9,6 +10,26 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class BotGetResponseTest {
+
+    @Test
+    @DisplayName("/start command must trigger the bot even from not admin.")
+    fun testStartCommandMustTriggerTheBot() {
+        val wikiBot = getWikiBot()
+
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+        val notBotAdmin = botAdmin + "_"
+
+        val start = Start()
+
+        val result = wikiBot.getResponseText("/start", notBotAdmin)
+
+        val expectedResult = MessageProcessingResult.specialCommand(
+            Optional.of(start.getResponse("", wikiBot)),
+            false
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
 
     @Test
     @DisplayName("Message without bot name must not trigger the bot.")
