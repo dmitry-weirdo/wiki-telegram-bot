@@ -3,10 +3,7 @@ package com.dv.telegram;
 import com.dv.telegram.command.BotSpecialCommands;
 import com.dv.telegram.command.SpecialCommandResponse;
 import com.dv.telegram.config.BotSettings;
-import com.dv.telegram.data.CityChatData;
-import com.dv.telegram.data.CountryChatData;
-import com.dv.telegram.data.WikiBotCommandData;
-import com.dv.telegram.data.WikiPageData;
+import com.dv.telegram.data.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -31,7 +28,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private List<WikiPageData> pages;
     private List<CityChatData> cityChats;
     private List<CountryChatData> countryChats;
-    private List<WikiBotCommandData> commands;
+    private WikiBotCommandsDataList commands;
 
     private final String botName;
     private final String botNameLowerCase;
@@ -70,7 +67,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.pages = wikiPagesData;
         this.cityChats = cityChatsData;
         this.countryChats = countryChatsData;
-        this.commands = commands;
+        this.commands = new WikiBotCommandsDataList(commands);
 
         this.botName = config.getBotName();
         this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
@@ -116,7 +113,7 @@ public class WikiBot extends TelegramLongPollingBot {
         return specialCommands;
     }
 
-    public List<WikiBotCommandData> getCommands() {
+    public WikiBotCommandsDataList getCommands() {
         return commands;
     }
 
@@ -247,9 +244,9 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         // normal commands - configured in the Google Sheet
-        List<WikiBotCommandData> matchingCommands = findMatchingCommands(lowerText);
+        List<WikiBotCommandData> matchingCommands = commands.findMatches(lowerText);
         if (!matchingCommands.isEmpty()) { // matching command found -> only handle the command
-            String commandAnswerText = getCommandAnswerText(matchingCommands);
+            String commandAnswerText = commands.getResponseText(matchingCommands);
 
             return MessageProcessingResult.answerFound(commandAnswerText);
         }
@@ -301,20 +298,13 @@ public class WikiBot extends TelegramLongPollingBot {
             this.pages = botData.getPages();
             this.cityChats = botData.getCityChats();
             this.countryChats = botData.getCountryChats();
-            this.commands = botData.getCommands();
+            this.commands = new WikiBotCommandsDataList(botData.getCommands());
 
             return true;
         }
         catch (Exception e) {
             return false;
         }
-    }
-
-    private List<WikiBotCommandData> findMatchingCommands(String text) {
-        return commands
-            .stream()
-            .filter(command -> command.isPresentIn(text))
-            .toList();
     }
 
     private List<WikiPageData> findMatchingPages(String text) {
@@ -336,19 +326,6 @@ public class WikiBot extends TelegramLongPollingBot {
             .stream()
             .filter(countryChat -> countryChat.isPresentIn(text))
             .toList();
-    }
-
-    private String getCommandAnswerText(List<WikiBotCommandData> matchingCommands) {
-        if (matchingCommands.size() == 1) {
-            return matchingCommands.get(0).getOneLineAnswer();
-        }
-
-        List<String> multilineAnswers = matchingCommands
-            .stream()
-            .map(WikiBotCommandData::getMultiLineAnswer)
-            .toList();
-
-        return StringUtils.join(multilineAnswers, "\n");
     }
 
     private Optional<String> getWikiPageAnswerText(List<WikiPageData> matchingPages) {

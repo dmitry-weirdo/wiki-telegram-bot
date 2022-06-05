@@ -181,8 +181,8 @@ internal class BotGetResponseTest {
         val text = "$botName, добрый вечер, Слава Україні!"
         val result = wikiBot.getResponseText(text, botAdmin)
 
-        val command0 = wikiBot.commands[0]
-        val command1 = wikiBot.commands[1]
+        val command0 = wikiBot.commands.answers[0]
+        val command1 = wikiBot.commands.answers[1]
 
         val expectedResult = MessageProcessingResult.answerFound(
             "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}"

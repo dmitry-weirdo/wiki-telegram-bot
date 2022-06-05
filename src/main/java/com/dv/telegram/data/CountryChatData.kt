@@ -5,10 +5,10 @@ class CountryChatData(
     val wordsString: String,
     val words: List<String>, // multiple chats possible for the same country are possible
     val chats: List<String>
-) {
+) : BotAnswerData {
     val chatsAnswer: String = fillChatsAnswer() // pre-fill the bot answer to join the strings only once
 
-    fun isPresentIn(text: String): Boolean {
+    override fun isPresentIn(text: String): Boolean {
         if (text.isBlank()) {
             return false
         }
@@ -29,7 +29,7 @@ class CountryChatData(
     }
 
     private fun getChatLines(): String {
-        val chatLines = chats.map{ "— $it" }
+        val chatLines = chats.map { "— $it" }
 
         return chatLines.joinToString("\n")
     }

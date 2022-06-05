@@ -4,8 +4,8 @@ data class WikiBotCommandData(
     val answer: String,
     val wordsString: String,
     val words: List<String>
-) {
-    fun isPresentIn(text: String): Boolean {
+) : BotAnswerData {
+    override fun isPresentIn(text: String): Boolean {
         if (text.isBlank()) {
             return false
         }
