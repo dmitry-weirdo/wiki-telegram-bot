@@ -1,11 +1,9 @@
 package com.dv.telegram;
 
 import com.dv.telegram.command.BotSpecialCommands;
-import com.dv.telegram.command.SpecialCommandResponse;
 import com.dv.telegram.config.BotSettings;
 import com.dv.telegram.data.*;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -13,17 +11,10 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Log4j2
 public class WikiBot extends TelegramLongPollingBot {
-
-    private static final String START_COMMAND = "/start";
 
     private final WikiBotConfig config;
     private WikiPagesDataList pages;
@@ -32,8 +23,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private WikiBotCommandsDataList commands;
 
     private final String botName;
-    private final String botNameLowerCase;
-    private final Pattern botNameWordPattern;
+
     private final String environmentName;
 
     private final BotSpecialCommands specialCommands;
@@ -41,6 +31,8 @@ public class WikiBot extends TelegramLongPollingBot {
     private final BotSettings settings; // settings cache in memory
 
     private final BotStatistics statistics;
+
+    private final WikiBotMessageProcessor messageProcessor;
 
     public WikiBot(
         WikiBotConfig config,
@@ -71,8 +63,6 @@ public class WikiBot extends TelegramLongPollingBot {
         this.commands = new WikiBotCommandsDataList(commands);
 
         this.botName = config.getBotName();
-        this.botNameLowerCase = config.getBotName().toLowerCase(Locale.ROOT);
-        this.botNameWordPattern = getBotNameFullWordPattern(botName);
 
         this.environmentName = config.getEnvironmentName();
 
@@ -80,6 +70,8 @@ public class WikiBot extends TelegramLongPollingBot {
         this.settings = BotSettings.create(config);
 
         this.statistics = new BotStatistics();
+
+        this.messageProcessor = new WikiBotMessageProcessor(this);
     }
 
     public String getBotToken() {
@@ -114,6 +106,18 @@ public class WikiBot extends TelegramLongPollingBot {
         return specialCommands;
     }
 
+    public WikiPagesDataList getPages() {
+        return pages;
+    }
+
+    public CityChatsDataList getCityChats() {
+        return cityChats;
+    }
+
+    public CountryChatsDataList getCountryChats() {
+        return countryChats;
+    }
+
     public WikiBotCommandsDataList getCommands() {
         return commands;
     }
@@ -126,10 +130,8 @@ public class WikiBot extends TelegramLongPollingBot {
         return statistics;
     }
 
-    public static Pattern getBotNameFullWordPattern(String botName) {
-        String botNameRegex = String.format("(?i).*\\b%s\\b.*", botName);
-        int botNamePatternFlags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.DOTALL;
-        return Pattern.compile(botNameRegex, botNamePatternFlags); // see https://stackoverflow.com/a/43738714/8534088
+    public WikiBotMessageProcessor getMessageProcessor() {
+        return messageProcessor;
     }
 
     public void onUpdateReceived(Update update) {
@@ -143,7 +145,7 @@ public class WikiBot extends TelegramLongPollingBot {
         String text = updateMessage.getText();
         String userName = updateMessage.getFrom().getUserName();
 
-        MessageProcessingResult processingResult = getResponseText(text, userName);
+        MessageProcessingResult processingResult = processMessage(text, userName);
         statistics.update(text, processingResult);
 
         if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
@@ -215,63 +217,8 @@ public class WikiBot extends TelegramLongPollingBot {
         }
     }
 
-    private boolean messageIsForTheBot(String lowerText) {
-        if (lowerText.equals(START_COMMAND)) { // special case: /start command without bot name
-            return true;
-        }
-
-        return switch (settings.getTriggerMode()) { // check whether the message contains the bot name
-            case ANY_SUBSTRING -> lowerText.contains(botNameLowerCase);
-            case STRING_START -> lowerText.startsWith(botNameLowerCase);
-            case FULL_WORD -> botNameWordPattern.matcher(lowerText).matches();
-        };
-    }
-
-    MessageProcessingResult getResponseText(String text, String userName) { // non-private for testing
-        if (StringUtils.isBlank(text)) {
-            return MessageProcessingResult.notForTheBot();
-        }
-
-        String lowerText = text.toLowerCase(Locale.ROOT);
-
-        if (!messageIsForTheBot(lowerText)) { // only work when bot is mentioned by name
-            return MessageProcessingResult.notForTheBot();
-        }
-
-        // special commands - not configured in the Google Sheet
-        SpecialCommandResponse specialCommandResponse = specialCommands.getResponse(text, userName, this);
-        if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
-            return MessageProcessingResult.specialCommand(specialCommandResponse.response, specialCommandResponse.useMarkdownInResponse);
-        }
-
-        // normal commands - configured in the Google Sheet
-        String commandsAnswerText = commands.getResponseText(lowerText);
-        if (StringUtils.isNotBlank(commandsAnswerText)) { // matching command found -> only handle the command
-            return MessageProcessingResult.answerFound(commandsAnswerText);
-        }
-
-        List<String> answers = Arrays.asList( // List.of() fails on null values!
-            pages.getResponseText(lowerText), // wiki pages - configured in the Google Sheet
-            cityChats.getResponseText(lowerText), // city chats - configured in the Google Sheet
-            countryChats.getResponseText(lowerText) // country chats - configured in the Google Sheet
-        );
-
-        return getResponseText(text, answers);
-    }
-
-    private MessageProcessingResult getResponseText(String text, List<String> answerOptionals) {
-        List<String> answers = answerOptionals
-            .stream()
-            .filter(StringUtils::isNotBlank)
-            .toList();
-
-        if (answers.isEmpty()) { // no answers found
-            Optional<String> noResultResponse = getNoResultResponse(text);
-            return MessageProcessingResult.answerNotFound(noResultResponse);
-        }
-
-        String combinedAnswers = StringUtils.join(answers, "\n\n");
-        return MessageProcessingResult.answerFound(combinedAnswers);
+    MessageProcessingResult processMessage(String text, String userName) { // non-private for testing
+        return messageProcessor.processMessage(text, userName);
     }
 
     public GoogleSheetBotData loadBotDataFromGoogleSheet() { // does NOT reload the bot data itself
@@ -291,21 +238,5 @@ public class WikiBot extends TelegramLongPollingBot {
         catch (Exception e) {
             return false;
         }
-    }
-
-    private Optional<String> getNoResultResponse(String text) {
-        log.info("Unknown command for the bot: {}", text);
-
-        if (settings.getReplyWhenNoAnswer()) { // reply on no answer
-            String noResultAnswer = getNoResultAnswer(text);
-            return Optional.of(noResultAnswer);
-        }
-
-        // no reply on no answer
-        return Optional.empty();
-    }
-
-    String getNoResultAnswer(String text) { // not private for testing
-        return MessageFormat.format(settings.getNoAnswerReply(), botName, text);
     }
 }

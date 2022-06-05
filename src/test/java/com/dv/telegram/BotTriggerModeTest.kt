@@ -61,10 +61,10 @@ internal class BotTriggerModeTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
         val notBotAdmin = botAdmin + "_"
 
-        val result = wikiBot.getResponseText(text, notBotAdmin)
+        val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.of(wikiBot.getNoResultAnswer(text))
+            Optional.of(wikiBot.messageProcessor.getNoResultAnswer(text))
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -74,7 +74,7 @@ internal class BotTriggerModeTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
         val notBotAdmin = botAdmin + "_"
 
-        val result = wikiBot.getResponseText(text, notBotAdmin)
+        val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.notForTheBot()
 

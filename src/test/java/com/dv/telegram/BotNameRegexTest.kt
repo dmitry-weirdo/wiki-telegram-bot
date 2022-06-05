@@ -10,7 +10,7 @@ internal class BotNameRegexTest {
     fun testBotNameRegex() {
         val botName = "Ника"
 
-        val pattern = WikiBot.getBotNameFullWordPattern(botName)
+        val pattern = WikiBotMessageProcessor.getBotNameFullWordPattern(botName)
 
         val s1 = "Привет, НикА дорогая!" // true
         val s2 = "КлубНика от купальНика." // false

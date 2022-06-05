@@ -22,7 +22,7 @@ internal class BotGetResponseTest {
 
         val start = Start()
 
-        val result = wikiBot.getResponseText("/start", notBotAdmin)
+        val result = wikiBot.processMessage("/start", notBotAdmin)
 
         val expectedResult = MessageProcessingResult.specialCommand(
             Optional.of(start.getResponse("", wikiBot)),
@@ -37,7 +37,7 @@ internal class BotGetResponseTest {
     fun testMessageWithoutBotNameIsNotForTheBot() {
         val wikiBot = getWikiBot()
 
-        val result = wikiBot.getResponseText("message not for the bot", "userName")
+        val result = wikiBot.processMessage("message not for the bot", "userName")
 
         assertThat(result).isEqualTo(MessageProcessingResult.notForTheBot())
     }
@@ -47,7 +47,7 @@ internal class BotGetResponseTest {
     fun testEmptyMessageIsNotForTheBot() {
         val wikiBot = getWikiBot()
 
-        val result = wikiBot.getResponseText("", "userName")
+        val result = wikiBot.processMessage("", "userName")
 
         assertThat(result).isEqualTo(MessageProcessingResult.notForTheBot())
     }
@@ -65,10 +65,10 @@ internal class BotGetResponseTest {
         val notBotAdmin = botAdmin + "_"
 
         val text = "$botName, some bad request."
-        val result = wikiBot.getResponseText(text, notBotAdmin)
+        val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.of(wikiBot.getNoResultAnswer(text))
+            Optional.of(wikiBot.messageProcessor.getNoResultAnswer(text))
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -86,7 +86,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
         val notBotAdmin = botAdmin + "_"
 
-        val result = wikiBot.getResponseText("$botName, some bad request.", notBotAdmin)
+        val result = wikiBot.processMessage("$botName, some bad request.", notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
             Optional.empty()
@@ -105,7 +105,7 @@ internal class BotGetResponseTest {
 
         val getEnvironment = GetEnvironment()
 
-        val result = wikiBot.getResponseText("$botName ${getEnvironment.defaultCommandName}", botAdmin)
+        val result = wikiBot.processMessage("$botName ${getEnvironment.defaultCommandName}", botAdmin)
 
         val expectedResult = MessageProcessingResult.specialCommand(
             Optional.of(getEnvironment.getResponse("", wikiBot)),
@@ -126,7 +126,7 @@ internal class BotGetResponseTest {
 
         val getEnvironment = GetEnvironment()
 
-        val result = wikiBot.getResponseText("$botName ${getEnvironment.defaultCommandName}", notBotAdmin)
+        val result = wikiBot.processMessage("$botName ${getEnvironment.defaultCommandName}", notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound("Override of the special command!")
 
@@ -145,10 +145,10 @@ internal class BotGetResponseTest {
         val getStatistics = GetStatistics()
 
         val text = "$botName ${getStatistics.defaultCommandName}"
-        val result = wikiBot.getResponseText(text, notBotAdmin)
+        val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.of(wikiBot.getNoResultAnswer(text))
+            Optional.of(wikiBot.messageProcessor.getNoResultAnswer(text))
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -163,7 +163,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, добрый вечер, дай вики Аугсбург Болгария"
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound("Добрый")
 
@@ -179,7 +179,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, добрый вечер, Слава Україні!"
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val command0 = wikiBot.commands.answers[0]
         val command1 = wikiBot.commands.answers[1]
@@ -200,7 +200,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, БезопасностЬ" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Правила безопасности — https://uahelp.wiki/safety"
@@ -218,7 +218,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, БезопасностЬ и вИкИ" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "— Стартовая страница вики — https://uahelp.wiki" +
@@ -237,7 +237,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, АугсБург" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Augsburg чаты:" +
@@ -258,7 +258,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, Айзенах и АугсБург" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Augsburg чаты:" +
@@ -281,7 +281,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, PortugaliA" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Португалия чаты:" +
@@ -302,7 +302,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, PortugaliA и болгарИя" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Болгария чаты:" +
@@ -325,7 +325,7 @@ internal class BotGetResponseTest {
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
         val text = "$botName, PortugaliA, АугсбурГ, вИкИ" // must be case-insensitive
-        val result = wikiBot.getResponseText(text, botAdmin)
+        val result = wikiBot.processMessage(text, botAdmin)
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Стартовая страница вики — https://uahelp.wiki" + // wiki pages
