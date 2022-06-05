@@ -402,7 +402,7 @@ public class WikiBot extends TelegramLongPollingBot {
         return Optional.empty();
     }
 
-    private String getNoResultAnswer(String text) {
+    String getNoResultAnswer(String text) { // not private for testing
         return MessageFormat.format(settings.getNoAnswerReply(), botName, text);
     }
 }
