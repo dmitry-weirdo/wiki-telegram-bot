@@ -1,8 +1,8 @@
 package com.dv.telegram
 
 import com.dv.telegram.data.CityChatsParser
-import com.dv.telegram.data.CommandsParser
 import com.dv.telegram.data.CountryChatsParser
+import com.dv.telegram.data.WikiBotCommandsParser
 import com.dv.telegram.data.WikiPagesParser
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.google.GoogleSheetReader
@@ -30,7 +30,7 @@ object GoogleSheetLoader : Logging {
         val wikiPages = WikiPagesParser.parseWikiPages(wikiBotGoogleSheet)
         val cityChatsData = CityChatsParser.parseCityChats(wikiBotGoogleSheet)
         val countryChatsData = CountryChatsParser.parseCountryChats(wikiBotGoogleSheet)
-        val botCommands = CommandsParser.parseWikiBotCommands(wikiBotGoogleSheet)
+        val botCommands = WikiBotCommandsParser.parseWikiBotCommands(wikiBotGoogleSheet)
 
         return GoogleSheetBotData(
             wikiPages,

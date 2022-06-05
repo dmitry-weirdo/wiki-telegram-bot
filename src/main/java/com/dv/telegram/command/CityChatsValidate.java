@@ -1,8 +1,8 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.CityChatData;
 import com.dv.telegram.GoogleSheetBotData;
 import com.dv.telegram.WikiBot;
+import com.dv.telegram.data.CityChatData;
 import com.dv.telegram.exception.CommandException;
 import com.dv.telegram.notion.NotionCityChats;
 import lombok.extern.log4j.Log4j2;

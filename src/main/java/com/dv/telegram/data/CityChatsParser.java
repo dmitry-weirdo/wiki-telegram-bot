@@ -1,6 +1,5 @@
 package com.dv.telegram.data;
 
-import com.dv.telegram.CityChatData;
 import com.dv.telegram.google.RowData;
 import com.dv.telegram.google.SheetData;
 import com.dv.telegram.google.WikiBotGoogleSheet;

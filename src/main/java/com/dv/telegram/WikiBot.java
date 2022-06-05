@@ -3,6 +3,10 @@ package com.dv.telegram;
 import com.dv.telegram.command.BotSpecialCommands;
 import com.dv.telegram.command.SpecialCommandResponse;
 import com.dv.telegram.config.BotSettings;
+import com.dv.telegram.data.CityChatData;
+import com.dv.telegram.data.CountryChatData;
+import com.dv.telegram.data.WikiBotCommandData;
+import com.dv.telegram.data.WikiPageData;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -293,7 +297,7 @@ public class WikiBot extends TelegramLongPollingBot {
 
     public boolean reloadBotDataFromGoogleSheet() {
         try {
-            GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
+            GoogleSheetBotData botData = loadBotDataFromGoogleSheet();
             this.pages = botData.getPages();
             this.cityChats = botData.getCityChats();
             this.countryChats = botData.getCountryChats();

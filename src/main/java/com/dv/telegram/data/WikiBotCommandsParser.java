@@ -1,6 +1,5 @@
 package com.dv.telegram.data;
 
-import com.dv.telegram.WikiBotCommandData;
 import com.dv.telegram.google.RowData;
 import com.dv.telegram.google.SheetData;
 import com.dv.telegram.google.WikiBotGoogleSheet;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
-public class CommandsParser {
+public class WikiBotCommandsParser {
 
     public static List<WikiBotCommandData> parseWikiBotCommands(WikiBotGoogleSheet sheet) {
         SheetData commandsSheet = sheet.getCommandsSheet();

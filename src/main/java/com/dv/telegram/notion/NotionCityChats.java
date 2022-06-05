@@ -1,6 +1,6 @@
 package com.dv.telegram.notion;
 
-import com.dv.telegram.CityChatData;
+import com.dv.telegram.data.CityChatData;
 import com.dv.telegram.exception.CommandException;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;

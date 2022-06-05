@@ -1,4 +1,4 @@
-package com.dv.telegram;
+package com.dv.telegram.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,9 +8,8 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class WikiPageData {
-    private String name;
-    private String url;
+public class WikiBotCommandData {
+    private String answer;
     private String wordsString;
     private List<String> words;
 
@@ -29,10 +28,10 @@ public class WikiPageData {
     }
 
     public String getOneLineAnswer() {
-        return String.format("%s — %s", name, url);
+        return answer;
     }
 
     public String getMultiLineAnswer() {
-        return String.format("— %s — %s", name, url);
+        return String.format("— %s", answer);
     }
 }

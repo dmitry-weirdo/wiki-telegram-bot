@@ -1,4 +1,4 @@
-package com.dv.telegram;
+package com.dv.telegram.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,16 +8,16 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class CountryChatData {
-    private String countryName;
+public class CityChatData {
+    private String cityName;
     private String wordsString;
     private List<String> words;
-    private List<String> chats; // multiple chats possible for the same country are possible
+    private List<String> chats; // multiple chats possible for the same city are possible
 
     private String chatsAnswer;
 
-    public CountryChatData(String countryName, String wordsString, List<String> words, List<String> chats) {
-        this.countryName = countryName;
+    public CityChatData(String cityName, String wordsString, List<String> words, List<String> chats) {
+        this.cityName = cityName;
         this.wordsString = wordsString;
         this.words = words;
         this.chats = chats;
@@ -40,7 +40,7 @@ public class CountryChatData {
 
     public void fillChatsAnswer() {
         String chatsList = getChatLines();
-        chatsAnswer = String.format("%s чаты:\n%s", countryName, chatsList); // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
+        chatsAnswer = String.format("%s чаты:\n%s", cityName, chatsList); // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
     }
 
     private String getChatLines() {
