@@ -89,6 +89,43 @@ internal class BotGetResponseTest {
         assertThat(result).isEqualTo(expectedResult)
     }
 
+    @Test
+    @DisplayName("Command must override wiki pages, city chats and country chats.")
+    fun testCommandMustOverrideWikiPagesAndChats() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, добрый вечер, дай вики Аугсбург Болгария"
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound("Добрый")
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    @DisplayName("Multiple command matches must return a multiline commands response.")
+    fun testCommandMultipleMatches() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, добрый вечер, Слава Україні!"
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val command0 = wikiBot.commands[0]
+        val command1 = wikiBot.commands[1]
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "${command0.multiLineAnswer}\n${command1.multiLineAnswer}"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
     private fun getWikiBot(): WikiBot {
         val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json").path
         val configs = JacksonUtils.parseConfigs(configFilePath)
@@ -122,7 +159,7 @@ internal class BotGetResponseTest {
             CityChatData(
                 "Augsburg",
                 "Аугсбург, Аугбург, Augburg, аугзбург",
-                listOf("Аугсбург", "Аугбург", "Augburg", "аугзбург"),
+                listOf("аугсбург", "аугбург", "augburg", "аугзбург"),
                 listOf(
                     "https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине",
                     "https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины",
@@ -132,7 +169,7 @@ internal class BotGetResponseTest {
             CityChatData(
                 "Eisenach",
                 "Eisenach, Айзенах",
-                listOf("Eisenach", "Айзенах"),
+                listOf("eisenach", "айзенах"),
                 listOf(
                     "https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA"
                 )
@@ -143,7 +180,7 @@ internal class BotGetResponseTest {
             CountryChatData(
                 "Болгария",
                 "Болгария, Болгарія, Bulgaria, Bulgarien, Bolgaria, Bulgaria",
-                listOf("Болгария", "Болгарія", "Bulgaria", "Bulgarien", "Bolgaria", "Bulgaria"),
+                listOf("болгария", "болгарія", "bulgaria", "bulgarien", "bolgaria", "bulgaria"),
                 listOf(
                     "https://t.me/UAhelpinfo/28 — Общая информация"
                 )
@@ -151,7 +188,7 @@ internal class BotGetResponseTest {
             CountryChatData(
                 "Португалия",
                 "Португалия, Португалія, Portugal, Portugalia",
-                listOf("Португалия", "Португалія", "Portugal", "Portugalia"),
+                listOf("португалия", "португалія", "portugal", "portugalia"),
                 listOf(
                     "https://t.me/UAhelpinfo/89 — Общая информация",
                     "https://t.me/toportugal — Из Украины в Португалию",
@@ -164,12 +201,12 @@ internal class BotGetResponseTest {
             WikiBotCommandData(
                 "Добрый",
                 "Добрый день, добрый вечер",
-                listOf("Добрый день", "добрый вечер")
+                listOf("добрый день", "добрый вечер")
             ),
             WikiBotCommandData(
                 "Героям слава!",
                 "Слава Украине, Слава Україні, Слава Украини",
-                listOf("Слава Украине", "Слава Україні", "Слава Украини")
+                listOf("слава украине", "слава україні", "слава украини")
             ),
             WikiBotCommandData(
                 "Override of the special command!",

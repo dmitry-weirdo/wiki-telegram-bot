@@ -112,6 +112,10 @@ public class WikiBot extends TelegramLongPollingBot {
         return specialCommands;
     }
 
+    public List<WikiBotCommandData> getCommands() {
+        return commands;
+    }
+
     public BotSettings getSettings() {
         return settings;
     }
