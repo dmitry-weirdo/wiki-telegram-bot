@@ -1,242 +1,196 @@
-package com.dv.telegram;
+package com.dv.telegram
 
-import com.dv.telegram.command.BotSpecialCommands;
-import com.dv.telegram.config.BotSettings;
-import com.dv.telegram.data.*;
-import lombok.extern.log4j.Log4j2;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import com.dv.telegram.command.BotSpecialCommands
+import com.dv.telegram.config.BotSettings
+import com.dv.telegram.data.*
+import org.apache.logging.log4j.kotlin.Logging
+import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
+import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Update
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
-import java.util.List;
+class WikiBot(
+    private val config: WikiBotConfig,
+    wikiPagesData: List<WikiPageData>,
+    cityChatsData: List<CityChatData>,
+    countryChatsData: List<CountryChatData>,
+    commandsData: List<WikiBotCommandData>
+) : TelegramLongPollingBot(), Logging {
+    var pages: WikiPagesDataList // can be reloaded from Google Sheet
+        private set
 
-@Log4j2
-public class WikiBot extends TelegramLongPollingBot {
+    var cityChats: CityChatsDataList // can be reloaded from Google Sheet
+        private set
 
-    private final WikiBotConfig config;
-    private WikiPagesDataList pages;
-    private CityChatsDataList cityChats;
-    private CountryChatsDataList countryChats;
-    private WikiBotCommandsDataList commands;
+    var countryChats: CountryChatsDataList // can be reloaded from Google Sheet
+        private set
 
-    private final String botName;
+    var commands: WikiBotCommandsDataList // can be reloaded from Google Sheet
+        private set
 
-    private final String environmentName;
+    val botName: String
 
-    private final BotSpecialCommands specialCommands;
+    val environmentName: String
 
-    private final BotSettings settings; // settings cache in memory
+    val specialCommands: BotSpecialCommands
 
-    private final BotStatistics statistics;
+    val settings: BotSettings // settings cache in memory
 
-    private final WikiBotMessageProcessor messageProcessor;
+    val statistics: BotStatistics
 
-    public WikiBot(
-        WikiBotConfig config,
-        GoogleSheetBotData botData
-    ) {
-        this(
-            config,
-            botData.getPages(),
-            botData.getCityChats(),
-            botData.getCountryChats(),
-            botData.getCommands()
-        );
+    val messageProcessor: WikiBotMessageProcessor
+
+    constructor(
+        config: WikiBotConfig,
+        botData: GoogleSheetBotData
+    ) : this(
+        config,
+        botData.pages,
+        botData.cityChats,
+        botData.countryChats,
+        botData.commands
+    )
+
+    init {
+        pages = WikiPagesDataList(wikiPagesData)
+        cityChats = CityChatsDataList(cityChatsData)
+        countryChats = CountryChatsDataList(countryChatsData)
+        commands = WikiBotCommandsDataList(commandsData)
+
+        botName = config.botName
+
+        environmentName = config.environmentName
+
+        specialCommands = BotSpecialCommands.create(config)
+        settings = BotSettings.create(config)
+
+        statistics = BotStatistics()
+
+        messageProcessor = WikiBotMessageProcessor(this)
     }
 
-    public WikiBot(
-        WikiBotConfig config,
-        List<WikiPageData> wikiPagesData,
-        List<CityChatData> cityChatsData,
-        List<CountryChatData> countryChatsData,
-        List<WikiBotCommandData> commands
-    ) {
-        super();
+    // additional getters
+    val notionToken: String
+        get() = config.notionToken
 
-        this.config = config;
-        this.pages = new WikiPagesDataList(wikiPagesData);
-        this.cityChats = new CityChatsDataList(cityChatsData);
-        this.countryChats = new CountryChatsDataList(countryChatsData);
-        this.commands = new WikiBotCommandsDataList(commands);
+    val notionCityPageId: String
+        get() = config.cityChatsPageId
 
-        this.botName = config.getBotName();
+    val notionCityChatsToggleHeading1Text: String
+        get() = config.cityChatsToggleHeading1Text
 
-        this.environmentName = config.getEnvironmentName();
-
-        this.specialCommands = BotSpecialCommands.create(config);
-        this.settings = BotSettings.create(config);
-
-        this.statistics = new BotStatistics();
-
-        this.messageProcessor = new WikiBotMessageProcessor(this);
+    // functions overridden from Telegram API (TelegramLongPollingBot and its parent hierarchy)
+    override fun getBotToken(): String {
+        return config.botToken
     }
 
-    public String getBotToken() {
-        return config.getBotToken();
+    override fun getBotUsername(): String {
+        return "dv_wiki_bot" // todo: read from config if needed. Seems to be overridden by what is set by "/setname" in the @BotFather
     }
 
-    public String getBotUsername() {
-        return "dv_wiki_bot"; // todo: read from config if needed. Seems to be overridden by what is set by "/setname" in the @BotFather
-    }
-
-    public String getBotName() {
-        return botName;
-    }
-
-    public String getEnvironmentName() {
-        return environmentName;
-    }
-
-    public String getNotionToken() {
-        return config.notionToken;
-    }
-
-    public String getNotionCityPageId() {
-        return config.cityChatsPageId;
-    }
-
-    public String getNotionCityChatsToggleHeading1Text() {
-        return config.cityChatsToggleHeading1Text;
-    }
-
-    public BotSpecialCommands getSpecialCommands() {
-        return specialCommands;
-    }
-
-    public WikiPagesDataList getPages() {
-        return pages;
-    }
-
-    public CityChatsDataList getCityChats() {
-        return cityChats;
-    }
-
-    public CountryChatsDataList getCountryChats() {
-        return countryChats;
-    }
-
-    public WikiBotCommandsDataList getCommands() {
-        return commands;
-    }
-
-    public BotSettings getSettings() {
-        return settings;
-    }
-
-    public BotStatistics getStatistics() {
-        return statistics;
-    }
-
-    public WikiBotMessageProcessor getMessageProcessor() {
-        return messageProcessor;
-    }
-
-    public void onUpdateReceived(Update update) {
+    override fun onUpdateReceived(update: Update) {
         // todo: env option to disable the bot globally!
-
-        Message updateMessage = update.getMessage();
+        val updateMessage = update.message
         if (!update.hasMessage() || !updateMessage.hasText()) {
-            return;
+            return
         }
 
-        String text = updateMessage.getText();
-        String userName = updateMessage.getFrom().getUserName();
+        val text = updateMessage.text
+        val userName = updateMessage.from.userName
 
-        MessageProcessingResult processingResult = processMessage(text, userName);
-        statistics.update(text, processingResult);
+        val processingResult = processMessage(text, userName)
+        statistics.update(text, processingResult)
 
-        if (!processingResult.getMessageIsForTheBot()) { // message is not for the bot -> do nothing
-            return;
+        if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
+            return
         }
 
         // if the message is a reply, is for the bot and ReplyWhenNoAnswer is false, we still have to delete it
-        Message replyToMessage = updateMessage.getReplyToMessage();
-        boolean updateMessageIsReply = (replyToMessage != null);
+        val replyToMessage = updateMessage.replyToMessage
+        val updateMessageIsReply = (replyToMessage != null)
 
-        boolean deleteBotCallMessage = settings.getDeleteBotCallMessageOnMessageReply() && updateMessageIsReply;
+        val deleteBotCallMessage = settings.deleteBotCallMessageOnMessageReply && updateMessageIsReply
         if (deleteBotCallMessage) {
-            deleteBotCallMessage(updateMessage);
+            deleteBotCallMessage(updateMessage)
         }
 
         if (processingResult.hasNoResponse()) { // no response -> nothing to return
-            return;
+            return
         }
 
         // command is for the bot and has the response -> send the response message
         try {
-            SendMessage sendMessage = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult);
-            execute(sendMessage); // Call method to send the message
+            val sendMessage = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
+            execute(sendMessage) // Call method to send the message
         }
-        catch (TelegramApiException e) {
-            log.error("TelegramApiException occurred on sending the bot response message", e); // todo: add which message has failed the bot
-            throw new RuntimeException(e);
+        catch (e: TelegramApiException) {
+            logger.error("TelegramApiException occurred on sending the bot response message", e) // todo: add which message has failed the bot
+            throw RuntimeException(e)
         }
     }
 
-    private SendMessage createSendMessage(
-        Message updateMessage,
-        Message replyToMessage,
-        boolean deleteBotCallMessage,
-        MessageProcessingResult processingResult
-    ) {
-        String chatId = updateMessage.getChatId().toString();
-        String responseText = processingResult.getResponseOrFail();
+    private fun createSendMessage(
+        updateMessage: Message,
+        replyToMessage: Message?,
+        deleteBotCallMessage: Boolean,
+        processingResult: MessageProcessingResult
+    ): SendMessage {
+        val chatId = updateMessage.chatId.toString()
+        val responseText = processingResult.getResponseOrFail()
 
-        Integer replyToMessageId = deleteBotCallMessage
-            ? replyToMessage.getMessageId() // reply to the original message
-            : updateMessage.getMessageId() // reply to the "call bot" message
-        ;
+        val replyToMessageId =
+            if (deleteBotCallMessage) replyToMessage!!.messageId // reply to the original message
+            else updateMessage.messageId // reply to the "call bot" message
 
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setReplyToMessageId(replyToMessageId);
-        sendMessage.setText(responseText);
-        sendMessage.disableWebPagePreview();
+        val sendMessage = SendMessage()
+        sendMessage.chatId = chatId
+        sendMessage.replyToMessageId = replyToMessageId
+        sendMessage.text = responseText
+        sendMessage.disableWebPagePreview()
 
-        if (processingResult.getUseMarkdown()) {
-            sendMessage.setParseMode("Markdown");
+        if (processingResult.useMarkdown) {
+            sendMessage.parseMode = "Markdown"
         }
 
-        return sendMessage;
+        return sendMessage
     }
 
-    private void deleteBotCallMessage(Message updateMessage) {
-        DeleteMessage deleteMessage = new DeleteMessage(
-            updateMessage.getChatId().toString(),
-            updateMessage.getMessageId()
-        );
+    private fun deleteBotCallMessage(updateMessage: Message) {
+        val deleteMessage = DeleteMessage(
+            updateMessage.chatId.toString(),
+            updateMessage.messageId
+        )
 
         try {
-            execute(deleteMessage);
+            execute(deleteMessage)
         }
-        catch (TelegramApiException e) {
-            log.error("Failed to delete message", e);
+        catch (e: TelegramApiException) {
+            logger.error("Failed to delete message", e)
         }
     }
 
-    MessageProcessingResult processMessage(String text, String userName) { // non-private for testing
-        return messageProcessor.processMessage(text, userName);
+    fun processMessage(text: String, userName: String): MessageProcessingResult { // non-private for testing
+        return messageProcessor.processMessage(text, userName)
     }
 
-    public GoogleSheetBotData loadBotDataFromGoogleSheet() { // does NOT reload the bot data itself
-        return GoogleSheetLoader.readGoogleSheet(config);
+    fun reloadBotDataFromGoogleSheet(): Boolean {
+        return try {
+            val botData = loadBotDataFromGoogleSheet()
+            pages = WikiPagesDataList(botData)
+            cityChats = CityChatsDataList(botData)
+            countryChats = CountryChatsDataList(botData)
+            commands = WikiBotCommandsDataList(botData)
+
+            true
+        }
+        catch (e: Exception) {
+            false
+        }
     }
 
-    public boolean reloadBotDataFromGoogleSheet() {
-        try {
-            GoogleSheetBotData botData = loadBotDataFromGoogleSheet();
-            this.pages = new WikiPagesDataList(botData);
-            this.cityChats = new CityChatsDataList(botData);
-            this.countryChats = new CountryChatsDataList(botData);
-            this.commands = new WikiBotCommandsDataList(botData);
-
-            return true;
-        }
-        catch (Exception e) {
-            return false;
-        }
+    fun loadBotDataFromGoogleSheet(): GoogleSheetBotData { // does NOT reload the bot data itself
+        return GoogleSheetLoader.readGoogleSheet(config)
     }
 }
