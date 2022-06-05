@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private final WikiBotConfig config;
     private WikiPagesDataList pages;
     private CityChatsDataList cityChats;
-    private List<CountryChatData> countryChats;
+    private CountryChatsDataList countryChats;
     private WikiBotCommandsDataList commands;
 
     private final String botName;
@@ -66,7 +67,7 @@ public class WikiBot extends TelegramLongPollingBot {
         this.config = config;
         this.pages = new WikiPagesDataList(wikiPagesData);
         this.cityChats = new CityChatsDataList(cityChatsData);
-        this.countryChats = countryChatsData;
+        this.countryChats = new CountryChatsDataList(countryChatsData);
         this.commands = new WikiBotCommandsDataList(commands);
 
         this.botName = config.getBotName();
@@ -243,43 +244,25 @@ public class WikiBot extends TelegramLongPollingBot {
             return MessageProcessingResult.specialCommand(specialCommandResponse.response, specialCommandResponse.useMarkdownInResponse);
         }
 
-        // todo: think on executing commands.getResponseText and checking whether it is empty
         // normal commands - configured in the Google Sheet
-        List<WikiBotCommandData> matchingCommands = commands.findMatches(lowerText);
-        if (!matchingCommands.isEmpty()) { // matching command found -> only handle the command
-            String commandAnswerText = commands.getResponseText(matchingCommands);
-
-            return MessageProcessingResult.answerFound(commandAnswerText);
+        String commandsAnswerText = commands.getResponseText(lowerText);
+        if (StringUtils.isNotBlank(commandsAnswerText)) { // matching command found -> only handle the command
+            return MessageProcessingResult.answerFound(commandsAnswerText);
         }
 
-        // wiki pages - configured in the Google Sheet
-        Optional<String> wikiPageAnswerText = Optional.ofNullable(
-            pages.getResponseText(lowerText)
-        );
-
-        // city chats - configured in the Google Sheet
-        Optional<String> cityChatsAnswerText = Optional.ofNullable(
-            cityChats.getResponseText(lowerText)
-        );
-
-        // country chats - configured in the Google Sheet
-        List<CountryChatData> matchingCountryChats = findMatchingCountryChats(lowerText);
-        Optional<String> countryChatsAnswerText = getCountryChatsAnswerText(matchingCountryChats);
-
-        List<Optional<String>> answers = List.of(
-            wikiPageAnswerText,
-            cityChatsAnswerText,
-            countryChatsAnswerText
+        List<String> answers = Arrays.asList( // List.of() fails on null values!
+            pages.getResponseText(lowerText), // wiki pages - configured in the Google Sheet
+            cityChats.getResponseText(lowerText), // city chats - configured in the Google Sheet
+            countryChats.getResponseText(lowerText) // country chats - configured in the Google Sheet
         );
 
         return getResponseText(text, answers);
     }
 
-    private MessageProcessingResult getResponseText(String text, List<Optional<String>> answerOptionals) {
+    private MessageProcessingResult getResponseText(String text, List<String> answerOptionals) {
         List<String> answers = answerOptionals
             .stream()
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .filter(StringUtils::isNotBlank)
             .toList();
 
         if (answers.isEmpty()) { // no answers found
@@ -300,7 +283,7 @@ public class WikiBot extends TelegramLongPollingBot {
             GoogleSheetBotData botData = loadBotDataFromGoogleSheet();
             this.pages = new WikiPagesDataList(botData.getPages());
             this.cityChats = new CityChatsDataList(botData.getCityChats());
-            this.countryChats = botData.getCountryChats();
+            this.countryChats = new CountryChatsDataList(botData.getCountryChats());
             this.commands = new WikiBotCommandsDataList(botData.getCommands());
 
             return true;
@@ -308,27 +291,6 @@ public class WikiBot extends TelegramLongPollingBot {
         catch (Exception e) {
             return false;
         }
-    }
-
-    private List<CountryChatData> findMatchingCountryChats(String text) {
-        return countryChats
-            .stream()
-            .filter(countryChat -> countryChat.isPresentIn(text))
-            .toList();
-    }
-
-    private Optional<String> getCountryChatsAnswerText(List<CountryChatData> matchingCityChats) {
-        if (matchingCityChats.isEmpty()) {
-            return Optional.empty();
-        }
-
-        List<String> multilineAnswers = matchingCityChats
-            .stream()
-            .map(CountryChatData::getChatsAnswer)
-            .toList();
-
-        String answer = StringUtils.join(multilineAnswers, "\n\n");
-        return Optional.of(answer);
     }
 
     private Optional<String> getNoResultResponse(String text) {
