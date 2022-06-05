@@ -1,0 +1,59 @@
+{
+  "configs": [
+    {
+      "botName": "TestBot",
+      "botToken": "testBotToken",
+      "environmentName": "Unit tests environment",
+
+      // Google Sheets
+      "googleSheetsApiKey": "testApiKey",
+      "googleSpreadsheetId": "testSpreadSheetId",
+      //      "wikiPagesSheetName": "Страницы вики и ключевые слова",
+      //      "cityChatsSheetName": "Список чатов по городам",
+      //      "countryChatsSheetName": "Список чатов по странам",
+      //      "commandsSheetName": "Список болталки",
+
+      // Notion
+      "notionToken": "testNotionToken",
+//      "cityChatsPageId": "24ec680a988441698efe1003a304ded1",
+//      "cityChatsToggleHeading1Text": "Чаты по землям и городам Германии (Telegram, WhatsApp)",
+
+      // special commands
+      "botAdmins": [
+        "dmitry_weirdo"
+      ],
+
+      "commands": {
+//        "ListCommands": "/listCommands666",
+
+        //        "GetEnvironment": "/getEnvironment666"//,
+        //        "ReloadFromGoogleSheet": "/gs-reload-5150",
+
+        // settings
+        //        "ListSettings": "/listSettings",
+        //        "GetSetting": "/getSetting",
+        //        "SetSetting": "/setSetting",
+//        "HelpSetting": "/helpSetting666",
+
+        // stats
+        //        "GetStatistics": "/getStats",
+        //        "GetFailedRequests": "/getFailedRequests",
+        //        "ClearFailedRequests": "/clearFailedRequests"
+
+        // notion
+//        "CityChatsValidate": "/cityChatsValidate666"
+      },
+
+      // settings that can be changed in runtime
+      "settings": {
+        //        "StartMessage": "666Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, называя меня по имени.\nНапример:\n— {0}, где найти работу?\n— {0} Дюссельдорф\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!",
+        "StartMessage": "Привет! Меня зовут {0}.\n\nЗадавайте мне вопросы, обращаясь ко мне по имени.\nНапример:\n— {0}, как найти работу?\n— {0} где курсы немецкого?\n— {0} FAQ?\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!",
+        "DeleteBotCallMessageOnMessageReply": "true",
+        "BotTriggerMode": "FULL_WORD",
+        "ReplyWhenNoAnswer": "true",
+        //        "NoAnswerReply": ""
+        "NoAnswerReply": "{0} ничего не знает про ваш запрос «{1}» :("
+      }
+    }
+  ]
+}

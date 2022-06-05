@@ -1,9 +1,11 @@
 package com.dv.telegram;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.Optional;
 
+@Data
 @AllArgsConstructor
 public class MessageProcessingResult {
 
@@ -17,7 +19,7 @@ public class MessageProcessingResult {
         return response.isEmpty();
     }
 
-    public String getResponse() {
+    public String getResponseOrFail() {
         return response
             .orElseThrow(
                 () -> new IllegalStateException("getResponse called on an empty response.")
@@ -33,7 +35,7 @@ public class MessageProcessingResult {
     }
 
     public static MessageProcessingResult answerFound(String response) {
-        return new MessageProcessingResult(true, false, false, true, Optional.of(response));
+        return answerFound(Optional.ofNullable(response));
     }
 
     public static MessageProcessingResult answerFound(Optional<String> response) {

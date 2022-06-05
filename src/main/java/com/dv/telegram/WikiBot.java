@@ -175,7 +175,7 @@ public class WikiBot extends TelegramLongPollingBot {
         MessageProcessingResult processingResult
     ) {
         String chatId = updateMessage.getChatId().toString();
-        String responseText = processingResult.getResponse();
+        String responseText = processingResult.getResponseOrFail();
 
         Integer replyToMessageId = deleteBotCallMessage
             ? replyToMessage.getMessageId() // reply to the original message
@@ -221,7 +221,7 @@ public class WikiBot extends TelegramLongPollingBot {
         };
     }
 
-    private MessageProcessingResult getResponseText(String text, String userName) {
+    MessageProcessingResult getResponseText(String text, String userName) { // non-private for testing
         if (StringUtils.isBlank(text)) {
             return MessageProcessingResult.notForTheBot();
         }
