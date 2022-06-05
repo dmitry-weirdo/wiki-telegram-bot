@@ -148,7 +148,7 @@ public class WikiBot extends TelegramLongPollingBot {
         MessageProcessingResult processingResult = processMessage(text, userName);
         statistics.update(text, processingResult);
 
-        if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
+        if (!processingResult.getMessageIsForTheBot()) { // message is not for the bot -> do nothing
             return;
         }
 
@@ -196,7 +196,7 @@ public class WikiBot extends TelegramLongPollingBot {
         sendMessage.setText(responseText);
         sendMessage.disableWebPagePreview();
 
-        if (processingResult.useMarkdown) {
+        if (processingResult.getUseMarkdown()) {
             sendMessage.setParseMode("Markdown");
         }
 

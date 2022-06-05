@@ -4,7 +4,6 @@ import com.dv.telegram.config.BotTriggerMode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class BotTriggerModeTest {
 
@@ -64,7 +63,7 @@ internal class BotTriggerModeTest {
         val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.of(wikiBot.messageProcessor.getNoResultAnswer(text))
+            wikiBot.messageProcessor.getNoResultAnswer(text)
         )
 
         assertThat(result).isEqualTo(expectedResult)

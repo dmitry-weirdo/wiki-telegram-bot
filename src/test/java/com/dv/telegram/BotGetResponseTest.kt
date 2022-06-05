@@ -8,7 +8,6 @@ import com.dv.telegram.config.ReplyWhenNoAnswer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class BotGetResponseTest {
 
@@ -25,7 +24,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage("/start", notBotAdmin)
 
         val expectedResult = MessageProcessingResult.specialCommand(
-            Optional.of(start.getResponse("", wikiBot)),
+            start.getResponse("", wikiBot),
             false
         )
 
@@ -68,7 +67,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.of(wikiBot.messageProcessor.getNoResultAnswer(text))
+            wikiBot.messageProcessor.getNoResultAnswer(text)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -88,9 +87,7 @@ internal class BotGetResponseTest {
 
         val result = wikiBot.processMessage("$botName, some bad request.", notBotAdmin)
 
-        val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.empty()
-        )
+        val expectedResult = MessageProcessingResult.answerNotFound(null)
 
         assertThat(result).isEqualTo(expectedResult)
     }
@@ -108,7 +105,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage("$botName ${getEnvironment.defaultCommandName}", botAdmin)
 
         val expectedResult = MessageProcessingResult.specialCommand(
-            Optional.of(getEnvironment.getResponse("", wikiBot)),
+            getEnvironment.getResponse("", wikiBot),
             false
         )
 
@@ -148,7 +145,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, notBotAdmin)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            Optional.of(wikiBot.messageProcessor.getNoResultAnswer(text))
+            wikiBot.messageProcessor.getNoResultAnswer(text)
         )
 
         assertThat(result).isEqualTo(expectedResult)

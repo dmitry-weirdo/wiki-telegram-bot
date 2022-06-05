@@ -1,52 +1,63 @@
-package com.dv.telegram;
+package com.dv.telegram
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-import java.util.Optional;
-
-@Data
-@AllArgsConstructor
-public class MessageProcessingResult {
-
-    public final boolean messageIsForTheBot;
-    public final boolean isSpecialCommand;
-    public final boolean useMarkdown;
-    public final boolean answerIsFound;
-    public final Optional<String> response;
-
-    public boolean hasNoResponse() {
-        return response.isEmpty();
+data class MessageProcessingResult(
+    val messageIsForTheBot: Boolean,
+    val isSpecialCommand: Boolean,
+    val useMarkdown: Boolean,
+    val answerIsFound: Boolean,
+    val response: String?
+) {
+    fun hasNoResponse(): Boolean {
+        return response == null
     }
 
-    public String getResponseOrFail() {
-        return response
-            .orElseThrow(
-                () -> new IllegalStateException("getResponse called on an empty response.")
-            );
+    fun getResponseOrFail(): String {
+        return response ?: throw IllegalStateException("getResponse called on an empty response.")
     }
 
-    public static MessageProcessingResult notForTheBot() {
-        return new MessageProcessingResult(false, false, false, false, Optional.empty());
-    }
-
-    public static MessageProcessingResult specialCommand(Optional<String> response, boolean useMarkdown) {
-        return new MessageProcessingResult(true, true, useMarkdown, true, response);
-    }
-
-    public static MessageProcessingResult answerFound(String response) {
-        return answerFound(Optional.ofNullable(response));
-    }
-
-    public static MessageProcessingResult answerFound(Optional<String> response) {
-        if (response.isEmpty()) {
-            throw new IllegalArgumentException("For answerFound result, the response text must be present.");
+    companion object { // factory methods
+        @JvmStatic
+        fun notForTheBot(): MessageProcessingResult {
+            return MessageProcessingResult(
+                messageIsForTheBot = false,
+                isSpecialCommand = false,
+                useMarkdown = false,
+                answerIsFound = false,
+                response = null
+            )
         }
 
-        return new MessageProcessingResult(true, false, false, true, response);
-    }
+        @JvmStatic
+        fun specialCommand(response: String?, useMarkdown: Boolean): MessageProcessingResult {
+            return MessageProcessingResult(
+                messageIsForTheBot = true,
+                isSpecialCommand = true,
+                useMarkdown = useMarkdown,
+                answerIsFound = true,
+                response = response
+            )
+        }
 
-    public static MessageProcessingResult answerNotFound(Optional<String> response) {
-        return new MessageProcessingResult(true, false, false, false, response);
+        @JvmStatic
+        fun answerFound(response: String): MessageProcessingResult {
+            return MessageProcessingResult(
+                messageIsForTheBot = true,
+                isSpecialCommand = false,
+                useMarkdown = false,
+                answerIsFound = true,
+                response = response
+            )
+        }
+
+        @JvmStatic
+        fun answerNotFound(response: String?): MessageProcessingResult {
+            return MessageProcessingResult(
+                messageIsForTheBot = true,
+                isSpecialCommand = false,
+                useMarkdown = false,
+                answerIsFound = false,
+                response = response
+            )
+        }
     }
 }

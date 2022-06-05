@@ -49,7 +49,10 @@ public class WikiBotMessageProcessor {
         // special commands - not configured in the Google Sheet
         SpecialCommandResponse specialCommandResponse = wikiBot.getSpecialCommands().getResponse(text, userName, wikiBot);
         if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
-            return MessageProcessingResult.specialCommand(specialCommandResponse.response, specialCommandResponse.useMarkdownInResponse);
+            return MessageProcessingResult.specialCommand(
+                specialCommandResponse.response.orElse(null),
+                specialCommandResponse.useMarkdownInResponse
+            );
         }
 
         // normal commands - configured in the Google Sheet
@@ -87,7 +90,7 @@ public class WikiBotMessageProcessor {
 
         if (answers.isEmpty()) { // no answers found
             Optional<String> noResultResponse = getNoResultResponse(text);
-            return MessageProcessingResult.answerNotFound(noResultResponse);
+            return MessageProcessingResult.answerNotFound(noResultResponse.orElse(null));
         }
 
         String combinedAnswers = StringUtils.join(answers, "\n\n");

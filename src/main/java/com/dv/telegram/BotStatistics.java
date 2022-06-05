@@ -23,14 +23,14 @@ public class BotStatistics {
     private static final String COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)";
 
     public void update(String text, MessageProcessingResult processingResult) {
-        if (!processingResult.messageIsForTheBot) {
+        if (!processingResult.getMessageIsForTheBot()) {
             return;
         }
 
-        if (processingResult.isSpecialCommand) {
+        if (processingResult.isSpecialCommand()) {
             specialCommandsCount++;
         }
-        else if (processingResult.answerIsFound) {
+        else if (processingResult.getAnswerIsFound()) {
             successfulRequestsCount++;
         }
         else {
