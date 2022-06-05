@@ -3,6 +3,7 @@ package com.dv.telegram
 import com.dv.telegram.command.GetEnvironment
 import com.dv.telegram.command.GetStatistics
 import com.dv.telegram.command.Start
+import com.dv.telegram.config.ReplyWhenNoAnswer
 import com.dv.telegram.util.JacksonUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -49,6 +50,49 @@ internal class BotGetResponseTest {
         val result = wikiBot.getResponseText("", "userName")
 
         assertThat(result).isEqualTo(MessageProcessingResult.notForTheBot())
+    }
+
+    @Test
+    @DisplayName("ReplyWhenNoAnswer == true must return \"answer not found\" response.")
+    fun testNoResponseWithReplyWhenNoAnswerIsTrue() {
+        val wikiBot = getWikiBot {
+            it.settings[ReplyWhenNoAnswer.NAME] = true.toString()
+            it
+        }
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+        val notBotAdmin = botAdmin + "_"
+
+        val text = "$botName, some bad request."
+        val result = wikiBot.getResponseText(text, notBotAdmin)
+
+        val expectedResult = MessageProcessingResult.answerNotFound(
+            Optional.of(wikiBot.getNoResultAnswer(text))
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    @DisplayName("ReplyWhenNoAnswer == false must turn off the \"answer not found\" response.")
+    fun testNoResponseWithReplyWhenNoAnswerIsFalse() {
+        val wikiBot = getWikiBot {
+            it.settings[ReplyWhenNoAnswer.NAME] = false.toString()
+            it
+        }
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+        val notBotAdmin = botAdmin + "_"
+
+        val result = wikiBot.getResponseText("$botName, some bad request.", notBotAdmin)
+
+        val expectedResult = MessageProcessingResult.answerNotFound(
+            Optional.empty()
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
     }
 
     @Test
@@ -298,15 +342,18 @@ internal class BotGetResponseTest {
         assertThat(result).isEqualTo(expectedResult)
     }
 
-    private fun getWikiBot(): WikiBot {
-        val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json").path
+    private fun getWikiBot(
+        configUpdater: (config: WikiBotConfig) -> WikiBotConfig = { it } // by default, do not change config read from file
+    ): WikiBot {
+        val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json")?.path
         val configs = JacksonUtils.parseConfigs(configFilePath)
         val config = configs.configs[0]
+        val updatedConfig = configUpdater(config)
 
         val botData = getBotData()
 
         return WikiBot(
-            config,
+            updatedConfig,
             botData
         )
     }
