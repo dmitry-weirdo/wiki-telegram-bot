@@ -25,7 +25,7 @@ public class WikiBot extends TelegramLongPollingBot {
     private static final String START_COMMAND = "/start";
 
     private final WikiBotConfig config;
-    private List<WikiPageData> pages;
+    private WikiPagesDataList pages;
     private List<CityChatData> cityChats;
     private List<CountryChatData> countryChats;
     private WikiBotCommandsDataList commands;
@@ -64,7 +64,7 @@ public class WikiBot extends TelegramLongPollingBot {
         super();
 
         this.config = config;
-        this.pages = wikiPagesData;
+        this.pages = new WikiPagesDataList(wikiPagesData);
         this.cityChats = cityChatsData;
         this.countryChats = countryChatsData;
         this.commands = new WikiBotCommandsDataList(commands);
@@ -243,6 +243,7 @@ public class WikiBot extends TelegramLongPollingBot {
             return MessageProcessingResult.specialCommand(specialCommandResponse.response, specialCommandResponse.useMarkdownInResponse);
         }
 
+        // todo: think on executing commands.getResponseText and checking whether it is empty
         // normal commands - configured in the Google Sheet
         List<WikiBotCommandData> matchingCommands = commands.findMatches(lowerText);
         if (!matchingCommands.isEmpty()) { // matching command found -> only handle the command
@@ -252,8 +253,9 @@ public class WikiBot extends TelegramLongPollingBot {
         }
 
         // wiki pages - configured in the Google Sheet
-        List<WikiPageData> matchingPages = findMatchingPages(lowerText);
-        Optional<String> wikiPageAnswerText = getWikiPageAnswerText(matchingPages);
+        Optional<String> wikiPageAnswerText = Optional.ofNullable(
+            pages.getResponseText(lowerText)
+        );
 
         // city chats - configured in the Google Sheet
         List<CityChatData> matchingCityChats = findMatchingCityChats(lowerText);
@@ -295,7 +297,7 @@ public class WikiBot extends TelegramLongPollingBot {
     public boolean reloadBotDataFromGoogleSheet() {
         try {
             GoogleSheetBotData botData = loadBotDataFromGoogleSheet();
-            this.pages = botData.getPages();
+            this.pages = new WikiPagesDataList(botData.getPages());
             this.cityChats = botData.getCityChats();
             this.countryChats = botData.getCountryChats();
             this.commands = new WikiBotCommandsDataList(botData.getCommands());
@@ -305,13 +307,6 @@ public class WikiBot extends TelegramLongPollingBot {
         catch (Exception e) {
             return false;
         }
-    }
-
-    private List<WikiPageData> findMatchingPages(String text) {
-        return pages
-            .stream()
-            .filter(page -> page.isPresentIn(text))
-            .toList();
     }
 
     private List<CityChatData> findMatchingCityChats(String text) {
@@ -326,25 +321,6 @@ public class WikiBot extends TelegramLongPollingBot {
             .stream()
             .filter(countryChat -> countryChat.isPresentIn(text))
             .toList();
-    }
-
-    private Optional<String> getWikiPageAnswerText(List<WikiPageData> matchingPages) {
-        if (matchingPages.isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (matchingPages.size() == 1) {
-            String oneLineAnswer = matchingPages.get(0).getOneLineAnswer();
-            return Optional.of(oneLineAnswer);
-        }
-
-        List<String> multilineAnswers = matchingPages
-            .stream()
-            .map(WikiPageData::getMultiLineAnswer)
-            .toList();
-
-        String answer = StringUtils.join(multilineAnswers, "\n");
-        return Optional.of(answer);
     }
 
     private Optional<String> getCityChatsAnswerText(List<CityChatData> matchingCityChats) {
