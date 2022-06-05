@@ -10,12 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
-public class CountryChatsParser { // mostly the same as CityChatsParser
+public class CountryChatsParser implements SheetDataParser<CountryChatData> { // mostly the same as CityChatsParser
 
-    public static List<CountryChatData> parseCountryChats(WikiBotGoogleSheet sheet) {
-        SheetData commandsSheet = sheet.getCountryChatsSheet();
-        List<RowData> rows = commandsSheet.getRowsWithoutFirstRow();
+    @Override
+    public SheetData getSheetData(WikiBotGoogleSheet sheet) {
+        return sheet.getCountryChatsSheet();
+    }
 
+    @Override
+    public List<CountryChatData> parse(List<RowData> rows) {
         List<CountryChatData> chatsData = new ArrayList<>();
 
         int rowNum = 1;
@@ -43,7 +46,7 @@ public class CountryChatsParser { // mostly the same as CityChatsParser
             rowNum++;
         }
 
-        log.info("Total {} commands parsed.", chatsData.size());
+        log.info("Total {} country chats parsed.", chatsData.size());
 
         return chatsData;
     }

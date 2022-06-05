@@ -9,12 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
-public class WikiBotCommandsParser {
+public class WikiBotCommandsParser implements SheetDataParser<WikiBotCommandData> {
 
-    public static List<WikiBotCommandData> parseWikiBotCommands(WikiBotGoogleSheet sheet) {
-        SheetData commandsSheet = sheet.getCommandsSheet();
-        List<RowData> rows = commandsSheet.getRowsWithoutFirstRow();
+    @Override
+    public SheetData getSheetData(WikiBotGoogleSheet sheet) {
+        return sheet.getCommandsSheet();
+    }
 
+    @Override
+    public List<WikiBotCommandData> parse(List<RowData> rows) {
         List<WikiBotCommandData> commands = new ArrayList<>();
 
         int rowNum = 1;

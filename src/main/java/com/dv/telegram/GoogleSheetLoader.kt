@@ -27,10 +27,10 @@ object GoogleSheetLoader : Logging {
 
     private fun reloadGoogleSheetUnsafe(config: WikiBotConfig): GoogleSheetBotData {
         val wikiBotGoogleSheet = GoogleSheetReader.readGoogleSheetSafe(config)
-        val wikiPages = WikiPagesParser.parseWikiPages(wikiBotGoogleSheet)
-        val cityChatsData = CityChatsParser.parseCityChats(wikiBotGoogleSheet)
-        val countryChatsData = CountryChatsParser.parseCountryChats(wikiBotGoogleSheet)
-        val botCommands = WikiBotCommandsParser.parseWikiBotCommands(wikiBotGoogleSheet)
+        val wikiPages = WikiPagesParser().parse(wikiBotGoogleSheet)
+        val cityChatsData = CityChatsParser().parse(wikiBotGoogleSheet)
+        val countryChatsData = CountryChatsParser().parse(wikiBotGoogleSheet)
+        val botCommands = WikiBotCommandsParser().parse(wikiBotGoogleSheet)
 
         return GoogleSheetBotData(
             wikiPages,
