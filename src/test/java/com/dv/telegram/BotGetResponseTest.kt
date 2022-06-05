@@ -198,6 +198,42 @@ internal class BotGetResponseTest {
         assertThat(result).isEqualTo(expectedResult)
     }
 
+    @Test
+    @DisplayName("Country chats single answer.")
+    fun testCountryChatsSingleAnswer() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, PortugaliA" // must be case-insensitive
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Португалия чаты:\n— https://t.me/UAhelpinfo/89 — Общая информация\n— https://t.me/toportugal — Из Украины в Португалию\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    @DisplayName("Country chats multiple answers.")
+    fun testCountryChatsMultipleAnswers() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, PortugaliA и болгарИя" // must be case-insensitive
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Болгария чаты:\n— https://t.me/UAhelpinfo/28 — Общая информация\n\nПортугалия чаты:\n— https://t.me/UAhelpinfo/89 — Общая информация\n— https://t.me/toportugal — Из Украины в Португалию\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
 
     private fun getWikiBot(): WikiBot {
         val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json").path
