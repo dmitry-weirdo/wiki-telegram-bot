@@ -54,14 +54,15 @@ internal class BotCommandUtilsTest {
 
     @Test
     fun testGetBotAdmins() {
-        val config = WikiBotConfig()
-        config.botAdmins = (listOf(
-            "@tonygerm",
-            "@Anna543210",
-            "DmRodionov",
-            "dmitry_weirdo",
-            "anutikin",
-        ))
+        val config = WikiBotConfig(
+            botAdmins = listOf(
+                "@tonygerm",
+                "@Anna543210",
+                "DmRodionov",
+                "dmitry_weirdo",
+                "anutikin",
+            )
+        )
 
         val botAdmins = BotCommandUtils.getBotAdmins(config)
 
@@ -79,12 +80,11 @@ internal class BotCommandUtilsTest {
 
     @Test
     fun testFillCommandsWithOverrides() {
-        val config = WikiBotConfig()
-
-        // override a couple of command names
-        config.commands = mapOf(
-            "ReloadFromGoogleSheet" to "/reloadFromGoogleSheet",
-            "ListAdmins" to "/getAdmins",
+        val config = WikiBotConfig(
+            commands = mapOf( // override a couple of command names
+                "ReloadFromGoogleSheet" to "/reloadFromGoogleSheet",
+                "ListAdmins" to "/getAdmins",
+            )
         )
 
         val allCommands = BotCommand.getAllCommands()
@@ -111,10 +111,7 @@ internal class BotCommandUtilsTest {
 
     @Test
     fun testFillCommandsWithoutOverrides() {
-        val config = WikiBotConfig()
-
-        // override a couple of command names
-        config.commands = mapOf()
+        val config = WikiBotConfig() // no overrides
 
         val allCommands = BotCommand.getAllCommands()
 

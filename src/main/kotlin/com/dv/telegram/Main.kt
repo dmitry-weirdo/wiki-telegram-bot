@@ -30,9 +30,8 @@ class Main : Logging {
                 logger.info("Total bot configs: $threadsCount.")
 
                 val callableTasks = wikiBotConfigs
-                    .getConfigs()
+                    .configs
                     .map { this.createCallableTask(it) }
-                    .toList()
 
                 val executorService = Executors.newFixedThreadPool(threadsCount)
                 executorService.invokeAll(callableTasks) // todo: this currently does not stop Main on exception in the thread

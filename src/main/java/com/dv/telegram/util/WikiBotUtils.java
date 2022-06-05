@@ -13,20 +13,12 @@ public final class WikiBotUtils {
 
     public static WikiBotConfig readConfig() {
         String configFilePath = getConfigFilePath();
-
-        WikiBotConfig config = JacksonUtils.parseConfig(configFilePath);
-        config.fillDefaults();
-
-        return config;
+        return JacksonUtils.parseConfig(configFilePath);
     }
 
     public static WikiBotConfigs readConfigs() {
         String configFilePath = getConfigFilePath();
-
-        WikiBotConfigs configs = JacksonUtils.parseConfigs(configFilePath);
-        configs.fillDefaults();
-
-        return configs;
+        return JacksonUtils.parseConfigs(configFilePath);
     }
 
     public static String getConfigFilePath() {

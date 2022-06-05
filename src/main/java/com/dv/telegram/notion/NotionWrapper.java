@@ -31,7 +31,7 @@ public class NotionWrapper {
         int threadsCount = wikiBotConfigs.getConfigs().size();
         log.info("Total bot configs: {}", threadsCount);
 
-        WikiBotConfig config = wikiBotConfigs.configs.get(0);
+        WikiBotConfig config = wikiBotConfigs.getConfigs().get(0);
         GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
 
         List<CityChatData> cityChatsData = botData.getCityChats();

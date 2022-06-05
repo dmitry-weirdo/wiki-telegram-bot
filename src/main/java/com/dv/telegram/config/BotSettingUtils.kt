@@ -4,7 +4,7 @@ import com.dv.telegram.WikiBotConfig
 
 object BotSettingUtils {
     fun fillSettingsMap(config: WikiBotConfig): Map<String, BotSetting<*>> {
-        return fillSettingsMap(config.getSettings())
+        return fillSettingsMap(config.settings)
     }
 
     fun fillSettingsMap(settings: Map<String?, String?>): Map<String, BotSetting<*>> {
