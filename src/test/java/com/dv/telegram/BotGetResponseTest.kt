@@ -185,7 +185,7 @@ internal class BotGetResponseTest {
         val command1 = wikiBot.commands[1]
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "${command0.multiLineAnswer}\n${command1.multiLineAnswer}"
+            "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}"
         )
 
         assertThat(result).isEqualTo(expectedResult)

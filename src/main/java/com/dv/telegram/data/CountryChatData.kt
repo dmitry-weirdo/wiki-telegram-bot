@@ -1,58 +1,36 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
+class CountryChatData(
+    val countryName: String,
+    val wordsString: String,
+    val words: List<String>, // multiple chats possible for the same country are possible
+    val chats: List<String>
+) {
+    val chatsAnswer: String = fillChatsAnswer() // pre-fill the bot answer to join the strings only once
 
-import java.util.List;
-
-@Data
-@AllArgsConstructor
-public class CountryChatData {
-    private String countryName;
-    private String wordsString;
-    private List<String> words;
-    private List<String> chats; // multiple chats possible for the same country are possible
-
-    private String chatsAnswer;
-
-    public CountryChatData(String countryName, String wordsString, List<String> words, List<String> chats) {
-        this.countryName = countryName;
-        this.wordsString = wordsString;
-        this.words = words;
-        this.chats = chats;
-        fillChatsAnswer(); // pre-fill the bot answer to join the strings only once
-    }
-
-    public String getChatsAnswer() { // todo: Lombok + Kotlin hack
-        return chatsAnswer;
-    }
-
-    public boolean isPresentIn(String text) {
-        if (StringUtils.isBlank(text)) {
-            return false;
+    fun isPresentIn(text: String): Boolean {
+        if (text.isBlank()) {
+            return false
         }
 
-        for (String word : words) {
+        for (word in words) {
             if (text.contains(word)) {
-                return true;
+                return true
             }
         }
 
-        return false;
+        return false
     }
 
-    public void fillChatsAnswer() {
-        String chatsList = getChatLines();
-        chatsAnswer = String.format("%s чаты:\n%s", countryName, chatsList); // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
+    private fun fillChatsAnswer(): String {
+        val chatsList = getChatLines()
+
+        return "$countryName чаты:\n$chatsList" // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
     }
 
-    private String getChatLines() {
-        List<String> chatLines = chats
-            .stream()
-            .map(chat -> String.format("— %s", chat))
-            .toList();
+    private fun getChatLines(): String {
+        val chatLines = chats.map{ "— $it" }
 
-        return StringUtils.join(chatLines, "\n");
+        return chatLines.joinToString("\n")
     }
 }

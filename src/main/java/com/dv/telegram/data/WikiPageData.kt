@@ -1,43 +1,26 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.List;
-
-@Data
-public class WikiPageData {
-    private String name;
-    private String url;
-    private String wordsString;
-    private List<String> words;
-
-    public WikiPageData(String name, String url, String wordsString, List<String> words) { // todo: Kotlin + Lombok hack
-        this.name = name;
-        this.url = url;
-        this.wordsString = wordsString;
-        this.words = words;
-    }
-
-    public boolean isPresentIn(String text) {
-        if (StringUtils.isBlank(text)) {
-            return false;
+data class WikiPageData(
+    val name: String,
+    val url: String,
+    val wordsString: String,
+    val words: List<String>
+) {
+    fun isPresentIn(text: String): Boolean {
+        if (text.isBlank()) {
+            return false
         }
 
-        for (String word : words) {
+        for (word in words) {
             if (text.contains(word)) {
-                return true;
+                return true
             }
         }
 
-        return false;
+        return false
     }
 
-    public String getOneLineAnswer() {
-        return String.format("%s — %s", name, url);
-    }
+    fun getOneLineAnswer() = "$name — $url"
 
-    public String getMultiLineAnswer() {
-        return String.format("— %s — %s", name, url);
-    }
+    fun getMultiLineAnswer() = "— $name — $url"
 }
