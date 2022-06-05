@@ -1,17 +1,21 @@
 package com.dv.telegram.data;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 public class WikiBotCommandData {
     private String answer;
     private String wordsString;
     private List<String> words;
+
+    public WikiBotCommandData(String answer, String wordsString, List<String> words) { // todo: Kotlin + Lombok hack
+        this.answer = answer;
+        this.wordsString = wordsString;
+        this.words = words;
+    }
 
     public boolean isPresentIn(String text) {
         if (StringUtils.isBlank(text)) {

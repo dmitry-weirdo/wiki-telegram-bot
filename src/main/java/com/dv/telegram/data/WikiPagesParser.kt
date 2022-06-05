@@ -1,43 +1,33 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import com.dv.telegram.google.RowData;
-import com.dv.telegram.google.SheetData;
-import com.dv.telegram.google.WikiBotGoogleSheet;
-import lombok.extern.log4j.Log4j2;
+import com.dv.telegram.google.RowData
+import com.dv.telegram.google.WikiBotGoogleSheet
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.ArrayList;
-import java.util.List;
+class WikiPagesParser : SheetDataParser<WikiPageData>, Logging {
 
-@Log4j2
-public class WikiPagesParser implements SheetDataParser<WikiPageData> {
+    override fun getSheetData(sheet: WikiBotGoogleSheet) = sheet.wikiPagesSheet
 
-    @Override
-    public SheetData getSheetData(WikiBotGoogleSheet sheet) {
-        return sheet.getWikiPagesSheet();
-    }
+    override fun parse(rows: List<RowData>): List<WikiPageData> {
+        val pages = mutableListOf<WikiPageData>()
 
-    @Override
-    public List<WikiPageData> parse(List<RowData> rows) {
-        List<WikiPageData> pages = new ArrayList<>();
+        var rowNum = 1
 
-        int rowNum = 1;
+        for (row in rows) {
+            val pageName = row.getCellOrBlank(0)
+            val pageUrl = row.getCellOrBlank(1)
+            val wordsString = row.getCellOrBlank(2)
+            val words = DataUtils.parseWords(wordsString)
 
-        for (RowData row : rows) {
-            String pageName = row.getCellOrBlank(0);
-            String pageUrl = row.getCellOrBlank(1);
-            String wordsString = row.getCellOrBlank(2);
+            val pageData = WikiPageData(pageName, pageUrl, wordsString, words)
+            pages.add(pageData)
 
-            List<String> words = DataUtils.parseWords(wordsString);
-
-            WikiPageData pageData = new WikiPageData(pageName, pageUrl, wordsString, words);
-            pages.add(pageData);
-
-            log.info("Row {}: {} / {} / {}", rowNum, pageName, pageUrl, words);
-            rowNum++;
+            logger.info("Row $rowNum: $pageName / $pageUrl / $words")
+            rowNum++
         }
 
-        log.info("Total {} wiki pages parsed.", pages.size());
+        logger.info("Total ${pages.size} wiki pages parsed.")
 
-        return pages;
+        return pages
     }
 }

@@ -24,6 +24,10 @@ public class CountryChatData {
         fillChatsAnswer(); // pre-fill the bot answer to join the strings only once
     }
 
+    public String getChatsAnswer() { // todo: Lombok + Kotlin hack
+        return chatsAnswer;
+    }
+
     public boolean isPresentIn(String text) {
         if (StringUtils.isBlank(text)) {
             return false;

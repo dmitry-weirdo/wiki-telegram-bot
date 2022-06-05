@@ -1,42 +1,32 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import com.dv.telegram.google.RowData;
-import com.dv.telegram.google.SheetData;
-import com.dv.telegram.google.WikiBotGoogleSheet;
-import lombok.extern.log4j.Log4j2;
+import com.dv.telegram.google.RowData
+import com.dv.telegram.google.WikiBotGoogleSheet
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.ArrayList;
-import java.util.List;
+class WikiBotCommandsParser : SheetDataParser<WikiBotCommandData>, Logging {
 
-@Log4j2
-public class WikiBotCommandsParser implements SheetDataParser<WikiBotCommandData> {
+    override fun getSheetData(sheet: WikiBotGoogleSheet) = sheet.commandsSheet
 
-    @Override
-    public SheetData getSheetData(WikiBotGoogleSheet sheet) {
-        return sheet.getCommandsSheet();
-    }
+    override fun parse(rows: List<RowData>): List<WikiBotCommandData> {
+        val commands = mutableListOf<WikiBotCommandData>()
 
-    @Override
-    public List<WikiBotCommandData> parse(List<RowData> rows) {
-        List<WikiBotCommandData> commands = new ArrayList<>();
+        var rowNum = 1
 
-        int rowNum = 1;
+        for (row in rows) {
+            val answer = row.getCellOrBlank(0)
+            val wordsString = row.getCellOrBlank(1)
+            val words = DataUtils.parseWords(wordsString)
 
-        for (RowData row : rows) {
-            String answer = row.getCellOrBlank(0);
-            String wordsString = row.getCellOrBlank(1);
+            val command = WikiBotCommandData(answer, wordsString, words)
+            commands.add(command)
 
-            List<String> words = DataUtils.parseWords(wordsString);
-
-            WikiBotCommandData command = new WikiBotCommandData(answer, wordsString, words);
-            commands.add(command);
-
-            log.info("Row {}: / {} / {}", rowNum, answer, words);
-            rowNum++;
+            logger.info("Row $rowNum: / $answer / $words")
+            rowNum++
         }
 
-        log.info("Total {} commands parsed.", commands.size());
+        logger.info("Total ${commands.size} commands parsed.")
 
-        return commands;
+        return commands
     }
 }

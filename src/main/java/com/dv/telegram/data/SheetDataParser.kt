@@ -1,22 +1,19 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import com.dv.telegram.google.RowData;
-import com.dv.telegram.google.SheetData;
-import com.dv.telegram.google.WikiBotGoogleSheet;
+import com.dv.telegram.google.RowData
+import com.dv.telegram.google.SheetData
+import com.dv.telegram.google.WikiBotGoogleSheet
 
-import java.util.List;
+interface SheetDataParser<T> {
+    fun getSheetData(sheet: WikiBotGoogleSheet): SheetData
 
-public interface SheetDataParser<T> {
+    fun parse(rows: List<RowData>): List<T>
 
-    SheetData getSheetData(WikiBotGoogleSheet sheet);
+    fun parse(sheet: WikiBotGoogleSheet): List<T> {
+        val sheetData = getSheetData(sheet)
 
-    List<T> parse(List<RowData> rows);
+        val rows = sheetData.getRowsWithoutFirstRow()
 
-    default List<T> parse(WikiBotGoogleSheet sheet) {
-        SheetData sheetData = getSheetData(sheet);
-
-        List<RowData> rows = sheetData.getRowsWithoutFirstRow();
-
-        return parse(rows);
+        return parse(rows)
     }
 }

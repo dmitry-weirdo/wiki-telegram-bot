@@ -1,53 +1,44 @@
-package com.dv.telegram.data;
+package com.dv.telegram.data
 
-import com.dv.telegram.google.RowData;
-import com.dv.telegram.google.SheetData;
-import com.dv.telegram.google.WikiBotGoogleSheet;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.google.RowData
+import com.dv.telegram.google.WikiBotGoogleSheet
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.ArrayList;
-import java.util.List;
+class CityChatsParser : SheetDataParser<CityChatData>, Logging {
 
-@Log4j2
-public class CityChatsParser implements SheetDataParser<CityChatData> {
+    override fun getSheetData(sheet: WikiBotGoogleSheet) = sheet.cityChatsSheet
 
-    @Override
-    public SheetData getSheetData(WikiBotGoogleSheet sheet) {
-        return sheet.getCityChatsSheet();
-    }
+    override fun parse(rows: List<RowData>): List<CityChatData> {
+        val chatsData = mutableListOf<CityChatData>()
 
-    @Override
-    public List<CityChatData> parse(List<RowData> rows) {
-        List<CityChatData> chatsData = new ArrayList<>();
+        var rowNum = 1
 
-        int rowNum = 1;
-
-        for (RowData row : rows) {
-            String cityName = row.getCellOrBlank(0);
+        for (row in rows) {
+            val cityName = row.getCellOrBlank(0)
 
             // words
-            String wordsString = row.getCellOrBlank(1);
-            List<String> words = DataUtils.parseWords(wordsString);
+            val wordsString = row.getCellOrBlank(1)
+            val words = DataUtils.parseWords(wordsString)
 
-            List<String> chats = new ArrayList<>();
-            for (int cellNum = 2; cellNum < row.getCells().size(); cellNum++) {
-                String chat = row.getCellOrBlank(cellNum);
-                if (StringUtils.isNotBlank(chat)) {
-                    chats.add(chat);
+            // chats
+            val chats = mutableListOf<String>()
+            for (cellNum in 2 until row.cells.size) {
+                val chat = row.getCellOrBlank(cellNum)
+                if (chat.isNotBlank()) {
+                    chats.add(chat)
                 }
             }
 
-            CityChatData cityChat = new CityChatData(cityName, wordsString, words, chats);
-            chatsData.add(cityChat);
+            val cityChat = CityChatData(cityName, wordsString, words, chats)
+            chatsData.add(cityChat)
 
-            log.info("Row {}: / {} / {} / {}", rowNum, cityName, words, chats);
-            log.info(cityChat.getChatsAnswer());
-            rowNum++;
+            logger.info("Row $rowNum: / $cityName / $words / $chats")
+            logger.info(cityChat.chatsAnswer)
+            rowNum++
         }
 
-        log.info("Total {} city chats parsed.", chatsData.size());
+        logger.info("Total ${chatsData.size} city chats parsed.")
 
-        return chatsData;
+        return chatsData
     }
 }
