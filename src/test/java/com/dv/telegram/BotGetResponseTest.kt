@@ -126,6 +126,42 @@ internal class BotGetResponseTest {
         assertThat(result).isEqualTo(expectedResult)
     }
 
+    @Test
+    @DisplayName("Wiki pages single answer.")
+    fun testWikiPagesSingleAnswer() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, БезопасностЬ" // must be case-insensitive
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Правила безопасности — https://uahelp.wiki/safety"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    @DisplayName("Wiki pages multiple answers.")
+    fun testWikiPagesMultipleAnswers() {
+        val wikiBot = getWikiBot();
+
+        val botName = wikiBot.botName
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next();
+
+        val text = "$botName, БезопасностЬ и вИкИ" // must be case-insensitive
+        val result = wikiBot.getResponseText(text, botAdmin)
+
+        val expectedResult = MessageProcessingResult.answerFound(
+            "— Стартовая страница вики — https://uahelp.wiki\n— Правила безопасности — https://uahelp.wiki/safety"
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
     private fun getWikiBot(): WikiBot {
         val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json").path
         val configs = JacksonUtils.parseConfigs(configFilePath)
