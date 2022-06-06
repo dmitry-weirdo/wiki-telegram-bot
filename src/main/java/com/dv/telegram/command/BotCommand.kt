@@ -1,87 +1,79 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.exception.CommandException;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBot
+import com.dv.telegram.exception.CommandException
 
-import java.util.ArrayList;
-import java.util.List;
+interface BotCommand {
+    val name: String // english name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
 
-public interface BotCommand {
+    fun getDescription(bot: WikiBot): String // description, in Russian // todo: must be localized with MessageBundle
+    fun useMarkdownInResponse(): Boolean
 
-    String getName(); // english name, no spaces
-    String getDescription(WikiBot bot); // description, in Russian
-    boolean useMarkdownInResponse();
+    val defaultCommandName: String // default command name when it is not overridden by config
+    var commandName: String? // overridden command name. Defines abstract getter and setter.
 
-    String getDefaultCommandName(); // default command when it is not overridden by config
-    String getCommandName();
-    void setCommandName(String commandName);
-
-    default String getCommandText() {
-        if (StringUtils.isBlank(getCommandName())) {
-            return getDefaultCommandName();
+    val commandText: String
+        get() = if (commandName.isNullOrBlank()) {
+            defaultCommandName
+        }
+        else {
+            commandName!!
         }
 
-        return getCommandName();
+    fun requiresBotAdminRights(): Boolean {
+        return true
     }
 
-    default boolean requiresBotAdminRights() {
-        return true;
-    }
+    fun getResponse(text: String, bot: WikiBot): String
 
-    String getResponse(String text, WikiBot bot);
-
-    default boolean textContainsCommand(String text) {
+    fun textContainsCommand(text: String): Boolean {
         return text.contains(
-            getCommandText()
-        );
+            commandText
+        )
     }
 
-    default String errorResponse(CommandException e) {
-        List<String> allErrors = new ArrayList<>();
+    fun errorResponse(e: CommandException): String {
+        val allErrors: MutableList<String> = mutableListOf()
 
         // no bold markdown in the header, because we can return the user input data in the error messages
-        allErrors.add("При выполнении команды возникли следующие ошибки:");
+        allErrors.add("При выполнении команды возникли следующие ошибки:")
+        e.errorMessages.forEach{
+            allErrors.add("— $it\n")
+        }
 
-        e.getErrorMessages().forEach(error ->
-            allErrors.add(
-                String.format("— %s%n", error)
-            )
-        );
-
-        return StringUtils.join(allErrors, "\n");
+        return allErrors.joinToString("\n")
     }
 
-    default String unknownErrorResponse(Exception e) {
-        return "При выполнении команды произошла неизвестная ошибка";
+    fun unknownErrorResponse(e: Exception): String {
+        return "При выполнении команды произошла неизвестная ошибка"
     }
 
-    static List<BotCommand> getAllCommands() {
-        return List.of(
+    companion object {
+        fun getAllCommands() = listOf(
             // commands
-            new HelpCommand(), // first command to be found since it documents the other commands
-            new ListCommands(),
-            new ListAdmins(),
+            HelpCommand(), // first command to be found since it documents the other commands
+            ListCommands(),
+            ListAdmins(),
 
             // basic commands
-            new Start(),
-            new GetEnvironment(),
-            new ReloadFromGoogleSheet(),
+            Start(),
+            GetEnvironment(),
+            ReloadFromGoogleSheet(),
 
             // Notion
-            new CityChatsValidate(),
-            new CityChatsExportToNotion(),
+            CityChatsValidate(),
+            CityChatsExportToNotion(),
 
             // settings
-            new ListSettings(),
-            new HelpSetting(),
-            new GetSetting(),
-            new SetSetting(),
+            ListSettings(),
+            HelpSetting(),
+            GetSetting(),
+            SetSetting(),
 
             // statistics
-            new GetStatistics(),
-            new GetFailedRequests(),
-            new ClearFailedRequests()
-        );
+            GetStatistics(),
+            GetFailedRequests(),
+            ClearFailedRequests()
+        )
     }
 }

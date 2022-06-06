@@ -1,33 +1,25 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.config.BotSetting;
+import com.dv.telegram.config.BotSetting
 
-public abstract class BasicBotCommand implements BotCommand {
+abstract class BasicBotCommand : BotCommand {
+    override var commandName: String? = null // interface only defines abstract getter and setter, not the field itself
 
-    protected String commandName;
-
-    @Override
-    public String getCommandName() {
-        return commandName;
+    override fun useMarkdownInResponse(): Boolean {
+        return false
     }
 
-    @Override
-    public void setCommandName(String commandName) {
-        this.commandName = commandName;
-    }
+    companion object {
+        @JvmStatic
+        fun getSettingValueForMarkdown(botSetting: BotSetting<*>): String {
+            return getSettingValueForMarkdown(
+                botSetting.getValue().toString()
+            )
+        }
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return false;
-    }
-
-    public static String getSettingValueForMarkdown(BotSetting<?> botSetting) {
-        return getSettingValueForMarkdown(
-            botSetting.getValue().toString()
-        );
-    }
-
-    public static String getSettingValueForMarkdown(String settingValue) {
-        return settingValue.replaceAll("\\_", "\\\\_"); // for Markdown, escape "_" as "\_" to not fail sending the Telegram message
+        @JvmStatic
+        fun getSettingValueForMarkdown(settingValue: String): String {
+            return settingValue.replace("\\_".toRegex(), "\\\\_") // for Markdown, escape "_" as "\_" to not fail sending the Telegram message
+        }
     }
 }

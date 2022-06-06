@@ -32,12 +32,12 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
             .firstOrNull { it.commandText == commandText }
     }
 
-    fun useMarkdownInResponse(text: String?) =
+    fun useMarkdownInResponse(text: String) =
         commands.any {
             it.textContainsCommand(text) && it.useMarkdownInResponse()
         }
 
-    fun getResponse(text: String?, userName: String, bot: WikiBot): SpecialCommandResponse {
+    fun getResponse(text: String, userName: String, bot: WikiBot): SpecialCommandResponse {
         val userHasBotAdminRights = userHasRightsToExecuteSpecialCommands(userName)
 
         val command = commands
