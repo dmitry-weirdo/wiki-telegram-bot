@@ -1,57 +1,32 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBot
 
-import java.util.ArrayList;
-import java.util.List;
+class ListCommands : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-public class ListCommands extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText` — получить список команд бота."
 
-    @Override
-    public String getName() {
-        return ListCommands.class.getSimpleName();
-    }
+    override fun useMarkdownInResponse() = true
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — получить список команд бота.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override val defaultCommandName = "/listCommands"
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return true;
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val lines = mutableListOf<String>()
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/listCommands";
-    }
+        lines.add("Список команд бота:")
 
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        List<String> lines = new ArrayList<>();
-
-        lines.add("Список команд бота:");
-
-        for (BotCommand command : bot.getSpecialCommands().getCommands()) {
-            lines.add(String.format(
-                "— `%s %s`",
-                bot.getBotName(),
-                command.getCommandText()
-            ));
+        for (command in bot.specialCommands.commands) {
+            lines.add(
+                "— `${bot.botName} ${command.commandText}`"
+            )
         }
 
-        lines.add(String.format(
-            "Для получения справки по команде используйте команду\n`%s %s <commandName>`",
-            bot.getBotName(),
-            bot.getSpecialCommands().getHelpCommand().getCommandText()
-        ));
+        lines.add(
+            "Для получения справки по команде используйте команду\n`${bot.botName} ${bot.specialCommands.helpCommand.commandText} <commandName>`",
+        )
 
-        return StringUtils.join(lines, "\n\n");
+        return lines.joinToString("\n\n")
     }
 }
