@@ -1,57 +1,35 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.config.BotSetting;
+import com.dv.telegram.WikiBot
 
-public class HelpSetting extends BasicBotCommand {
+class HelpSetting : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-    @Override
-    public String getName() {
-        return HelpSetting.class.getSimpleName();
-    }
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText <settingName>` — получить помощь по настройке с названием `<settingName>`."
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s <settingName>` — получить помощь по настройке с названием `<settingName>`.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override fun useMarkdownInResponse() = true
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return true;
-    }
+    override val defaultCommandName = "/helpSetting"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/helpSetting";
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        int commandStartIndex = text.indexOf(getCommandText());
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val commandStartIndex = text.indexOf(commandText)
         if (commandStartIndex < 0) {
-            return unknownSettingResponse();
+            return unknownSettingResponse()
         }
 
-        int commandEndIndex = commandStartIndex + getCommandText().length();
-        if (commandEndIndex >= text.length()) {
-            return unknownSettingResponse();
+        val commandEndIndex = commandStartIndex + commandText.length
+        if (commandEndIndex >= text.length) {
+            return unknownSettingResponse()
         }
 
-        String settingName = text.substring(commandEndIndex).trim();
+        val settingName = text.substring(commandEndIndex).trim()
 
-        BotSetting<?> botSetting = bot.getSettings().getBotSetting(settingName);
-        if (botSetting == null) {
-            return unknownSettingResponse();
-        }
+        val botSetting = bot.settings.getBotSetting(settingName)
+            ?: return unknownSettingResponse()
 
-        return String.format("*%s*\n%s", botSetting.getName(), botSetting.getDescription());
+        return "*${botSetting.name}*\n${botSetting.description}"
     }
 
-    private String unknownSettingResponse() {
-        return "Неизвестное имя настройки.";
-    }
+    private fun unknownSettingResponse() = "Неизвестное имя настройки."
 }
