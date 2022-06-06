@@ -187,12 +187,112 @@ internal class BotSettingsCommandsTest {
     }
 
     @Test
+    @DisplayName("Test /getSetting command: incorrect setting names.")
+    fun testGetSettingIncorrectSettingNames() {
+        val wikiBot = BotTestUtils.getWikiBot()
+        val botName = wikiBot.botName.uppercase() // match must be case-insensitive
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+
+        val getSetting = GetSetting()
+
+        // no setting name
+        val noSettingNameResult = wikiBot.processMessage("$botName ${getSetting.defaultCommandName}", botAdmin)
+
+        val expectedNoSettingNameResult = MessageProcessingResult.specialCommand("Неизвестное имя настройки.", true)
+
+        assertThat(noSettingNameResult).isEqualTo(expectedNoSettingNameResult)
+
+        // incorrect setting name
+        val incorrectSettingNameResult = wikiBot.processMessage("$botName ${getSetting.defaultCommandName} BadSetting", botAdmin)
+
+        val expectedIncorrectSettingNameResult = MessageProcessingResult.specialCommand("Неизвестное имя настройки.", true)
+
+        assertThat(incorrectSettingNameResult).isEqualTo(expectedIncorrectSettingNameResult)
+    }
+
+    @Test
+    @DisplayName("Test /setSetting command: incorrect setting names.")
+    fun testSetSettingIncorrectSettingNames() {
+        val wikiBot = BotTestUtils.getWikiBot()
+        val botName = wikiBot.botName.uppercase() // match must be case-insensitive
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+
+        val setSetting = SetSetting()
+
+        // no setting name
+        val noSettingNameResult = wikiBot.processMessage("$botName ${setSetting.defaultCommandName}", botAdmin)
+
+        val expectedNoSettingNameResult = MessageProcessingResult.specialCommand("Неизвестное имя настройки.", true)
+
+        assertThat(noSettingNameResult).isEqualTo(expectedNoSettingNameResult)
+
+        // incorrect setting name
+        val incorrectSettingNameResult = wikiBot.processMessage("$botName ${setSetting.defaultCommandName} BadSetting", botAdmin)
+
+        val expectedIncorrectSettingNameResult = MessageProcessingResult.specialCommand("Неизвестное имя настройки.", true)
+
+        assertThat(incorrectSettingNameResult).isEqualTo(expectedIncorrectSettingNameResult)
+    }
+
+    @Test
+    @DisplayName("Test /setSetting command: incorrect setting value.")
+    fun testSetSettingIncorrectSettingValue() {
+        val wikiBot = BotTestUtils.getWikiBot()
+        val botName = wikiBot.botName.uppercase() // match must be case-insensitive
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+
+        val listSettings = ListSettings()
+        val getSetting = GetSetting()
+        val setSetting = SetSetting()
+
+        // incorrect setting value
+        val incorrectValue = "BAD-VALUE"
+        val incorrectSettingValueResult = wikiBot.processMessage("$botName ${setSetting.defaultCommandName} ${BotTriggerMode.NAME} $incorrectValue", botAdmin)
+
+        val expectedIncorrectSettingValueResult = MessageProcessingResult.specialCommand(
+            "Ошибка при установке настройки *${BotTriggerMode.NAME}* в значение" +
+                "\n$incorrectValue",
+            true
+        )
+        assertThat(incorrectSettingValueResult).isEqualTo(expectedIncorrectSettingValueResult)
+
+        // /getSetting must not change
+        val getSettingRequest = wikiBot.processMessage("$botName ${getSetting.defaultCommandName} ${BotTriggerMode.NAME}", botAdmin)
+
+        val expectedGetSettingRequest = MessageProcessingResult.specialCommand(
+            "*${BotTriggerMode.NAME}*" +
+                "\nFULL\\_WORD",
+            true
+        )
+
+        assertThat(getSettingRequest).isEqualTo(expectedGetSettingRequest)
+
+        // /listSettings must not change
+        val listSettingsResult = wikiBot.processMessage("$botName ${listSettings.defaultCommandName}", botAdmin)
+
+        // initial values from test-config.json
+        val expectedListSettingsResult = MessageProcessingResult.specialCommand(
+            "— *${StartMessage.NAME}*:" +
+                "\nПривет! Меня зовут {0}.\n\nЗадавайте мне вопросы, обращаясь ко мне по имени.\nНапример:\n— {0}, как найти работу?\n— {0} где курсы немецкого?\n— {0} FAQ?\n\nЯ буду стараться ответить на все вопросы, ответам на которые меня научили!" +
+                "\n\n— *${DeleteBotCallMessageOnMessageReply.NAME}*:" +
+                "\ntrue" +
+                "\n\n— *${BotTriggerMode.NAME}*:" +
+                "\nFULL\\_WORD" + // _ must be escaped to not break the Markdown
+                "\n\n— *${ReplyWhenNoAnswer.NAME}*:" +
+                "\ntrue" +
+                "\n\n— *${NoAnswerReply.NAME}*:" +
+                "\n{0} ничего не знает про ваш запрос «{1}» :(",
+            true
+        )
+
+        assertThat(listSettingsResult).isEqualTo(expectedListSettingsResult)
+    }
+
+    @Test
     @DisplayName("Test /helpSetting command.")
     fun testHelpSetting() {
         // todo: implement method
     }
 
     // todo: /helpSetting for unknown setting
-    // todo: /setSetting for unknown setting
-    // todo: /getSetting for unknown setting
 }
