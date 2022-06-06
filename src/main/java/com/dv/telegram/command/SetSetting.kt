@@ -1,75 +1,53 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.config.BotSetting;
+import com.dv.telegram.WikiBot
 
-public class SetSetting extends BasicBotCommand {
+class SetSetting : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-    @Override
-    public String getName() {
-        return SetSetting.class.getSimpleName();
-    }
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText <settingName> <settingValue>` — установить значение настройки с названием `<settingName>` в значение `<settingValue>`."
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s <settingName> <settingValue>` — установить значение настройки с названием `<settingName>` в значение `<settingValue>`.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override fun useMarkdownInResponse() = true
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return true;
-    }
+    override val defaultCommandName = "/setSetting"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/setSetting";
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        int commandStartIndex = text.indexOf(getCommandText());
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val commandStartIndex = text.indexOf(commandText)
         if (commandStartIndex < 0) {
-            return unknownSettingResponse();
+            return unknownSettingResponse()
         }
 
-        int commandEndIndex = commandStartIndex + getCommandText().length();
-        if (commandEndIndex >= text.length()) {
-            return unknownSettingResponse();
+        val commandEndIndex = commandStartIndex + commandText.length
+        if (commandEndIndex >= text.length) {
+            return unknownSettingResponse()
         }
 
-        String settingNameAndValue = text.substring(commandEndIndex).trim();
+        val settingNameAndValue = text.substring(commandEndIndex).trim()
 
-        String nameValueSeparator = " ";
-        int separatorIndex = settingNameAndValue.indexOf(nameValueSeparator);
+        val nameValueSeparator = " "
+        val separatorIndex = settingNameAndValue.indexOf(nameValueSeparator)
 
-        if (separatorIndex < 0 || separatorIndex >= settingNameAndValue.length()) {
-            return unknownSettingResponse(); // todo: probably another more concrete response
+        if (separatorIndex < 0 || separatorIndex >= settingNameAndValue.length) {
+            return unknownSettingResponse() // todo: probably another more concrete response
         }
 
-        String settingName = settingNameAndValue.substring(0, separatorIndex).trim();
-        String settingValue = settingNameAndValue.substring(separatorIndex).trim();
+        val settingName = settingNameAndValue.substring(0, separatorIndex).trim()
+        val settingValue = settingNameAndValue.substring(separatorIndex).trim()
 
-        BotSetting<?> botSetting = bot.getSettings().getBotSetting(settingName);
-        if (botSetting == null) {
-            return unknownSettingResponse();
-        }
+        val botSetting = bot.settings.getBotSetting(settingName)
+            ?: return unknownSettingResponse()
 
-        try {
-            botSetting.setValue(settingValue);
-            bot.getSettings().fillSettingCacheFields();
-        }
-        catch (Exception e) {
-            return String.format("Ошибка при установке настройки *%s* в значение\n%s", settingName, BasicBotCommand.getSettingValueForMarkdown(settingValue));
-        }
+        return try {
+            botSetting.setValue(settingValue)
+            bot.settings.fillSettingCacheFields()
 
-        return String.format("*%s* установлена в значение\n%s", botSetting.getName(), BasicBotCommand.getSettingValueForMarkdown(botSetting));
+            "*${botSetting.name}* установлена в значение\n${getSettingValueForMarkdown(settingValue)}"
+        }
+        catch (e: Exception) {
+            "Ошибка при установке настройки *${botSetting.name}* в значение\n${getSettingValueForMarkdown(settingValue)}"
+        }
     }
 
-    private String unknownSettingResponse() {
-        return "Неизвестное имя настройки.";
-    }
+    private fun unknownSettingResponse(): String = "Неизвестное имя настройки."
 }
