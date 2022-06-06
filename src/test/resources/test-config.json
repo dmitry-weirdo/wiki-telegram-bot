@@ -20,7 +20,8 @@
 
       // special commands
       "botAdmins": [
-        "dmitry_weirdo"
+        "dmitry_weirdo",
+        "DmRodionov"
       ],
 
       "commands": {
