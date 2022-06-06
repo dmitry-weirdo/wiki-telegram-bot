@@ -48,7 +48,7 @@ public class HelpSetting extends BasicBotCommand {
             return unknownSettingResponse();
         }
 
-        return String.format("*%s*%n%s", botSetting.getName(), botSetting.getDescription());
+        return String.format("*%s*\n%s", botSetting.getName(), botSetting.getDescription());
     }
 
     private String unknownSettingResponse() {

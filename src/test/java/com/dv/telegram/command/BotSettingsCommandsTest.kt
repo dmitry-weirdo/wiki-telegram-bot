@@ -289,10 +289,48 @@ internal class BotSettingsCommandsTest {
     }
 
     @Test
-    @DisplayName("Test /helpSetting command.")
+    @DisplayName("Test /helpSetting command: correct setting name, successful path.")
     fun testHelpSetting() {
-        // todo: implement method
+        val wikiBot = BotTestUtils.getWikiBot()
+        val botName = wikiBot.botName.uppercase() // match must be case-insensitive
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+
+        val helpSetting = HelpSetting()
+
+        // execute /helpSetting ReplyWhenNoAnswer
+        val helpSettingResult = wikiBot.processMessage("$botName ${helpSetting.defaultCommandName} ${ReplyWhenNoAnswer.NAME}", botAdmin)
+
+        val expectedHelpSettingNameResult = MessageProcessingResult.specialCommand(
+            "*${ReplyWhenNoAnswer.NAME}*"
+                + "\n*true* — Если бот не нашёл ответа, он выдаст ответ, определённый настройкой *${NoAnswerReply.NAME}*."
+                + "\n\n*false* — Если бот не нашёл ответа, он не будет отвечать.",
+            true
+        )
+
+        assertThat(helpSettingResult).isEqualTo(expectedHelpSettingNameResult)
     }
 
-    // todo: /helpSetting for unknown setting
+    @Test
+    @DisplayName("Test /helpSetting command: incorrect setting names.")
+    fun testHelpSettingIncorrectSettingNames() {
+        val wikiBot = BotTestUtils.getWikiBot()
+        val botName = wikiBot.botName.uppercase() // match must be case-insensitive
+        val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
+
+        val helpSetting = HelpSetting()
+
+        // no setting name
+        val noSettingNameResult = wikiBot.processMessage("$botName ${helpSetting.defaultCommandName}", botAdmin)
+
+        val expectedNoSettingNameResult = MessageProcessingResult.specialCommand("Неизвестное имя настройки.", true)
+
+        assertThat(noSettingNameResult).isEqualTo(expectedNoSettingNameResult)
+
+        // incorrect setting name
+        val incorrectSettingNameResult = wikiBot.processMessage("$botName ${helpSetting.defaultCommandName} BadSetting", botAdmin)
+
+        val expectedIncorrectSettingNameResult = MessageProcessingResult.specialCommand("Неизвестное имя настройки.", true)
+
+        assertThat(incorrectSettingNameResult).isEqualTo(expectedIncorrectSettingNameResult)
+    }
 }
