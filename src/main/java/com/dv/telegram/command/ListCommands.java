@@ -47,7 +47,7 @@ public class ListCommands extends BasicBotCommand {
         }
 
         lines.add(String.format(
-            "Для получения справки по команде используйте команду%n`%s %s <commandName>`",
+            "Для получения справки по команде используйте команду\n`%s %s <commandName>`",
             bot.getBotName(),
             bot.getSpecialCommands().getHelpCommand().getCommandText()
         ));

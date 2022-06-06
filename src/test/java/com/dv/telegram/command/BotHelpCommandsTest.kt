@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-internal class BotCommandsCommandsTest {
+internal class BotHelpCommandsTest {
 
     @Test
     @DisplayName("Test /helpCommand command: correct command name, successful path.")
