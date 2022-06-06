@@ -300,14 +300,14 @@ internal class BotSettingsCommandsTest {
         // execute /helpSetting ReplyWhenNoAnswer
         val helpSettingResult = wikiBot.processMessage("$botName ${helpSetting.defaultCommandName} ${ReplyWhenNoAnswer.NAME}", botAdmin)
 
-        val expectedHelpSettingNameResult = MessageProcessingResult.specialCommand(
+        val expectedHelpSettingResult = MessageProcessingResult.specialCommand(
             "*${ReplyWhenNoAnswer.NAME}*"
                 + "\n*true* — Если бот не нашёл ответа, он выдаст ответ, определённый настройкой *${NoAnswerReply.NAME}*."
                 + "\n\n*false* — Если бот не нашёл ответа, он не будет отвечать.",
             true
         )
 
-        assertThat(helpSettingResult).isEqualTo(expectedHelpSettingNameResult)
+        assertThat(helpSettingResult).isEqualTo(expectedHelpSettingResult)
     }
 
     @Test

@@ -51,7 +51,7 @@ public class HelpCommand extends BasicBotCommand {
         }
 
         return String.format(
-            "*%s*%n%s",
+            "*%s*\n%s",
             botCommand.getCommandText(),
             botCommand.getDescription(bot)
         );
