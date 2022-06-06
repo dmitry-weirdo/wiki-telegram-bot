@@ -49,7 +49,7 @@ public class GetSetting extends BasicBotCommand {
         }
 
         String value = BasicBotCommand.getSettingValueForMarkdown(botSetting);
-        return String.format("*%s*%n%s", botSetting.getName(), value);
+        return String.format("*%s*\n%s", botSetting.getName(), value);
     }
 
     private String unknownSettingResponse() {

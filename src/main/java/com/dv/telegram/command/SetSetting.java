@@ -63,10 +63,10 @@ public class SetSetting extends BasicBotCommand {
             bot.getSettings().fillSettingCacheFields();
         }
         catch (Exception e) {
-            return String.format("Ошибка при установке настройки *%s* в значение%n%s", settingName, BasicBotCommand.getSettingValueForMarkdown(settingValue));
+            return String.format("Ошибка при установке настройки *%s* в значение\n%s", settingName, BasicBotCommand.getSettingValueForMarkdown(settingValue));
         }
 
-        return String.format("*%s* установлена в значение%n%s", botSetting.getName(), BasicBotCommand.getSettingValueForMarkdown(botSetting));
+        return String.format("*%s* установлена в значение\n%s", botSetting.getName(), BasicBotCommand.getSettingValueForMarkdown(botSetting));
     }
 
     private String unknownSettingResponse() {

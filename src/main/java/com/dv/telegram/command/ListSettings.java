@@ -39,7 +39,7 @@ public class ListSettings extends BasicBotCommand {
 
         for (BotSetting<?> setting : bot.getSettings().getSettings().values()) {
             settingsLines.add(String.format(
-                "— *%s*:%n%s",
+                "— *%s*:\n%s",
                 setting.getName(),
                 getSettingValueForMarkdown(setting)
             ));
