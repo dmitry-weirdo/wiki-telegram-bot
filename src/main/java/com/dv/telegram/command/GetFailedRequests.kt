@@ -1,47 +1,27 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBot
 
-import java.util.ArrayList;
-import java.util.List;
+class GetFailedRequests : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-public class GetFailedRequests extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText` — получить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка."
 
-    @Override
-    public String getName() {
-        return GetFailedRequests.class.getSimpleName();
-    }
+    override val defaultCommandName = "/getFailedRequests"
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — получить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val failedRequestsLines = bot
+            .statistics
+            .failedRequests
+            .map { "— $it" }
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/getFailedRequests";
-    }
+        val totalLine = "Разных неудачных запросов: ${failedRequestsLines.size}"
 
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        List<String> failedRequestsLines = bot
-            .getStatistics()
-            .getFailedRequests()
-            .stream()
-            .map(failedRequest -> String.format("— %s", failedRequest))
-            .toList();
+        val responseLines = mutableListOf<String>()
+        responseLines.add(totalLine)
+        responseLines.addAll(failedRequestsLines)
 
-        String totalLine = String.format("Разных неудачных запросов: %d", failedRequestsLines.size());
-
-        List<String> responseLines = new ArrayList<>();
-        responseLines.add(totalLine);
-        responseLines.addAll(failedRequestsLines);
-
-        return StringUtils.join(responseLines, "\n");
+        return responseLines.joinToString("\n")
     }
 }
