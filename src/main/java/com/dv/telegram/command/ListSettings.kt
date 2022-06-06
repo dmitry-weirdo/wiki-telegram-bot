@@ -1,50 +1,26 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.config.BotSetting;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBot
 
-import java.util.ArrayList;
-import java.util.List;
+class ListSettings : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-public class ListSettings extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText` — вывести список изменяемых в рантайме настроек бота."
 
-    @Override
-    public String getName() {
-        return ListSettings.class.getSimpleName();
-    }
+    override fun useMarkdownInResponse() = true
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — вывести список изменяемых в рантайме настроек бота.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override val defaultCommandName = "/listSettings"
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return true;
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val settingsLines = mutableListOf<String>()
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/listSettings";
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        List<String> settingsLines = new ArrayList<>();
-
-        for (BotSetting<?> setting : bot.getSettings().getSettings().values()) {
-            settingsLines.add(String.format(
-                "— *%s*:\n%s",
-                setting.getName(),
-                getSettingValueForMarkdown(setting)
-            ));
+        for (setting in bot.settings.settings.values) {
+            settingsLines.add(
+                "— *${setting.name}*:\n${getSettingValueForMarkdown(setting)}",
+            )
         }
 
-        return StringUtils.join(settingsLines, "\n\n");
+        return settingsLines.joinToString("\n\n")
     }
 }
