@@ -1,34 +1,15 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
+import com.dv.telegram.WikiBot
 
-public class GetEnvironment extends BasicBotCommand {
+class GetEnvironment : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-    @Override
-    public String getName() {
-        return GetEnvironment.class.getSimpleName();
-    }
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText` — выдать окружение, в котором запущен инстанс бота."
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — выдать окружение, в котором запущен инстанс бота.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override val defaultCommandName = "/getEnvironment"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/getEnvironment";
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        return String.format(
-            "%s живёт здесь: %s.",
-            bot.getBotName(),
-            bot.getEnvironmentName()
-        );
-    }
+    override fun getResponse(text: String, bot: WikiBot) =
+        "${bot.botName} живёт здесь: ${bot.environmentName}."
 }
