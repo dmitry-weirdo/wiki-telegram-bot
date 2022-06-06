@@ -1,32 +1,20 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
+import com.dv.telegram.WikiBot
 
-public class ClearFailedRequests extends BasicBotCommand {
+class ClearFailedRequests : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-    @Override
-    public String getName() {
-        return ClearFailedRequests.class.getSimpleName();
-    }
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText` — очистить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка."
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — очистить список разных неуспешных вызовов бота с момента текущего запуска инстанса или с момента очистки этого списка.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override val defaultCommandName = "/clearFailedRequests"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/clearFailedRequests";
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val clearedFailedRequestsCount = bot.statistics.failedRequests.size
 
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        int clearedFailedRequestsCount = bot.getStatistics().getFailedRequests().size();
-        bot.getStatistics().clearFailedRequests();
-        return String.format("Список из %d неудачных запросов к боту очищен.", clearedFailedRequestsCount);
+        bot.statistics.clearFailedRequests()
+
+        return "Список из $clearedFailedRequestsCount неудачных запросов к боту очищен."
     }
 }
