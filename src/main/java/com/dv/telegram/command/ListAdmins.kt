@@ -1,53 +1,31 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBot
 
-import java.util.ArrayList;
-import java.util.List;
+class ListAdmins : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-public class ListAdmins extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) = """
+        `${bot.botName} $commandText` — вывести список администраторов бота, которые имеют право запускать специальные команды из списка в `${bot.botName} ${bot.specialCommands.listCommands.commandText}`.
+        
+        Команда `${bot.specialCommands.startCommand.commandText}` всегда доступна всем пользователям.
+        """.trimIndent()
 
-    @Override
-    public String getName() {
-        return ListAdmins.class.getSimpleName();
-    }
+    override fun useMarkdownInResponse() = true
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — вывести список администраторов бота, которые имеют право запускать специальные команды из списка в `%s %s`.%n%nКоманда `%s` всегда доступна всем пользователям.",
-            bot.getBotName(),
-            getCommandText(),
-            bot.getBotName(),
-            bot.getSpecialCommands().getListCommands().getCommandText(),
-            bot.getSpecialCommands().getStartCommand().getCommandText()
-        );
-    }
+    override val defaultCommandName = "/listAdmins"
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return true;
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val adminLines = mutableListOf<String>()
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/listAdmins";
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        List<String> adminLines = new ArrayList<>();
-
-        for (String botAdmin : bot.getSpecialCommands().getBotAdmins()) {
-            adminLines.add(String.format(
-                "— %s",
-                getSettingValueForMarkdown( // escape _ in user names like "dmitry_weirdo"
-                    BotCommandUtils.getClickableUserName(botAdmin)
-                )
-            ));
+        for (botAdmin in bot.specialCommands.botAdmins) {
+            adminLines.add(
+                "— ${ getSettingValueForMarkdown( 
+                    BotCommandUtils.getClickableUserName(botAdmin) 
+                ) }" // escape _ in user names like "dmitry_weirdo"
+            )
         }
 
-        return StringUtils.join(adminLines, "\n");
+        return adminLines.joinToString("\n")
     }
 }
