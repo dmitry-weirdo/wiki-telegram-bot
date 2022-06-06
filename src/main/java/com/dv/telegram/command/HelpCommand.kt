@@ -1,63 +1,38 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
+import com.dv.telegram.WikiBot
 
-public class HelpCommand extends BasicBotCommand {
+class HelpCommand : BasicBotCommand() {
+    override val name: String = javaClass.simpleName
 
-    @Override
-    public String getName() {
-        return HelpCommand.class.getSimpleName();
-    }
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText <commandName>` — получить помощь по команде с названием `<commandName>`."
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s <commandName>` — получить помощь по команде с названием `<commandName>`.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    override fun useMarkdownInResponse() = true
 
-    @Override
-    public boolean useMarkdownInResponse() {
-        return true;
-    }
+    override val defaultCommandName: String
+        get() = "/helpCommand"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/helpCommand";
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        int commandStartIndex = text.indexOf(getCommandText());
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val commandStartIndex = text.indexOf(commandText)
         if (commandStartIndex < 0) {
-            return unknownCommandResponse();
+            return unknownCommandResponse()
         }
 
-        int commandEndIndex = commandStartIndex + getCommandText().length();
-        if (commandEndIndex >= text.length()) {
-            return unknownCommandResponse();
+        val commandEndIndex = commandStartIndex + commandText.length
+        if (commandEndIndex >= text.length) {
+            return unknownCommandResponse()
         }
 
-        String commandText = text.substring(commandEndIndex).trim();
+        val commandText = text.substring(commandEndIndex).trim()
 
-        BotCommand botCommand = bot
-            .getSpecialCommands()
-            .getCommand(commandText);
+        val botCommand = bot
+            .specialCommands
+            .getCommand(commandText)
+            ?: return unknownCommandResponse()
 
-        if (botCommand == null) {
-            return unknownCommandResponse();
-        }
-
-        return String.format(
-            "*%s*\n%s",
-            botCommand.getCommandText(),
-            botCommand.getDescription(bot)
-        );
+        return "*${botCommand.commandText}*\n${botCommand.getDescription(bot)}"
     }
 
-    private String unknownCommandResponse() {
-        return "Неизвестное имя команды.";
-    }
+    private fun unknownCommandResponse() = "Неизвестное имя команды."
 }
