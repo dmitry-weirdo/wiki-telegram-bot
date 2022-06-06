@@ -1,51 +1,32 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.config.StartMessage;
+import com.dv.telegram.WikiBot
+import com.dv.telegram.config.StartMessage
+import java.text.MessageFormat
 
-import java.text.MessageFormat;
+class Start : BasicBotCommand() {
+    override val name: String = javaClass.simpleName // class defined explicitly because of Java -> Kotlin class conversion
 
-public class Start extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) = """
+        `${bot.botName} $commandText` — выдать приветственное сообщение бота. Сообщение определяется настройкой *${StartMessage.NAME}*.
 
-    @Override
-    public String getName() {
-        return Start.class.getSimpleName();
-    }
+        Команда также работает без имени бота: `$commandText`.
+        """.trimIndent()
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — выдать приветственное сообщение бота. Сообщение определяется настройкой *%s*.%n%nКоманда также работает без имени бота: `%s`.",
-            bot.getBotName(),
-            getCommandText(),
-            StartMessage.NAME,
-            getCommandText()
-        );
-    }
+    override val defaultCommandName = "/start"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/start";
-    }
+    // /start is a standard command, cannot be overridden
+    override var commandName
+        get() = super.commandName
+        set(commandName) = // /start is a standard command, cannot be overridden
+            throw UnsupportedOperationException("Cannot override $defaultCommandName command name.")
 
-    @Override
-    public void setCommandName(String commandName) { // /start is a standard command, cannot be overridden
-        throw new UnsupportedOperationException(String.format(
-            "Cannot override %s command name.",
-            getDefaultCommandName()
-        ));
-    }
+    override fun requiresBotAdminRights() = false // /start command should be available for non-admin users too
 
-    @Override
-    public boolean requiresBotAdminRights() {
-        return false; // /start command should be available for non-admin users too
-    }
-
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        return MessageFormat.format(
-            bot.getSettings().getStartMessage(),
-            bot.getBotName()
-        );
-    }
+    override fun getResponse(text: String, bot: WikiBot): String = // class defined explicitly because of Java -> Kotlin class conversion
+        // todo: use some Kotlin formatter instead of Java if exists and possible
+        MessageFormat.format(
+            bot.settings.startMessage,
+            bot.botName
+        )
 }
