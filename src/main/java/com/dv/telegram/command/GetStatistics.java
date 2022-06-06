@@ -36,11 +36,11 @@ public class GetStatistics extends BasicBotCommand {
         BotStatistics statistics = bot.getStatistics();
 
         List<String> statisticsLines = List.of(
-            getStatisticsLine("Время старта бота", statistics.startTime),
+            getStatisticsLine("Время старта бота", statistics.getStartTime()),
             getStatisticsLine("Успешных запросов", statistics.getSuccessfulRequestsCountWithPercentage()),
             getStatisticsLine("Неуспешных запросов", statistics.getFailedRequestsCountWithPercentage()),
             getStatisticsLine("Всего запросов", statistics.getTotalCallsWithPercentage()),
-            getStatisticsLine("Вызовов специальных команд", statistics.specialCommandsCount),
+            getStatisticsLine("Вызовов специальных команд", statistics.getSpecialCommandsCount()),
             getStatisticsLine("Всего запросов (вместе со специальными командами)", statistics.getTotalCallsWithSpecialCommands())
         );
 

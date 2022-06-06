@@ -2,6 +2,7 @@ package com.dv.telegram.statistics
 
 import com.dv.telegram.BotTestUtils
 import com.dv.telegram.MessageProcessingResult
+import com.dv.telegram.command.ClearFailedRequests
 import com.dv.telegram.command.GetEnvironment
 import com.dv.telegram.command.GetFailedRequests
 import com.dv.telegram.command.GetStatistics
@@ -138,7 +139,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.failedRequests).containsExactly(failedRequestText)
         assertThat(statistics.totalCalls).isEqualTo(2)
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
-        assertThat(statistics.specialCommandsCount).isEqualTo(2)  // updated
+        assertThat(statistics.specialCommandsCount).isEqualTo(2) // updated
         assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(4) // updated
 
         // execute /getStats
@@ -169,7 +170,32 @@ internal class BotStatisticsTest {
         assertThat(statistics.failedRequests).containsExactly(failedRequestText)
         assertThat(statistics.totalCalls).isEqualTo(2)
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
-        assertThat(statistics.specialCommandsCount).isEqualTo(3)  // updated
+        assertThat(statistics.specialCommandsCount).isEqualTo(3) // updated
         assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(5) // updated
+
+        // execute /clearFailedRequests
+        val clearFailedRequests = ClearFailedRequests()
+
+        val clearFailedRequestsResult =
+            wikiBot.processMessage("$botName ${clearFailedRequests.defaultCommandName}", botAdmin)
+
+        val expectedClearFailedRequestsResult = MessageProcessingResult.specialCommand(
+            "Список из 1 неудачных запросов к боту очищен.",
+            false
+        )
+
+        assertThat(clearFailedRequestsResult).isEqualTo(expectedClearFailedRequestsResult)
+
+        // /clearFailedRequests is also a special command
+        assertThat(statistics.startTime).isEqualTo(startTime)
+        assertThat(statistics.successfulRequestsCount).isEqualTo(1)
+        assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
+        assertThat(statistics.failedRequestsCount).isEqualTo(1) // NOT changed
+        assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("1 (50.00 %)") // NOT changed
+        assertThat(statistics.failedRequests).isEmpty() // cleared
+        assertThat(statistics.totalCalls).isEqualTo(2)
+        assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
+        assertThat(statistics.specialCommandsCount).isEqualTo(4) // updated
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(6) // updated
     }
 }

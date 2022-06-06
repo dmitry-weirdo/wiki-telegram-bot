@@ -1,76 +1,68 @@
-package com.dv.telegram.statistics;
+package com.dv.telegram.statistics
 
-import com.dv.telegram.MessageProcessingResult;
-import lombok.Data;
-
-import java.time.ZonedDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import com.dv.telegram.MessageProcessingResult
+import lombok.Data
+import java.time.ZonedDateTime
 
 @Data
-public class BotStatistics {
+class BotStatistics {
+    val startTime: ZonedDateTime = ZonedDateTime.now()
+    var specialCommandsCount = 0L
+    var successfulRequestsCount = 0L
+    var failedRequestsCount = 0L
+    var failedRequests: MutableSet<String> = LinkedHashSet() // todo: add String -> count map if required
 
-    public BotStatistics() {
-        startTime = ZonedDateTime.now();
+    companion object {
+        private const val COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)"
     }
 
-    public final ZonedDateTime startTime;
-    public long specialCommandsCount = 0;
-    public long successfulRequestsCount = 0;
-    public long failedRequestsCount = 0;
-
-    public Set<String> failedRequests = new LinkedHashSet<>(); // todo: add String -> count map if required
-
-    private static final String COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)";
-
-    public void update(String text, MessageProcessingResult processingResult) {
-        if (!processingResult.getMessageIsForTheBot()) {
-            return;
+    fun update(text: String, processingResult: MessageProcessingResult) {
+        if (!processingResult.messageIsForTheBot) {
+            return
         }
 
-        if (processingResult.isSpecialCommand()) {
-            specialCommandsCount++;
+        if (processingResult.isSpecialCommand) {
+            specialCommandsCount++
         }
-        else if (processingResult.getAnswerIsFound()) {
-            successfulRequestsCount++;
+
+        else if (processingResult.answerIsFound) {
+            successfulRequestsCount++
         }
         else {
-            failedRequestsCount++;
-            addFailedRequest(text);
+            failedRequestsCount++
+            addFailedRequest(text)
         }
     }
 
-    public String getSuccessfulRequestsCountWithPercentage() {
-        double successfulRequestsPercentage = (getTotalCalls() == 0) ? 0d : getSuccessfulRequestsPercentage();
-        return String.format(COUNT_PERCENTAGE_FORMAT, successfulRequestsCount, successfulRequestsPercentage);
+    val successfulRequestsCountWithPercentage: String
+        get() {
+            val successfulRequestsPercentage = if (totalCalls == 0L) 0.0 else successfulRequestsPercentage
+            return String.format(COUNT_PERCENTAGE_FORMAT, successfulRequestsCount, successfulRequestsPercentage)
+        }
+
+    val failedRequestsCountWithPercentage: String
+        get() {
+            val failedRequestPercentage = if (totalCalls == 0L) 0.0 else (100 - successfulRequestsPercentage)
+            return String.format(COUNT_PERCENTAGE_FORMAT, failedRequestsCount, failedRequestPercentage)
+        }
+
+    val totalCallsWithPercentage: String
+        get() = String.format(COUNT_PERCENTAGE_FORMAT, totalCalls, 100.0)
+
+    private val successfulRequestsPercentage: Double
+        get() = 100 * successfulRequestsCount / totalCalls.toDouble()
+
+    val totalCalls: Long
+        get() = successfulRequestsCount + failedRequestsCount
+
+    val totalCallsWithSpecialCommands: Long
+        get() = specialCommandsCount + totalCalls
+
+    private fun addFailedRequest(failedRequest: String) {
+        failedRequests.add(failedRequest)
     }
 
-    public String getFailedRequestsCountWithPercentage() {
-        double failedRequestPercentage = (getTotalCalls() == 0) ? 0d : (100 - getSuccessfulRequestsPercentage());
-        return String.format(COUNT_PERCENTAGE_FORMAT, failedRequestsCount, failedRequestPercentage);
-    }
-
-    public String getTotalCallsWithPercentage() {
-        return String.format(COUNT_PERCENTAGE_FORMAT, getTotalCalls(), 100d);
-    }
-
-    private double getSuccessfulRequestsPercentage() {
-        return 100 * successfulRequestsCount / (double) getTotalCalls();
-    }
-
-    public long getTotalCalls() {
-        return successfulRequestsCount + failedRequestsCount;
-    }
-
-    public long getTotalCallsWithSpecialCommands() {
-        return specialCommandsCount + getTotalCalls();
-    }
-
-    private void addFailedRequest(String failedRequest) {
-        failedRequests.add(failedRequest);
-    }
-
-    public void clearFailedRequests() {
-        failedRequests.clear();
+    fun clearFailedRequests() {
+        failedRequests.clear()
     }
 }

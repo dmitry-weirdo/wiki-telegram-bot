@@ -25,7 +25,7 @@ public class ClearFailedRequests extends BasicBotCommand {
 
     @Override
     public String getResponse(String text, WikiBot bot) {
-        int clearedFailedRequestsCount = bot.getStatistics().failedRequests.size();
+        int clearedFailedRequestsCount = bot.getStatistics().getFailedRequests().size();
         bot.getStatistics().clearFailedRequests();
         return String.format("Список из %d неудачных запросов к боту очищен.", clearedFailedRequestsCount);
     }
