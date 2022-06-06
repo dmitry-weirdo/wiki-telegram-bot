@@ -1,88 +1,56 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.GoogleSheetBotData;
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.data.CityChatData;
-import com.dv.telegram.exception.CommandException;
-import com.dv.telegram.notion.NotionCityChats;
-import com.dv.telegram.notion.NotionCityChatsImportResult;
-import com.dv.telegram.notion.NotionWrapper;
-import lombok.extern.log4j.Log4j2;
+import com.dv.telegram.WikiBot
+import com.dv.telegram.exception.CommandException
+import com.dv.telegram.notion.NotionCityChats
+import com.dv.telegram.notion.NotionWrapper
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.List;
+class CityChatsExportToNotion : BasicBotCommand(), Logging {
+    override val name: String = javaClass.simpleName
 
-@Log4j2
-public class CityChatsExportToNotion extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) = """
+        `${bot.botName} $commandText` — загрузить список чатов городов из Google Sheet в страницу вики.
+        
+        Сначала будет выполнена валидация данных чатов в GoogleSheet, аналогичная операции `${bot.botName} ${bot.specialCommands.cityChatsValidateCommand.commandText}`.
+        
+        Если валидация данных не прошла успешно, импорт в вики выполняться не будет.
+        
+        Предыдущий список чатов на странице вики будет удалён.
 
-    @Override
-    public String getName() {
-        return CityChatsExportToNotion.class.getSimpleName();
-    }
+        ❗️Операция импорта в вики занимает длительное время, поэтому не волнуйтесь, что ответ на команду придёт только через несколько минут.
+        Вызов команды будет блокировать другие вызовы бота на время её выполнения.
+        Параллельные вызовы операции _в одном боте_ будут выполняться один за другим, поэтому обязательно дожидайтесь ответа бота на предыдущий вызов.
+        Параллельные вызовы операции _из разных ботов_ будут возвращать ошибку.
+        
+        Эта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `${bot.botName} ${bot.specialCommands.reloadFromGoogleSheetCommand.commandText}`.
+        """.trimIndent()
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            """
-            `%s %s` — загрузить список чатов городов из Google Sheet в страницу вики.
-            
-            Сначала будет выполнена валидация данных чатов в GoogleSheet, аналогичная операции `%s %s`.
-            
-            Если валидация данных не прошла успешно, импорт в вики выполняться не будет.
-            
-            Предыдущий список чатов на странице вики будет удалён.
+    override val defaultCommandName = "/cityChatsExportToNotion"
 
-            ❗️Операция импорта в вики занимает длительное время, поэтому не волнуйтесь, что ответ на команду придёт только через несколько минут.
-            Вызов команды будет блокировать другие вызовы бота на время её выполнения.
-            Параллельные вызовы операции _в одном боте_ будут выполняться один за другим, поэтому обязательно дожидайтесь ответа бота на предыдущий вызов.
-            Параллельные вызовы операции _из разных ботов_ будут возвращать ошибку.
-            
-            Эта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `%s %s`.
-            """,
-            bot.getBotName(),
-            getCommandText(),
-            bot.getBotName(),
-            bot.getSpecialCommands().getCityChatsValidateCommand().getCommandText(),
-            bot.getBotName(),
-            bot.getSpecialCommands().getReloadFromGoogleSheetCommand().getCommandText()
-        );
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        return try {
+            val botData = bot.loadBotDataFromGoogleSheet()
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/cityChatsExportToNotion";
-    }
+            val cityChats = NotionCityChats.from(botData.cityChats)
+            val totalChats = NotionCityChats.countTotalChats(cityChats)
 
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        try {
-            GoogleSheetBotData botData = bot.loadBotDataFromGoogleSheet();
-            List<CityChatData> cityChatData = botData.getCityChats();
+            logger.info("$totalChats city chats for ${cityChats.size} cities successfully parsed from Google Sheet.")
 
-            List<NotionCityChats> cityChats = NotionCityChats.from(cityChatData);
-            int totalChats = NotionCityChats.countTotalChats(cityChats);
-
-            log.info("{} city chats for {} cities successfully parsed from Google Sheet.", totalChats, cityChats.size());
-
-            NotionCityChatsImportResult result = NotionWrapper.appendCityChats(
-                bot.getNotionToken(),
-                bot.getNotionCityPageId(),
-                bot.getNotionCityChatsToggleHeading1Text(),
+            val result = NotionWrapper.appendCityChats(
+                bot.notionToken,
+                bot.notionCityPageId,
+                bot.notionCityChatsToggleHeading1Text,
                 cityChats
-            );
+            )
 
-            return String.format(
-                "%d чатов для %d городов успешно считаны из Google Sheet и записаны на страницу вики \"%s\" в секцию \"%s\".",
-                result.totalChats,
-                result.totalCities,
-                result.pageTitle,
-                result.toggleHeading1Text
-            );
+            "${result.totalChats} чатов для ${result.totalCities} городов успешно считаны из Google Sheet и записаны на страницу вики \"${result.pageTitle}\" в секцию \"${result.toggleHeading1Text}\"."
         }
-        catch (CommandException e) {
-            return errorResponse(e);
+        catch (e: CommandException) {
+            errorResponse(e)
         }
-        catch (Exception e) {
-            return unknownErrorResponse(e);
+        catch (e: Exception) {
+            unknownErrorResponse(e)
         }
     }
 }

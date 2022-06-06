@@ -157,7 +157,7 @@ public class NotionWrapper {
         List<ToggleBlock> cityChatToggles = NotionPageUtils.getCityChatToggles(cityChats);
         client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
 
-        log.info("{} chats for {} cities appended to Notion page {} (\"{}\").", totalChats, totalCities, pageId, pageTitle);
+        log.info("{} chats for {} cities appended to Notion page {} (\"{}\"), toggle header 1 \"{}\".", totalChats, totalCities, pageId, pageTitle, toggleHeading1Text);
 
         return new NotionCityChatsImportResult(
             pageId,
