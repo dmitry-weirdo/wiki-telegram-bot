@@ -1,61 +1,40 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.statistics.BotStatistics;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.WikiBot
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+class GetStatistics : BasicBotCommand() {
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss") // todo: probably move to companion object
 
-public class GetStatistics extends BasicBotCommand {
+    override val name: String = javaClass.simpleName
 
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss");
+    override fun getDescription(bot: WikiBot) =
+        "`${bot.botName} $commandText` — получить статистику по работе бота с момента текущего запуска инстанса."
 
-    @Override
-    public String getName() {
-        return GetStatistics.class.getSimpleName();
+    override val defaultCommandName = "/getStats"
+
+    override fun getResponse(text: String, bot: WikiBot): String {
+        val statistics = bot.statistics
+
+        val statisticsLines = listOf(
+            getStatisticsLine("Время старта бота", statistics.startTime),
+            getStatisticsLine("Успешных запросов", statistics.successfulRequestsCountWithPercentage),
+            getStatisticsLine("Неуспешных запросов", statistics.failedRequestsCountWithPercentage),
+            getStatisticsLine("Всего запросов", statistics.totalCallsWithPercentage),
+            getStatisticsLine("Вызовов специальных команд", statistics.specialCommandsCount),
+            getStatisticsLine("Всего запросов (вместе со специальными командами)", statistics.totalCallsWithSpecialCommands)
+        )
+
+        return statisticsLines.joinToString("\n")
     }
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            "`%s %s` — получить статистику по работе бота с момента текущего запуска инстанса.",
-            bot.getBotName(),
-            getCommandText()
-        );
-    }
+    private fun getStatisticsLine(name: String, count: Long) =
+        "— $name: $count"
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/getStats";
-    }
+    private fun getStatisticsLine(name: String, value: String) =
+        "— $name: $value"
 
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        BotStatistics statistics = bot.getStatistics();
-
-        List<String> statisticsLines = List.of(
-            getStatisticsLine("Время старта бота", statistics.getStartTime()),
-            getStatisticsLine("Успешных запросов", statistics.getSuccessfulRequestsCountWithPercentage()),
-            getStatisticsLine("Неуспешных запросов", statistics.getFailedRequestsCountWithPercentage()),
-            getStatisticsLine("Всего запросов", statistics.getTotalCallsWithPercentage()),
-            getStatisticsLine("Вызовов специальных команд", statistics.getSpecialCommandsCount()),
-            getStatisticsLine("Всего запросов (вместе со специальными командами)", statistics.getTotalCallsWithSpecialCommands())
-        );
-
-        return StringUtils.join(statisticsLines, "\n");
-    }
-
-    private String getStatisticsLine(String name, long count) {
-        return String.format("— %s: %d", name, count);
-    }
-
-    private String getStatisticsLine(String name, String value) {
-        return String.format("— %s: %s", name, value);
-    }
-
-    private String getStatisticsLine(String name, ZonedDateTime time) {
-        return String.format("— %s: %s", name, dateTimeFormatter.format(time));
-    }
+    private fun getStatisticsLine(name: String, time: ZonedDateTime) =
+        "— $name: ${dateTimeFormatter.format(time)}"
 }
