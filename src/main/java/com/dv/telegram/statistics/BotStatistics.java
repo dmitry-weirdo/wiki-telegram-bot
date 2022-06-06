@@ -1,5 +1,6 @@
-package com.dv.telegram;
+package com.dv.telegram.statistics;
 
+import com.dv.telegram.MessageProcessingResult;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
@@ -65,7 +66,7 @@ public class BotStatistics {
         return specialCommandsCount + getTotalCalls();
     }
 
-    public void addFailedRequest(String failedRequest) {
+    private void addFailedRequest(String failedRequest) {
         failedRequests.add(failedRequest);
     }
 

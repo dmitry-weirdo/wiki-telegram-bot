@@ -1,7 +1,7 @@
 package com.dv.telegram.command;
 
-import com.dv.telegram.BotStatistics;
 import com.dv.telegram.WikiBot;
+import com.dv.telegram.statistics.BotStatistics;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;

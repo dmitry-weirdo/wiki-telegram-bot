@@ -3,6 +3,7 @@ package com.dv.telegram
 import com.dv.telegram.command.BotSpecialCommands
 import com.dv.telegram.config.BotSettings
 import com.dv.telegram.data.*
+import com.dv.telegram.statistics.BotStatistics
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -101,7 +102,6 @@ class WikiBot(
         val userName = updateMessage.from.userName
 
         val processingResult = processMessage(text, userName)
-        statistics.update(text, processingResult)
 
         if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
             return
@@ -172,7 +172,11 @@ class WikiBot(
     }
 
     fun processMessage(text: String, userName: String): MessageProcessingResult { // non-private for testing
-        return messageProcessor.processMessage(text, userName)
+        val result = messageProcessor.processMessage(text, userName)
+
+        statistics.update(text, result) // moved into this method to be updated in the test
+
+        return result
     }
 
     fun reloadBotDataFromGoogleSheet(): Boolean {
