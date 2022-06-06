@@ -39,7 +39,7 @@ public class CityChatsExportToNotion extends BasicBotCommand {
             Эта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `%s %s`.
             """,
             bot.getBotName(),
-            getCommandText() ,
+            getCommandText(),
             bot.getBotName(),
             bot.getSpecialCommands().getCityChatsValidateCommand().getCommandText(),
             bot.getBotName(),

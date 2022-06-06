@@ -1,62 +1,39 @@
-package com.dv.telegram.command;
+package com.dv.telegram.command
 
-import com.dv.telegram.GoogleSheetBotData;
-import com.dv.telegram.WikiBot;
-import com.dv.telegram.data.CityChatData;
-import com.dv.telegram.exception.CommandException;
-import com.dv.telegram.notion.NotionCityChats;
-import lombok.extern.log4j.Log4j2;
+import com.dv.telegram.WikiBot
+import com.dv.telegram.exception.CommandException
+import com.dv.telegram.notion.NotionCityChats
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.List;
+class CityChatsValidate : BasicBotCommand(), Logging {
+    override val name: String = javaClass.simpleName
 
-@Log4j2
-public class CityChatsValidate extends BasicBotCommand {
+    override fun getDescription(bot: WikiBot) = """
+        `${bot.botName} $commandText` — проверить формат списка чатов городов в Google Sheet.
+        
+        Выдастся либо список ошибок, либо сообщение об успешной проверке.
+        
+        Эта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `${bot.botName} ${bot.specialCommands.reloadFromGoogleSheetCommand.commandText}`.
+        """.trimIndent()
 
-    @Override
-    public String getName() {
-        return CityChatsValidate.class.getSimpleName();
-    }
+    override val defaultCommandName = "/cityChatsValidate"
 
-    @Override
-    public String getDescription(WikiBot bot) {
-        return String.format(
-            """
-            `%s %s` — проверить формат списка чатов городов в Google Sheet.
-            
-            Выдастся либо список ошибок, либо сообщение об успешной проверке.
-            
-            Эта команда *НЕ* перезагружает список чатов в боте. Для перезагрузки конфига бота используйте `%s %s`.
-            """,
-            bot.getBotName(),
-            getCommandText(),
-            bot.getBotName(),
-            bot.getSpecialCommands().getReloadFromGoogleSheetCommand().getCommandText()
-        );
-    }
+    override fun getResponse(text: String, bot: WikiBot): String {
+        return try {
+            val botData = bot.loadBotDataFromGoogleSheet()
 
-    @Override
-    public String getDefaultCommandName() {
-        return "/cityChatsValidate";
-    }
+            val cityChats = NotionCityChats.from(botData.cityChats)
+            val totalChats = NotionCityChats.countTotalChats(cityChats)
 
-    @Override
-    public String getResponse(String text, WikiBot bot) {
-        try {
-            GoogleSheetBotData botData = bot.loadBotDataFromGoogleSheet();
-            List<CityChatData> cityChatData = botData.getCityChats();
+            logger.info("$totalChats city chats for ${cityChats.size} cities successfully parsed from Google Sheet.")
 
-            List<NotionCityChats> cityChats = NotionCityChats.from(cityChatData);
-            int totalChats = NotionCityChats.countTotalChats(cityChats);
-
-            log.info("{} city chats for {} cities successfully parsed from Google Sheet.", totalChats, cityChats.size());
-
-            return String.format("%d чатов для %d городов успешно считаны из Google Sheet.", totalChats, cityChats.size());
+            "$totalChats чатов для ${cityChats.size} городов успешно считаны из Google Sheet."
         }
-        catch (CommandException e) {
-            return errorResponse(e);
+        catch (e: CommandException) {
+            errorResponse(e)
         }
-        catch (Exception e) {
-            return unknownErrorResponse(e);
+        catch (e: Exception) {
+            unknownErrorResponse(e)
         }
     }
 }
