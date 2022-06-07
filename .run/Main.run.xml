@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Main" type="JetRunConfigurationType" nameIsGenerated="true">
+    <envs>
+      <env name="WIKI_BOT_CONFIG_FILE_PATH" value="C:\java\wiki-telegram-bot\.ignoreme\wiki-bot-config-test.json" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.dv.telegram.Main" />
+    <module name="wiki-telegram-bot" />
+    <shortenClasspath name="NONE" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
