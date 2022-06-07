@@ -35,7 +35,7 @@ public class NotionWrapper {
         GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
 
         List<CityChatData> cityChatsData = botData.getCityChats();
-        List<NotionCityChats> cityChats = NotionCityChats.from(cityChatsData);
+        List<NotionCityChats> cityChats = NotionCityChats.Companion.from(cityChatsData);
 //        List<NotionCityChats> cityChats = getCityChats();
 
         log.info("{} city chats read from Google Sheet.", cityChats.size());
@@ -148,7 +148,7 @@ public class NotionWrapper {
         client.appendBlockChildren(rootBlock.getId(), List.of(totalCitiesParagraph));
 
         // append paragraph with total cities count
-        Integer totalChats = NotionCityChats.countTotalChats(cityChats);
+        Integer totalChats = NotionCityChats.Companion.countTotalChats(cityChats);
         String totalChatsText = String.format("Всего чатов: %s", totalChats);
         ParagraphBlock totalChatsParagraph = NotionPageUtils.createParagraph(totalChatsText);
         client.appendBlockChildren(rootBlock.getId(), List.of(totalChatsParagraph));
@@ -170,16 +170,21 @@ public class NotionWrapper {
 
     private static List<NotionCityChats> getTestCityChats() { // get test data
         // city 1
-        NotionCityChats city1 = new NotionCityChats();
-        city1.setCityName("Ansbach");
+        NotionCityChats city1 = new NotionCityChats(
+            "Ansbach",
+            new ArrayList<>() // todo: after Kotlin migration, do not pass this parameter
+        );
+
         city1.addChat(
             "https://t.me/+QQ9lx56QjYU1ZjZi",
             "Ansbach/Landkreis Ansbach \uD83C\uDDE9\uD83C\uDDEA/Ukraine \uD83C\uDDFA\uD83C\uDDE6" // test with emojis
         );
 
         // city 2
-        NotionCityChats city2 = new NotionCityChats();
-        city2.setCityName("Bottrop");
+        NotionCityChats city2 = new NotionCityChats(
+            "Bottrop",
+            new ArrayList<>() // todo: after Kotlin migration, do not pass this parameter
+        );
 
         city2.addChat(
             "https://t.me/+lWmTWIFgAI9iN2Qy",

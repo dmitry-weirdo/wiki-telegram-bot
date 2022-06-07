@@ -1,187 +1,134 @@
-package com.dv.telegram.notion;
+package com.dv.telegram.notion
 
-import com.dv.telegram.data.CityChatData;
-import com.dv.telegram.exception.CommandException;
-import lombok.Data;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.data.CityChatData
+import com.dv.telegram.exception.CommandException
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-@Data
-@Log4j2
-public class NotionCityChats {
-    private static final String CHAT_LINK_AND_NAME_SEPARATOR_1 = " — ";
-    private static final String CHAT_LINK_AND_NAME_SEPARATOR_2 = " - ";
-    private static final String EXPECTED_URL_START = "https://";
-
-    private String cityName;
-    private List<NotionCityChat> chats = new ArrayList<>();
-
-    public void addChat(NotionCityChat chat) {
-        chats.add(chat);
+data class NotionCityChats (
+    val cityName: String?,
+    val chats: MutableList<NotionCityChat> = mutableListOf()
+) {
+    fun addChat(chat: NotionCityChat) {
+        chats.add(chat)
     }
 
-    public void addChat(String url, String name) {
+    fun addChat(url: String, name: String) {
         addChat(
-            new NotionCityChat(url, name)
-        );
+            NotionCityChat(url, name)
+        )
     }
 
-    public static int countTotalChats(List<NotionCityChats> cityChats) {
-        return cityChats
-            .stream()
-            .map(chats -> chats.getChats().size())
-            .reduce(0, Integer::sum);
-    }
+    companion object : Logging { // see https://www.baeldung.com/kotlin/logging#6-combining-with-companion-objects
+        const val CHAT_LINK_AND_NAME_SEPARATOR_1 = " — "
+        const val CHAT_LINK_AND_NAME_SEPARATOR_2 = " - "
+        const val EXPECTED_URL_START = "https://"
 
-    public static List<NotionCityChats> from(List<CityChatData> cityChatsData) {
-        List<String> errors = new ArrayList<>();
+        fun countTotalChats(cityChats: List<NotionCityChats>) = cityChats.sumOf { it.chats.size }
 
-        List<NotionCityChats> chats = cityChatsData
-            .stream()
-            .map(chat -> from(chat, errors))
-            .filter(Optional::isPresent) // filter out empty lines (without city name)
-            .map(Optional::get)
-            .toList();
+        fun from(cityChatsData: List<CityChatData>): List<NotionCityChats> {
+            val errors: MutableList<String> = ArrayList()
 
-        if (!errors.isEmpty()) {
-            throw new CommandException(errors);
-        }
+            val chats = cityChatsData.mapNotNull {
+                from(it, errors)
+            } // filter out empty lines (without city name) ( map -> filterNotNull )
 
-        // sort cities by name
-        return chats
-            .stream()
-            .filter(chat -> !chat.chats.isEmpty()) // do not add cities without chats
-            .sorted(Comparator.comparing(NotionCityChats::getCityName))
-            .toList();
-    }
-
-    public static Optional<NotionCityChats> from(CityChatData cityChatData, List<String> errors) {
-        String cityName = cityChatData.getCityName().trim();
-        if (StringUtils.isBlank(cityName)) {
-            // todo: error on empty city name + non-empty chats?
-            log.warn("Empty city name.");
-            return Optional.empty();
-        }
-
-        NotionCityChats chats = new NotionCityChats();
-        chats.setCityName(cityName);
-
-        for (String chatUrlAndName : cityChatData.getChats()) {
-            ChatParseResult chatParseResult = parseChat(chatUrlAndName);
-
-            if (chatParseResult.isEmpty()) { // no chat and no error -> just skip
-                continue;
+            if (errors.isNotEmpty()) {
+                throw CommandException(errors)
             }
 
-            if (chatParseResult.hasErrors()) {
-                errors.addAll(chatParseResult.getErrorMessages());
+            // sort cities by name
+            return chats
+                .filter { it.chats.isNotEmpty() } // do not add cities without chats
+                .sortedBy { it.cityName }
+        }
+
+        fun from(cityChatData: CityChatData, errors: MutableList<String>): NotionCityChats? {
+            val cityName = cityChatData.cityName.trim()
+            if (cityName.isBlank()) {
+                // todo: error on empty city name + non-empty chats?
+                logger.warn("Empty city name.")
+                return null
             }
 
-            Optional
-                .ofNullable(chatParseResult.getChat())
-                .ifPresent(chats::addChat);
-        }
+            val chats = NotionCityChats(cityName)
 
-        return Optional.of(chats);
-    }
+            for (chatUrlAndName in cityChatData.chats) {
+                val chatParseResult = parseChat(chatUrlAndName)
 
-    public static ChatParseResult parseChat(String chatString) {
-        if (StringUtils.isBlank(chatString)) {
-            return ChatParseResult.Companion.empty();
-        }
+                if (chatParseResult.isEmpty) { // no chat and no error -> just skip
+                    continue
+                }
 
-        String[] split;
+                if (chatParseResult.hasErrors()) {
+                    errors.addAll(chatParseResult.errorMessages)
+                }
 
-        if (StringUtils.contains(chatString, CHAT_LINK_AND_NAME_SEPARATOR_1)) {
-            split = chatString.split(CHAT_LINK_AND_NAME_SEPARATOR_1);
-            if (split.length < 2) {
-                return ChatParseResult.Companion.error(
-                    emptyChatName(chatString)
-                );
+                if (chatParseResult.chat != null) {
+                    chats.addChat(chatParseResult.chat)
+                }
             }
+
+            return chats
         }
-        else if (StringUtils.contains(chatString, CHAT_LINK_AND_NAME_SEPARATOR_2)) {
-            split = chatString.split(CHAT_LINK_AND_NAME_SEPARATOR_2);
-            if (split.length < 2) {
-                return ChatParseResult.Companion.error(
-                    emptyChatName(chatString)
-                );
+
+        fun parseChat(chatString: String): ChatParseResult {
+            if (chatString.isBlank()) {
+                return ChatParseResult.empty()
             }
+
+            val split: List<String>
+
+            if (chatString.contains(CHAT_LINK_AND_NAME_SEPARATOR_1)) {
+                split = chatString.split(CHAT_LINK_AND_NAME_SEPARATOR_1)
+
+                if (split.size < 2) {
+                    return ChatParseResult.emptyChatName(chatString)
+                }
+            }
+            else if (chatString.contains(CHAT_LINK_AND_NAME_SEPARATOR_2)) {
+                split = chatString.split(CHAT_LINK_AND_NAME_SEPARATOR_2)
+
+                if (split.size < 2) {
+                    return ChatParseResult.emptyChatName(chatString)
+                }
+            }
+            else {
+                logger.warn(
+                    "City chat string \"$chatString\" does not contain neither separator \"$CHAT_LINK_AND_NAME_SEPARATOR_1\" nor separator \"$CHAT_LINK_AND_NAME_SEPARATOR_2\".",
+                )
+
+                return ChatParseResult.noSeparatorInChatString(chatString)
+            }
+
+            val url = split[0].trim()
+            val name = split[1].trim()
+
+            if (url.isBlank()) {
+                return ChatParseResult.emptyChatUrl(chatString)
+            }
+
+            if (!url.startsWith(EXPECTED_URL_START)) {
+                logger.warn("Chat URL \"$url\" does not start with \"$EXPECTED_URL_START\".")
+
+                return ChatParseResult.chatUrlDoesNotStartWithHttps(chatString, url)
+            }
+
+            if (url == EXPECTED_URL_START) {
+                logger.warn("Chat URL is only \"$EXPECTED_URL_START\".")
+
+                return ChatParseResult.emptyChatUrl(chatString)
+            }
+
+            // todo: probably check the URL format correctness
+            // todo: in the best case, go to URL and check that it exists
+
+            if (name.isBlank()) {
+                logger.warn("Chat name for chat with url \"$url\" is empty. Please check that the chat exists and add its name.")
+
+                return ChatParseResult.emptyChatName(chatString)
+            }
+
+            return ChatParseResult.correctChat(url, name)
         }
-        else {
-            log.warn(
-                "City chat string \"{}\" does not contain neither separator \"{}\" nor separator \"{}\".",
-                chatString,
-                CHAT_LINK_AND_NAME_SEPARATOR_1,
-                CHAT_LINK_AND_NAME_SEPARATOR_2
-            );
-
-            return ChatParseResult.Companion.error(
-                noSeparatorInChatString(chatString)
-            );
-        }
-
-        var url = split[0].trim();
-        var name = split[1].trim();
-
-        if (StringUtils.isBlank(url)) {
-            return ChatParseResult.Companion.error(
-                emptyChatUrl(chatString)
-            );
-        }
-
-        if (!url.startsWith(EXPECTED_URL_START)) {
-            log.warn("Chat URL \"{}\" does not start with \"{}\".", url, EXPECTED_URL_START);
-
-            return ChatParseResult.Companion.error(
-                chatUrlDoesNotStartWithHttps(chatString, url)
-            );
-        }
-
-        if (url.equals(EXPECTED_URL_START)) {
-            log.warn("Chat URL is only {}.", EXPECTED_URL_START);
-            return ChatParseResult.Companion.error(
-                emptyChatUrl(chatString)
-            );
-        }
-
-        // todo: probably check the URL format correctness
-        // todo: in the best case, go to URL and check that it exists
-
-        if (StringUtils.isBlank(name)) {
-            log.warn("Chat name for chat with url \"{}\" is empty. Please check that the chat exists and add its name.", url);
-
-            return ChatParseResult.Companion.error(
-                emptyChatName(chatString)
-            );
-        }
-
-        return ChatParseResult.Companion.correctChat(url, name);
-    }
-
-    public static String emptyChatUrl(String chatString) {
-        return String.format("Описание чата \"%s\": пустой URL чата.", chatString);
-    }
-
-    public static String noSeparatorInChatString(String chatString) {
-        return String.format(
-            "Описание чата \"%s\" не содержит ни разделителя \"%s\", ни разделителя \"%s\".",
-            chatString,
-            CHAT_LINK_AND_NAME_SEPARATOR_1,
-            CHAT_LINK_AND_NAME_SEPARATOR_2
-        );
-    }
-
-    public static String chatUrlDoesNotStartWithHttps(String chatString, String url) {
-        return String.format("Описание чата \"%s\": URL чата \"%s\" не начинается с \"%s\".", chatString, url, EXPECTED_URL_START);
-    }
-
-    public static String emptyChatName(String chatString) {
-        return String.format("Описание чата \"%s\": пустое имя чата. Проверьте, что чат существует, и добавьте его название в описание чата.", chatString);
     }
 }

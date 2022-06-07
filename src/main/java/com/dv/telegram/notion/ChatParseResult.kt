@@ -27,5 +27,21 @@ data class ChatParseResult(
             NotionCityChat(url, name),
             emptyList()
         )
+
+        fun emptyChatUrl(chatString: String) = error(
+            "Описание чата \"$chatString\": пустой URL чата."
+        )
+
+        fun noSeparatorInChatString(chatString: String) = error(
+            "Описание чата \"$chatString\" не содержит ни разделителя \"${NotionCityChats.CHAT_LINK_AND_NAME_SEPARATOR_1}\", ни разделителя \"${NotionCityChats.CHAT_LINK_AND_NAME_SEPARATOR_2}\"."
+        )
+
+        fun chatUrlDoesNotStartWithHttps(chatString: String, url: String) = error(
+            "Описание чата \"$chatString\": URL чата \"$url\" не начинается с \"${NotionCityChats.EXPECTED_URL_START}\"."
+        )
+
+        fun emptyChatName(chatString: String) = error(
+            "Описание чата \"$chatString\": пустое имя чата. Проверьте, что чат существует, и добавьте его название в описание чата."
+        )
     }
 }
