@@ -100,7 +100,7 @@ public class NotionWrapper {
         String toggleHeading1Text,
         List<NotionCityChats> cityChats
     ) {
-        NotionOperationBlocker.getInstance().startOperation();
+        NotionOperationBlocker.INSTANCE.startOperation();
 
         NotionCityChatsImportResult[] result = new NotionCityChatsImportResult[1]; // hack to be effectively final from lamda
 
@@ -112,7 +112,7 @@ public class NotionWrapper {
             }
         );
 
-        NotionOperationBlocker.getInstance().stopOperation();
+        NotionOperationBlocker.INSTANCE.stopOperation();
 
         return result[0];
     }

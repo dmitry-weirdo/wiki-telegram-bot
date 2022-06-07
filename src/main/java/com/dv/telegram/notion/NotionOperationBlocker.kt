@@ -1,42 +1,27 @@
-package com.dv.telegram.notion;
+package com.dv.telegram.notion
 
-import com.dv.telegram.exception.CommandException;
-import lombok.extern.log4j.Log4j2;
+import com.dv.telegram.exception.CommandException
+import org.apache.logging.log4j.kotlin.Logging
+import java.util.concurrent.atomic.AtomicBoolean
 
-import java.util.concurrent.atomic.AtomicBoolean;
+object NotionOperationBlocker : Logging { // see https://stackoverflow.com/questions/51834996/singleton-class-in-kotlin
 
-@Log4j2
-public class NotionOperationBlocker {
+    private val operationRunning = AtomicBoolean(false)
 
-    private final AtomicBoolean operationRunning = new AtomicBoolean(false);
-
-    private static NotionOperationBlocker instance;
-
-    private NotionOperationBlocker() {
-    }
-
-    public static NotionOperationBlocker getInstance() {
-        if (instance == null) {
-            instance = new NotionOperationBlocker();
+    fun startOperation() {
+        if (operationRunning.get()) {
+            throw CommandException("Другая загрузка находится в процессе. Пожалуйста, подождите несколько минут!")
         }
 
-        return instance;
+        operationRunning.set(true)
+        logger.info("Operation started.")
     }
 
-    public void startOperation() {
+    fun stopOperation() {
         if (operationRunning.get()) {
-            throw new CommandException("Другая загрузка находится в процессе. Пожалуйста, подождите несколько минут!");
-        }
+            operationRunning.set(false)
 
-        operationRunning.set(true);
-        log.info("Operation started.");
-    }
-
-    public void stopOperation() {
-        if (operationRunning.get()) {
-            operationRunning.set(false);
-
-            log.info("Operation stopped.");
+            logger.info("Operation stopped.")
         }
     }
 }
