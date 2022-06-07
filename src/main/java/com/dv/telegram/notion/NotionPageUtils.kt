@@ -127,6 +127,23 @@ object NotionPageUtils : Logging {
         return content == text
     }
 
+    // NotionClient methods
+    fun append(client: NotionClient, parentBlock: Block, block: Block) {
+        append(client, parentBlock.id!!, block)
+    }
+
+    fun append(client: NotionClient, parentBlockId: String, block: Block) {
+        append(client, parentBlockId, listOf(block))
+    }
+
+    fun append(client: NotionClient, parentBlock: Block, blocks: List<Block>) {
+        append(client, parentBlock.id!!, blocks)
+    }
+
+    fun append(client: NotionClient, parentBlockId: String, blocks: List<Block>) {
+        client.appendBlockChildren(parentBlockId, blocks)
+    }
+
     // RichText methods
     fun createRichTextList(text: String) = listOf(
         createRichText(text)

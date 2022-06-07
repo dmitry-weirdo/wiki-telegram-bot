@@ -1,52 +1,43 @@
-package com.dv.telegram.notion;
+package com.dv.telegram.notion
 
-import com.dv.telegram.GoogleSheetBotData;
-import com.dv.telegram.GoogleSheetLoader;
-import com.dv.telegram.WikiBotConfig;
-import com.dv.telegram.WikiBotConfigs;
-import com.dv.telegram.data.CityChatData;
-import com.dv.telegram.util.WikiBotUtils;
-import kotlin.Unit;
-import lombok.extern.log4j.Log4j2;
-import notion.api.v1.NotionClient;
-import notion.api.v1.model.blocks.*;
-import notion.api.v1.model.pages.Page;
+import com.dv.telegram.GoogleSheetLoader
+import com.dv.telegram.util.WikiBotUtils
+import notion.api.v1.NotionClient
+import notion.api.v1.model.blocks.Block
+import notion.api.v1.model.blocks.HeadingOneBlock
+import org.apache.logging.log4j.kotlin.Logging
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+object NotionWrapper : Logging {
+    private const val NOTION_TOKEN_ENV_NAME = "NOTION_TOKEN"
 
-@Log4j2
-public class NotionWrapper {
-    private static final String NOTION_TOKEN_ENV_NAME = "NOTION_TOKEN";
+    private const val TOGGLE_HEADER_1_TO_APPEND_TEXT = "Чаты по землям и городам Германии (Telegram, WhatsApp)"
 
-    private static final String TOGGLE_HEADER_1_TO_APPEND_TEXT = "Чаты по землям и городам Германии (Telegram, WhatsApp)";
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss") // only primitives and Strings can be const o_O
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val wikiBotConfigs = WikiBotUtils.readConfigs()
 
-    public static void main(String[] args) {
-        WikiBotConfigs wikiBotConfigs = WikiBotUtils.readConfigs();
+        val threadsCount = wikiBotConfigs.configs.size
+        logger.info("Total bot configs: $threadsCount")
 
-        int threadsCount = wikiBotConfigs.getConfigs().size();
-        log.info("Total bot configs: {}", threadsCount);
+        val config = wikiBotConfigs.configs[0]
+        val botData = GoogleSheetLoader.readGoogleSheet(config)
 
-        WikiBotConfig config = wikiBotConfigs.getConfigs().get(0);
-        GoogleSheetBotData botData = GoogleSheetLoader.readGoogleSheet(config);
+        val cityChatsData = botData.cityChats
+        val cityChats = NotionCityChats.from(cityChatsData)
+//        val cityChats = getCityChats(); // use test data
 
-        List<CityChatData> cityChatsData = botData.getCityChats();
-        List<NotionCityChats> cityChats = NotionCityChats.Companion.from(cityChatsData);
-//        List<NotionCityChats> cityChats = getCityChats();
+        logger.info("$cityChats.size city chats read from Google Sheet.")
 
-        log.info("{} city chats read from Google Sheet.", cityChats.size());
+        val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 
-        String notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME);
-
-//        String pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
-//        String pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
-//        String pageId = "9a0effe48cf34cd49c849a9e05c61fb9"; // список чатов по городам (german-city-chats)
-        String pageId = "67sadfsadfjlkfdsaj"; // incorrect page
+//        val pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
+//        val pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
+//        val pageId = "9a0effe48cf34cd49c849a9e05c61fb9"; // список чатов по городам (german-city-chats)
+        val pageId = "67sadfsadfjlkfdsaj" // incorrect page
 
 /*
         if (true) {
@@ -69,139 +60,121 @@ public class NotionWrapper {
             pageId,
             TOGGLE_HEADER_1_TO_APPEND_TEXT,
             cityChats
-        );
+        )
     }
 
-    private static void appendToggleHeadingOne(String notionToken, String pageId) {
-        NotionPageUtils.INSTANCE.execute(
-            notionToken,
-            client -> appendToggleHeadingOne(client, pageId)
-        );
+    private fun appendToggleHeadingOne(notionToken: String, pageId: String) {
+        NotionPageUtils.execute(notionToken) { appendToggleHeadingOne(it, pageId) }
     }
 
-    private static Unit appendToggleHeadingOne(NotionClient client, String pageId) {
-        Page page = NotionPageUtils.INSTANCE.retrievePage(client, pageId);
+    private fun appendToggleHeadingOne(client: NotionClient, pageId: String) {
+        val page = NotionPageUtils.retrievePage(client, pageId)
 
-        Block paragraphInHeader = NotionPageUtils.INSTANCE.createParagraph("Paragraph as heading 1 child", List.of()); // todo: when Kotlin, remove empty list
+        val paragraphInHeader = NotionPageUtils.createParagraph("Paragraph as heading 1 child")
 
-        HeadingOneBlock.Element heading1Element = new HeadingOneBlock.Element(
-            NotionPageUtils.INSTANCE.createRichTextList("Heading 1 created with Notion API, hasChildren = true try"),
-            null,
-            List.of(paragraphInHeader) // heading with children is created as Toggle Heading
-        );
+        val heading1Element = HeadingOneBlock.Element(
+            richText = NotionPageUtils.createRichTextList("Heading 1 created with Notion API, hasChildren = true try"),
+            children = listOf(paragraphInHeader) // heading with children is created as Toggle Heading
+        )
 
-        Block heading1 = new HeadingOneBlock(heading1Element);
+        val heading1: Block = HeadingOneBlock(heading1Element)
 
-        client.appendBlockChildren(pageId, List.of(heading1));
-
-        return Unit.INSTANCE;
+        NotionPageUtils.append(client, pageId, heading1)
     }
 
-    public static NotionCityChatsImportResult appendCityChats(
-        String notionToken,
-        String pageId,
-        String toggleHeading1Text,
-        List<NotionCityChats> cityChats
-    ) {
-        NotionOperationBlocker.INSTANCE.startOperation();
+    fun appendCityChats(
+        notionToken: String,
+        pageId: String,
+        toggleHeading1Text: String,
+        cityChats: List<NotionCityChats>
+    ): NotionCityChatsImportResult {
+        NotionOperationBlocker.startOperation()
 
-        NotionCityChatsImportResult[] result = new NotionCityChatsImportResult[1]; // hack to be effectively final from lambda
+        var result: NotionCityChatsImportResult? = null
 
-        NotionPageUtils.INSTANCE.execute(
-            notionToken,
-            client -> {
-                NotionCityChatsImportResult importResult = appendCityChats(client, pageId, toggleHeading1Text, cityChats);
-                result[0] = importResult;
-                return Unit.INSTANCE;
-            }
-        );
+        NotionPageUtils.execute(notionToken) { client ->
+            result = appendCityChats(client, pageId, toggleHeading1Text, cityChats)
+        }
 
-        NotionOperationBlocker.INSTANCE.stopOperation();
+        NotionOperationBlocker.stopOperation()
 
-        return result[0];
+        return result!!
     }
 
-    private static NotionCityChatsImportResult appendCityChats(
-        NotionClient client,
-        String pageId,
-        String toggleHeading1Text,
-        List<NotionCityChats> cityChats
-    ) {
-        Page page = NotionPageUtils.INSTANCE.retrievePage(client, pageId);
-        String pageTitle = NotionPageUtils.INSTANCE.getPageTitle(page);
+    private fun appendCityChats(
+        client: NotionClient,
+        pageId: String,
+        toggleHeading1Text: String,
+        cityChats: List<NotionCityChats>
+    ): NotionCityChatsImportResult {
+        val page = NotionPageUtils.retrievePage(client, pageId)
+        val pageTitle = NotionPageUtils.getPageTitle(page)
 
-        log.info("Page with id = {} successfully retrieved.", pageId);
-        log.info("Page url: {}", page.getUrl());
-        log.info("Page created by: {}", page.getCreatedBy().getName());
-        log.info("Page title: {}", pageTitle);
+        logger.info("Page with id = $pageId successfully retrieved.")
+        logger.info("Page url: ${page.url}")
+        logger.info("Page created by: ${page.createdBy.name}")
+        logger.info("Page title: $pageTitle")
 
-        Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
-        log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
+        val blocks = client.retrieveBlockChildren(pageId, null, 100)
+        logger.info("Total blocks retrieved from the page: ${blocks.results.size}")
 
-        HeadingOneBlock rootBlock = NotionPageUtils.INSTANCE.deleteToggleHeading1Content(client, blocks, toggleHeading1Text);
+        val rootBlock = NotionPageUtils.deleteToggleHeading1Content(client, blocks, toggleHeading1Text)
 
         // append paragraph with refresh time
-        String refreshTimeText = String.format("Список чатов обновлён: %s", ZonedDateTime.now().format(dateTimeFormatter));
-        ParagraphBlock refreshTimeParagraph = NotionPageUtils.INSTANCE.createParagraph(refreshTimeText, List.of()); // todo: when Kotlin, remove empty list
-        client.appendBlockChildren(rootBlock.getId(), List.of(refreshTimeParagraph));
+        val refreshTimeText = "Список чатов обновлён: ${ZonedDateTime.now().format(dateTimeFormatter)}"
+        val refreshTimeParagraph = NotionPageUtils.createParagraph(refreshTimeText)
+        NotionPageUtils.append(client, rootBlock, refreshTimeParagraph)
 
         // append paragraph with total cities count
-        int totalCities = cityChats.size();
-        String totalCitiesText = String.format("Всего городов: %s", totalCities);
-        ParagraphBlock totalCitiesParagraph = NotionPageUtils.INSTANCE.createParagraph(totalCitiesText, List.of()); // todo: when Kotlin, remove empty list
-        client.appendBlockChildren(rootBlock.getId(), List.of(totalCitiesParagraph));
+        val totalCities = cityChats.size
+        val totalCitiesText = "Всего городов: $totalCities"
+        val totalCitiesParagraph = NotionPageUtils.createParagraph(totalCitiesText)
+        NotionPageUtils.append(client, rootBlock, totalCitiesParagraph)
 
         // append paragraph with total cities count
-        Integer totalChats = NotionCityChats.Companion.countTotalChats(cityChats);
-        String totalChatsText = String.format("Всего чатов: %s", totalChats);
-        ParagraphBlock totalChatsParagraph = NotionPageUtils.INSTANCE.createParagraph(totalChatsText, List.of()); // todo: when Kotlin, remove empty list
-        client.appendBlockChildren(rootBlock.getId(), List.of(totalChatsParagraph));
+        val totalChats = NotionCityChats.countTotalChats(cityChats)
+        val totalChatsText = "Всего чатов: $totalChats"
+        val totalChatsParagraph = NotionPageUtils.createParagraph(totalChatsText)
+        NotionPageUtils.append(client, rootBlock, totalChatsParagraph)
 
         // append toggles with city chats
-        List<ToggleBlock> cityChatToggles = NotionPageUtils.INSTANCE.getCityChatToggles(cityChats);
-        client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
+        val cityChatToggles = NotionPageUtils.getCityChatToggles(cityChats)
+        NotionPageUtils.append(client, rootBlock, cityChatToggles)
 
-        log.info("{} chats for {} cities appended to Notion page {} (\"{}\"), toggle header 1 \"{}\".", totalChats, totalCities, pageId, pageTitle, toggleHeading1Text);
+        logger.info("$totalChats chats for $totalCities cities appended to Notion page $pageId (\"$pageTitle\"), toggle header 1 \"$toggleHeading1Text\".")
 
-        return new NotionCityChatsImportResult(
+        return NotionCityChatsImportResult(
             pageId,
             pageTitle,
             toggleHeading1Text,
             totalCities,
             totalChats
-        );
+        )
     }
 
-    private static List<NotionCityChats> getTestCityChats() { // get test data
+    private fun getTestCityChats(): List<NotionCityChats> { // get test data
         // city 1
-        NotionCityChats city1 = new NotionCityChats(
-            "Ansbach",
-            new ArrayList<>() // todo: after Kotlin migration, do not pass this parameter
-        );
+        val city1 = NotionCityChats("Ansbach")
 
         city1.addChat(
             "https://t.me/+QQ9lx56QjYU1ZjZi",
             "Ansbach/Landkreis Ansbach \uD83C\uDDE9\uD83C\uDDEA/Ukraine \uD83C\uDDFA\uD83C\uDDE6" // test with emojis
-        );
+        )
 
         // city 2
-        NotionCityChats city2 = new NotionCityChats(
-            "Bottrop",
-            new ArrayList<>() // todo: after Kotlin migration, do not pass this parameter
-        );
+        val city2 = NotionCityChats("Bottrop")
 
         city2.addChat(
             "https://t.me/+lWmTWIFgAI9iN2Qy",
             "Помощь Украинцам \uD83C\uDDFA\uD83C\uDDE6Bottrop\uD83C\uDDE9\uD83C\uDDEA Кто знает что?"
-        );
+        )
 
         city2.addChat(
             "https://t.me/uahelp_ruhrgebiet",
             "UA Help Ruhrgebiet"
-        );
+        )
 
-        List<NotionCityChats> cities = new ArrayList<>(List.of(city1, city2)); // make mutable
-        cities.sort(Comparator.comparing(NotionCityChats::getCityName)); // sort by city name
-        return cities;
+        return listOf(city1, city2)
+            .sortedBy { it.cityName }
     }
 }
