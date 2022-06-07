@@ -79,10 +79,12 @@ public class NotionCityChats {
             }
 
             if (chatParseResult.hasErrors()) {
-                errors.addAll(chatParseResult.errorMessages);
+                errors.addAll(chatParseResult.getErrorMessages());
             }
 
-            chatParseResult.chat.ifPresent(chats::addChat);
+            Optional
+                .ofNullable(chatParseResult.getChat())
+                .ifPresent(chats::addChat);
         }
 
         return Optional.of(chats);
@@ -90,7 +92,7 @@ public class NotionCityChats {
 
     public static ChatParseResult parseChat(String chatString) {
         if (StringUtils.isBlank(chatString)) {
-            return ChatParseResult.empty();
+            return ChatParseResult.Companion.empty();
         }
 
         String[] split;
@@ -98,7 +100,7 @@ public class NotionCityChats {
         if (StringUtils.contains(chatString, CHAT_LINK_AND_NAME_SEPARATOR_1)) {
             split = chatString.split(CHAT_LINK_AND_NAME_SEPARATOR_1);
             if (split.length < 2) {
-                return ChatParseResult.error(
+                return ChatParseResult.Companion.error(
                     emptyChatName(chatString)
                 );
             }
@@ -106,7 +108,7 @@ public class NotionCityChats {
         else if (StringUtils.contains(chatString, CHAT_LINK_AND_NAME_SEPARATOR_2)) {
             split = chatString.split(CHAT_LINK_AND_NAME_SEPARATOR_2);
             if (split.length < 2) {
-                return ChatParseResult.error(
+                return ChatParseResult.Companion.error(
                     emptyChatName(chatString)
                 );
             }
@@ -119,7 +121,7 @@ public class NotionCityChats {
                 CHAT_LINK_AND_NAME_SEPARATOR_2
             );
 
-            return ChatParseResult.error(
+            return ChatParseResult.Companion.error(
                 noSeparatorInChatString(chatString)
             );
         }
@@ -128,7 +130,7 @@ public class NotionCityChats {
         var name = split[1].trim();
 
         if (StringUtils.isBlank(url)) {
-            return ChatParseResult.error(
+            return ChatParseResult.Companion.error(
                 emptyChatUrl(chatString)
             );
         }
@@ -136,14 +138,14 @@ public class NotionCityChats {
         if (!url.startsWith(EXPECTED_URL_START)) {
             log.warn("Chat URL \"{}\" does not start with \"{}\".", url, EXPECTED_URL_START);
 
-            return ChatParseResult.error(
+            return ChatParseResult.Companion.error(
                 chatUrlDoesNotStartWithHttps(chatString, url)
             );
         }
 
         if (url.equals(EXPECTED_URL_START)) {
             log.warn("Chat URL is only {}.", EXPECTED_URL_START);
-            return ChatParseResult.error(
+            return ChatParseResult.Companion.error(
                 emptyChatUrl(chatString)
             );
         }
@@ -154,12 +156,12 @@ public class NotionCityChats {
         if (StringUtils.isBlank(name)) {
             log.warn("Chat name for chat with url \"{}\" is empty. Please check that the chat exists and add its name.", url);
 
-            return ChatParseResult.error(
+            return ChatParseResult.Companion.error(
                 emptyChatName(chatString)
             );
         }
 
-        return ChatParseResult.correctChat(url, name);
+        return ChatParseResult.Companion.correctChat(url, name);
     }
 
     public static String emptyChatUrl(String chatString) {

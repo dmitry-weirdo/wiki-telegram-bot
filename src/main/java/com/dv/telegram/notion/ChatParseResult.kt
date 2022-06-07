@@ -1,49 +1,31 @@
-package com.dv.telegram.notion;
+package com.dv.telegram.notion
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+data class ChatParseResult(
+    val chat: NotionCityChat?,
+    val errorMessages: List<String>
+) {
+    val isEmpty: Boolean
+        get() = !hasErrors() && (chat == null)
 
-import java.util.List;
-import java.util.Optional;
+    val isCorrect: Boolean
+        get() = !hasErrors() && (chat != null)
 
-@Data
-@AllArgsConstructor
-public class ChatParseResult {
-    public final Optional<NotionCityChat> chat;
-    public final List<String> errorMessages;
+    fun hasErrors() = errorMessages.isNotEmpty()
 
-    public static ChatParseResult empty() {
-        return new ChatParseResult(
-            Optional.empty(),
-            List.of()
-        );
-    }
+    companion object {
+        fun empty() = ChatParseResult(
+            null,
+            emptyList()
+        )
 
-    public static ChatParseResult error(String... errorMessages) {
-        return new ChatParseResult(
-            Optional.empty(),
-            List.of(errorMessages)
-        );
-    }
+        fun error(vararg errorMessages: String) = ChatParseResult(
+            null,
+            listOf(*errorMessages)
+        )
 
-    public static ChatParseResult correctChat(String url, String name) {
-        return new ChatParseResult(
-            Optional.of(
-                new NotionCityChat(url, name)
-            ),
-            List.of()
-        );
-    }
-
-    public boolean isEmpty() {
-        return !hasErrors() && chat.isEmpty();
-    }
-
-    public boolean isCorrect() {
-        return !hasErrors() && chat.isPresent();
-    }
-
-    public boolean hasErrors() {
-        return !errorMessages.isEmpty();
+        fun correctChat(url: String, name: String) = ChatParseResult(
+            NotionCityChat(url, name),
+            emptyList()
+        )
     }
 }
