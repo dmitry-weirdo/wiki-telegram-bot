@@ -1,239 +1,200 @@
-package com.dv.telegram.notion;
+package com.dv.telegram.notion
 
-import com.dv.telegram.exception.CommandException;
-import lombok.extern.log4j.Log4j2;
-import notion.api.v1.NotionClient;
-import notion.api.v1.http.OkHttp4Client;
-import notion.api.v1.model.blocks.*;
-import notion.api.v1.model.common.RichTextLinkType;
-import notion.api.v1.model.common.RichTextType;
-import notion.api.v1.model.pages.Page;
-import notion.api.v1.model.pages.PageProperty;
-import org.apache.commons.lang3.StringUtils;
+import com.dv.telegram.exception.CommandException
+import notion.api.v1.NotionClient
+import notion.api.v1.http.OkHttp4Client
+import notion.api.v1.model.blocks.*
+import notion.api.v1.model.common.RichTextLinkType
+import notion.api.v1.model.common.RichTextType
+import notion.api.v1.model.pages.Page
+import notion.api.v1.model.pages.PageProperty.RichText
+import org.apache.logging.log4j.kotlin.Logging
 
-import java.util.List;
-import java.util.function.Consumer;
+object NotionPageUtils : Logging {
 
-@Log4j2
-public final class NotionPageUtils {
+    private const val MAX_PAGE_SIZE = 100 // setting more also returns 100
 
-    public static final int MAX_PAGE_SIZE = 100; // setting more also returns 100
+    private const val CHAT_LINK_AND_NAME_SEPARATOR = " — "
 
-    public static final String CHAT_LINK_AND_NAME_SEPARATOR = " — ";
+    private const val CONNECT_TIMEOUT_MILLISECONDS = 60000 // 1 minute = 60 seconds = 60000 milliseconds
+    private const val WRITE_TIMEOUT_MILLISECONDS = 60000 // 1 minute = 60 seconds = 60000 milliseconds
+    private const val READ_TIMEOUT_MILLISECONDS = 60000 // 1 minute = 60 seconds = 60000 milliseconds
 
-    private static final int CONNECT_TIMEOUT_MILLISECONDS = 60_000; // 1 minute = 60 seconds = 60000 milliseconds
-    private static final int WRITE_TIMEOUT_MILLISECONDS = 60_000; // 1 minute = 60 seconds = 60000 milliseconds
-    private static final int READ_TIMEOUT_MILLISECONDS = 60_000; // 1 minute = 60 seconds = 60000 milliseconds
+    fun execute(
+        notionToken: String,
+        task: (client: NotionClient) -> Unit
+    ) {
+        NotionClient(notionToken).use { client -> // use is a try-with-resource
+            setHttpClient(client)
 
-    private NotionPageUtils() {
-    }
-
-    public static void execute(String notionToken, Consumer<NotionClient> task) {
-        try (NotionClient client = new NotionClient(notionToken)) {
-            setHttpClient(client);
-
-            task.accept(client);
+            task(client)
         }
     }
 
-    public static void setHttpClient(NotionClient client) {
+    private fun setHttpClient(client: NotionClient) {
         // increase timeouts since writing a lot of toggles at once can lead to connection timeout
-        OkHttp4Client httpClient = new OkHttp4Client(
+        val httpClient = OkHttp4Client(
             CONNECT_TIMEOUT_MILLISECONDS,
             WRITE_TIMEOUT_MILLISECONDS,
             READ_TIMEOUT_MILLISECONDS
-        );
+        )
 
-        client.setHttpClient(httpClient);
+        client.httpClient = httpClient
     }
 
-    public static Page retrievePage(NotionClient client, String pageId) {
-        try {
-            return client.retrievePage(pageId);
+    fun retrievePage(client: NotionClient, pageId: String): Page {
+        return try {
+            client.retrievePage(pageId)
         }
-        catch(Exception e) {
-            throw new CommandException(String.format("Ошибка при получении страницы Notion с pageId = \"%s\".", pageId), e);
+        catch (e: Exception) {
+            throw CommandException("Ошибка при получении страницы Notion с pageId = \"$pageId\".", e)
         }
     }
 
-    public static String getPageTitle(Page page) {
+    fun getPageTitle(page: Page): String {
         return page
-            .getProperties()
-            .get("title")
-            .getTitle()
-            .get(0)
-            .getText()
-            .getContent();
+            .properties["title"]
+            ?.title
+            ?.get(0)
+            ?.text
+            ?.content
+            ?: throw CommandException("Не удалось получить название страницы ${page.id}.")
     }
 
-    public static HeadingOneBlock deleteToggleHeading1Content(NotionClient client, Blocks blocks, String heading1Text) {
-        HeadingOneBlock heading1ToAppend = NotionPageUtils.getToggleHeading1Content(blocks, heading1Text);
+    fun deleteToggleHeading1Content(client: NotionClient, blocks: Blocks, heading1Text: String): HeadingOneBlock {
+        val heading1ToAppend = getToggleHeading1Content(blocks, heading1Text)
 
-        int deletedBlocksCount = 0;
-        Blocks blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, MAX_PAGE_SIZE); // max pageSize is 100
+        var deletedBlocksCount = 0
+        var blockChildren = client.retrieveBlockChildren(
+            heading1ToAppend.id!!,
+            null,
+            MAX_PAGE_SIZE // max pageSize is 100
+        )
 
-        while (!blockChildren.getResults().isEmpty()) {
-            for (Block childBlock : blockChildren.getResults()) {
-                client.deleteBlock(childBlock.getId());
+        while (blockChildren.results.isNotEmpty()) {
+            for (childBlock in blockChildren.results) {
+                client.deleteBlock(childBlock.id!!)
             }
 
-            deletedBlocksCount += blockChildren.getResults().size();
+            deletedBlocksCount += blockChildren.results.size
 
-            blockChildren = client.retrieveBlockChildren(heading1ToAppend.getId(), null, MAX_PAGE_SIZE); // max pageSize is 100
+            blockChildren = client.retrieveBlockChildren(
+                heading1ToAppend.id!!,
+                null,
+                MAX_PAGE_SIZE // max pageSize is 100
+            )
         }
 
-        log.info("Removed {} child blocks from heading one with text \"{}\".", deletedBlocksCount, heading1Text);
+        logger.info("Removed $deletedBlocksCount child blocks from heading one with text \"$heading1Text\".")
 
-        return heading1ToAppend;
+        return heading1ToAppend
     }
 
-    public static HeadingOneBlock getToggleHeading1Content(Blocks blocks, String heading1Text) {
-        List<Block> headersWithText = blocks
-            .getResults()
-            .stream()
-            .filter(
-                block ->
-                    (block.getType() == BlockType.HeadingOne)
-                        && headingHasText(block.asHeadingOne(), heading1Text)
-            )
-            .toList();
+    private fun getToggleHeading1Content(blocks: Blocks, heading1Text: String): HeadingOneBlock {
+        val headersWithText = blocks
+            .results
+            .filter {
+                (it.type == BlockType.HeadingOne)
+                    && headingHasText(it.asHeadingOne(), heading1Text)
+            }
 
         if (headersWithText.isEmpty()) {
-            throw new CommandException(String.format("Header 1 с текстом \"%s\" не найден.", heading1Text));
+            throw CommandException("Header 1 с текстом \"$heading1Text\" не найден.")
         }
 
-        if (headersWithText.size() > 1) {
-            throw new CommandException(String.format("Найден более чем один header 1 с текстом \"%s\". Всего заголовков: %d.", heading1Text, headersWithText.size()));
+        if (headersWithText.size > 1) {
+            throw CommandException("Найден более чем один header 1 с текстом \"$heading1Text\". Всего заголовков: ${headersWithText.size}.")
         }
 
-        return headersWithText.get(0).asHeadingOne();
+        return headersWithText[0].asHeadingOne()
     }
 
-    private static boolean headingHasText(HeadingOneBlock heading1, String text) {
-        List<PageProperty.RichText> richTexts = heading1
-            .getHeading1()
-            .getRichText();
+    private fun headingHasText(heading1: HeadingOneBlock, text: String): Boolean {
+        val richTexts: List<RichText> = heading1.heading1.richText
 
         if (richTexts.isEmpty()) {
-            return false;
+            return false
         }
 
-        PageProperty.RichText.Text richText = richTexts
-            .get(0)
-            .getText();
+        val richText: RichText.Text = richTexts[0].text
+            ?: return false
 
-        if (richText == null) {
-            return false;
+        val content = richText.content
+        if (content.isNullOrBlank()) {
+            return false
         }
 
-        String content = richText.getContent();
-        if (StringUtils.isBlank(content)) {
-            return false;
-        }
-
-        return content.equals(text);
+        return content == text
     }
 
     // RichText methods
-    public static List<PageProperty.RichText> createRichTextList(String text) {
-        return List.of(
-            createRichText(text)
-        );
-    }
+    fun createRichTextList(text: String) = listOf(
+        createRichText(text)
+    )
 
-    public static PageProperty.RichText createRichText(String text) {
-        return new PageProperty.RichText(
+    fun createRichText(text: String) = RichText(
+        RichTextType.Text,
+        RichText.Text(text)
+    )
+
+    fun createRichTextLink(text: String?, url: String?): RichText {
+        val link = RichText.Link(RichTextLinkType.Url, url)
+
+        return RichText(
             RichTextType.Text,
-            new PageProperty.RichText.Text(text)
-        );
-    }
-
-    public static PageProperty.RichText createRichTextLink(String text, String url) {
-        PageProperty.RichText.Link link = new PageProperty.RichText.Link(RichTextLinkType.Url, url);
-
-        return new PageProperty.RichText(
-            RichTextType.Text,
-            new PageProperty.RichText.Text(text, link)
-        );
+            RichText.Text(text, link)
+        )
     }
 
     // ParagraphBlock methods
-    public static ParagraphBlock createParagraph(String text) {
-        return createParagraph(text, List.of());
-    }
-
-    public static ParagraphBlock createParagraph(String text, List<? extends Block> children) {
-        return new ParagraphBlock(
-            new ParagraphBlock.Element(
-                createRichTextList(text),
-                children
-            )
-        );
-    }
+    fun createParagraph(text: String, children: List<Block> = listOf()) = ParagraphBlock(
+        ParagraphBlock.Element(
+            createRichTextList(text),
+            children
+        )
+    )
 
     // ToggleBlock methods
-    public static List<ToggleBlock> getCityChatToggles(List<NotionCityChats> cityChats) {
+    fun getCityChatToggles(cityChats: List<NotionCityChats>): List<ToggleBlock> {
         return cityChats
-            .stream()
-            .map(NotionPageUtils::createToggle)
-            .toList();
+            .map { createToggle(it) }
     }
 
-    public static ToggleBlock createToggle(NotionCityChats city) {
-        List<NotionCityChat> chats = city.getChats();
-        List<BulletedListItemBlock> bullets = chats
-            .stream()
-            .map(NotionPageUtils::createBulletWithChatLink)
-            .toList();
+    fun createToggle(city: NotionCityChats): ToggleBlock {
+        val chats = city.chats
+
+        val bullets = chats
+            .map { createBulletWithChatLink(it) }
 
         return createToggle(
-            city.getCityName(),
+            city.cityName!!,
             bullets
-        );
+        )
     }
 
-    public static ToggleBlock createToggle(String text) {
-        return createToggle(text, List.of());
-    }
-
-    public static ToggleBlock createToggle(String text, List<? extends Block> children) {
-        return new ToggleBlock(
-            new ToggleBlock.Element(
-                createRichTextList(text),
-                children
-            )
-        );
-    }
+    fun createToggle(text: String, children: List<Block> = listOf()) = ToggleBlock(
+        ToggleBlock.Element(
+            createRichTextList(text),
+            children
+        )
+    )
 
     // BulletedListItemBlock methods
-    public static BulletedListItemBlock createBullet(String text) {
-        return createBullet(text, List.of());
-    }
+    fun createBullet(text: String, children: List<Block> = listOf()) = BulletedListItemBlock(
+        BulletedListItemBlock.Element(
+            createRichTextList(text),
+            children
+        )
+    )
 
-    public static BulletedListItemBlock createBullet(String text, List<? extends Block> children) {
-        return new BulletedListItemBlock(
-            new BulletedListItemBlock.Element(
-                createRichTextList(text),
-                children
+    fun createBulletWithChatLink(chat: NotionCityChat) = createBulletWithChatLink(chat.url, chat.name)
+
+    fun createBulletWithChatLink(chatLink: String, chatName: String) = BulletedListItemBlock(
+        BulletedListItemBlock.Element(
+            listOf(
+                createRichTextLink(chatLink, chatLink),
+                createRichText("$CHAT_LINK_AND_NAME_SEPARATOR$chatName")
             )
-        );
-    }
-
-    public static BulletedListItemBlock createBulletWithChatLink(NotionCityChat chat) {
-        return createBulletWithChatLink(
-            chat.getUrl(),
-            chat.getName()
-        );
-    }
-
-    public static BulletedListItemBlock createBulletWithChatLink(String chatLink, String chatName) {
-        return new BulletedListItemBlock(
-            new BulletedListItemBlock.Element(
-                List.of(
-                    createRichTextLink(chatLink, chatLink),
-                    createRichText(String.format("%s%s", CHAT_LINK_AND_NAME_SEPARATOR, chatName))
-                )
-            )
-        );
-    }
+        )
+    )
 }

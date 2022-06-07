@@ -6,6 +6,7 @@ import com.dv.telegram.WikiBotConfig;
 import com.dv.telegram.WikiBotConfigs;
 import com.dv.telegram.data.CityChatData;
 import com.dv.telegram.util.WikiBotUtils;
+import kotlin.Unit;
 import lombok.extern.log4j.Log4j2;
 import notion.api.v1.NotionClient;
 import notion.api.v1.model.blocks.*;
@@ -72,19 +73,19 @@ public class NotionWrapper {
     }
 
     private static void appendToggleHeadingOne(String notionToken, String pageId) {
-        NotionPageUtils.execute(
+        NotionPageUtils.INSTANCE.execute(
             notionToken,
             client -> appendToggleHeadingOne(client, pageId)
         );
     }
 
-    private static void appendToggleHeadingOne(NotionClient client, String pageId) {
-        Page page = NotionPageUtils.retrievePage(client, pageId);
+    private static Unit appendToggleHeadingOne(NotionClient client, String pageId) {
+        Page page = NotionPageUtils.INSTANCE.retrievePage(client, pageId);
 
-        Block paragraphInHeader = NotionPageUtils.createParagraph("Paragraph as heading 1 child");
+        Block paragraphInHeader = NotionPageUtils.INSTANCE.createParagraph("Paragraph as heading 1 child", List.of()); // todo: when Kotlin, remove empty list
 
         HeadingOneBlock.Element heading1Element = new HeadingOneBlock.Element(
-            NotionPageUtils.createRichTextList("Heading 1 created with Notion API, hasChildren = true try"),
+            NotionPageUtils.INSTANCE.createRichTextList("Heading 1 created with Notion API, hasChildren = true try"),
             null,
             List.of(paragraphInHeader) // heading with children is created as Toggle Heading
         );
@@ -92,6 +93,8 @@ public class NotionWrapper {
         Block heading1 = new HeadingOneBlock(heading1Element);
 
         client.appendBlockChildren(pageId, List.of(heading1));
+
+        return Unit.INSTANCE;
     }
 
     public static NotionCityChatsImportResult appendCityChats(
@@ -102,13 +105,14 @@ public class NotionWrapper {
     ) {
         NotionOperationBlocker.INSTANCE.startOperation();
 
-        NotionCityChatsImportResult[] result = new NotionCityChatsImportResult[1]; // hack to be effectively final from lamda
+        NotionCityChatsImportResult[] result = new NotionCityChatsImportResult[1]; // hack to be effectively final from lambda
 
-        NotionPageUtils.execute(
+        NotionPageUtils.INSTANCE.execute(
             notionToken,
             client -> {
                 NotionCityChatsImportResult importResult = appendCityChats(client, pageId, toggleHeading1Text, cityChats);
                 result[0] = importResult;
+                return Unit.INSTANCE;
             }
         );
 
@@ -123,8 +127,8 @@ public class NotionWrapper {
         String toggleHeading1Text,
         List<NotionCityChats> cityChats
     ) {
-        Page page = NotionPageUtils.retrievePage(client, pageId);
-        String pageTitle = NotionPageUtils.getPageTitle(page);
+        Page page = NotionPageUtils.INSTANCE.retrievePage(client, pageId);
+        String pageTitle = NotionPageUtils.INSTANCE.getPageTitle(page);
 
         log.info("Page with id = {} successfully retrieved.", pageId);
         log.info("Page url: {}", page.getUrl());
@@ -134,27 +138,27 @@ public class NotionWrapper {
         Blocks blocks = client.retrieveBlockChildren(pageId, null, 100);
         log.info("Total blocks retrieved from the page: {}", blocks.getResults().size());
 
-        HeadingOneBlock rootBlock = NotionPageUtils.deleteToggleHeading1Content(client, blocks, toggleHeading1Text);
+        HeadingOneBlock rootBlock = NotionPageUtils.INSTANCE.deleteToggleHeading1Content(client, blocks, toggleHeading1Text);
 
         // append paragraph with refresh time
         String refreshTimeText = String.format("Список чатов обновлён: %s", ZonedDateTime.now().format(dateTimeFormatter));
-        ParagraphBlock refreshTimeParagraph = NotionPageUtils.createParagraph(refreshTimeText);
+        ParagraphBlock refreshTimeParagraph = NotionPageUtils.INSTANCE.createParagraph(refreshTimeText, List.of()); // todo: when Kotlin, remove empty list
         client.appendBlockChildren(rootBlock.getId(), List.of(refreshTimeParagraph));
 
         // append paragraph with total cities count
         int totalCities = cityChats.size();
         String totalCitiesText = String.format("Всего городов: %s", totalCities);
-        ParagraphBlock totalCitiesParagraph = NotionPageUtils.createParagraph(totalCitiesText);
+        ParagraphBlock totalCitiesParagraph = NotionPageUtils.INSTANCE.createParagraph(totalCitiesText, List.of()); // todo: when Kotlin, remove empty list
         client.appendBlockChildren(rootBlock.getId(), List.of(totalCitiesParagraph));
 
         // append paragraph with total cities count
         Integer totalChats = NotionCityChats.Companion.countTotalChats(cityChats);
         String totalChatsText = String.format("Всего чатов: %s", totalChats);
-        ParagraphBlock totalChatsParagraph = NotionPageUtils.createParagraph(totalChatsText);
+        ParagraphBlock totalChatsParagraph = NotionPageUtils.INSTANCE.createParagraph(totalChatsText, List.of()); // todo: when Kotlin, remove empty list
         client.appendBlockChildren(rootBlock.getId(), List.of(totalChatsParagraph));
 
         // append toggles with city chats
-        List<ToggleBlock> cityChatToggles = NotionPageUtils.getCityChatToggles(cityChats);
+        List<ToggleBlock> cityChatToggles = NotionPageUtils.INSTANCE.getCityChatToggles(cityChats);
         client.appendBlockChildren(rootBlock.getId(), cityChatToggles);
 
         log.info("{} chats for {} cities appended to Notion page {} (\"{}\"), toggle header 1 \"{}\".", totalChats, totalCities, pageId, pageTitle, toggleHeading1Text);
