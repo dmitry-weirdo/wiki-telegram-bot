@@ -1,32 +1,21 @@
-package com.dv.telegram.exception;
+package com.dv.telegram.exception
 
-import java.util.List;
+class CommandException : RuntimeException {
+    val errorMessages: List<String>
 
-public class CommandException extends RuntimeException {
-
-    private final List<String> errorMessages;
-
-    public CommandException(String message) {
-        super(message);
-        errorMessages = List.of(message);
+    constructor(message: String) : super(message) {
+        errorMessages = listOf(message)
     }
 
-    public CommandException(List<String> messages) {
-        super(messages.get(0));
-        errorMessages = messages;
+    constructor(messages: List<String>) : super(messages[0]) {
+        errorMessages = messages
     }
 
-    public CommandException(String message, Throwable cause) {
-        super(message, cause);
-        errorMessages = List.of(message);
+    constructor(message: String, cause: Throwable?) : super(message, cause) {
+        errorMessages = listOf(message)
     }
 
-    public CommandException(List<String> messages, Throwable cause) {
-        super(messages.get(0), cause);
-        errorMessages = messages;
-    }
-
-    public List<String> getErrorMessages() {
-        return errorMessages;
+    constructor(messages: List<String>, cause: Throwable?) : super(messages[0], cause) {
+        errorMessages = messages
     }
 }
