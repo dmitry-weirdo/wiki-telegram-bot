@@ -55,12 +55,13 @@ public class NotionCityChats {
         // sort cities by name
         return chats
             .stream()
+            .filter(chat -> !chat.chats.isEmpty()) // do not add cities without chats
             .sorted(Comparator.comparing(NotionCityChats::getCityName))
             .toList();
     }
 
     public static Optional<NotionCityChats> from(CityChatData cityChatData, List<String> errors) {
-        String cityName = cityChatData.getCityName();
+        String cityName = cityChatData.getCityName().trim();
         if (StringUtils.isBlank(cityName)) {
             // todo: error on empty city name + non-empty chats?
             log.warn("Empty city name.");

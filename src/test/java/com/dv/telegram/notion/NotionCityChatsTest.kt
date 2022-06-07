@@ -1,6 +1,9 @@
 package com.dv.telegram.notion
 
+import com.dv.telegram.data.CityChatData
+import com.dv.telegram.exception.CommandException
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -112,5 +115,128 @@ internal class NotionCityChatsTest {
         assertThat(correctChatWithSeparator2Result).isEqualTo(ChatParseResult.correctChat(
             "https://t.me/good_chat", "Good chat name" // expect to be trimmed
         ))
+    }
+
+    @Test
+    @DisplayName("Test List<CityChatData> → List<NotionCityChats> conversion: errors, expect a thrown exception.")
+    fun testFromWithErrors() {
+        val cityChatsData = listOf(
+            CityChatData(
+                "   ", // empty city name -> will be just skipped
+                "keywords",
+                listOf("keywords"),
+                listOf(
+                    "bad",
+                    "chats"
+                )
+            ),
+            CityChatData(
+                "Aachen",
+                "Aachen",
+                listOf("Aachen"),
+                listOf( // empty chat names -> will be just skipped
+                    "   ",
+                    "",
+                    "  \t  "
+                )
+            ),
+            CityChatData(
+                "Berlin", // good chat -> no errors
+                "Berlin",
+                listOf("Berlin"),
+                listOf(
+                    "https://t.me/berlin_chat - Berlin chat 1",
+                    "https://t.me/berlin_work - Berlin work"
+                )
+            ),
+            CityChatData(
+                "Augsburg", // 2 of 3 chats have errors
+                "Augsburg",
+                listOf("Augsburg"),
+                listOf(
+                    "https://t.me/augsburg_chat - Augsburg good chat",
+                    "https://t.me/augsburg_work - ", // no chat name
+                    "http://t.me/augsburg_parents - Parents chats" // not https
+                )
+            ),
+            CityChatData(
+                "Duisburg", // 1 of 1 chats has errors
+                "Duisburg",
+                listOf("Duisburg"),
+                listOf(
+                    "https://t.me/duisburg_chat / Duisburg chat", // no correct separator
+                )
+            )
+        )
+
+        assertThatThrownBy { NotionCityChats.from(cityChatsData) }
+            .isInstanceOf(CommandException::class.java)
+            .extracting("errorMessages")
+            .isEqualTo(listOf(
+                NotionCityChats.emptyChatName("https://t.me/augsburg_work - "),
+                NotionCityChats.chatUrlDoesNotStartWithHttps("http://t.me/augsburg_parents - Parents chats", "http://t.me/augsburg_parents"),
+                NotionCityChats.noSeparatorInChatString("https://t.me/duisburg_chat / Duisburg chat")
+            ))
+    }
+
+    @Test
+    @DisplayName("Test List<CityChatData> → List<NotionCityChats> conversion: successful conversion.")
+    fun testFromWithoutErrors() {
+        val cityChatsData = listOf(
+            CityChatData(
+                "   ", // empty city name -> will be just skipped
+                "keywords",
+                listOf("keywords"),
+                listOf("bad", "chats")
+            ),
+            CityChatData(
+                "Aachen",
+                "Aachen",
+                listOf("Aachen"),
+                listOf( // empty chat names -> will be just skipped
+                    "   ",
+                    "",
+                    "  \t  "
+                )
+            ),
+            CityChatData(
+                " Berlin  \t", // good chats
+                "Berlin",
+                listOf("Berlin"),
+                listOf(
+                    "  https://t.me/berlin_chat \t —  \t Berlin chat 1   ", // separator 1
+                    "https://t.me/berlin_work - Berlin work", // separator 2
+                    "  \t " // empty chat must be ignored
+                )
+            ),
+            CityChatData(
+                "Augsburg", // 1 of 1 chats is good
+                "Augsburg",
+                listOf("Augsburg"),
+                listOf(
+                    "https://t.me/augsburg_chat - Augsburg good chat"
+                )
+            ),
+        )
+
+        val chats = NotionCityChats.from(cityChatsData)
+        assertThat(chats).hasSize(2) // only cities with at least 1 valid chat must be added
+
+        // chats must be sorted alphabetically by cityName
+        val city1 = chats[0]
+        assertThat(city1.cityName).isEqualTo("Augsburg")
+        assertThat(city1.chats).isEqualTo(listOf(
+            NotionCityChat("https://t.me/augsburg_chat", "Augsburg good chat")
+        ))
+
+        val city2 = chats[1]
+        assertThat(city2.cityName).isEqualTo("Berlin") // must be trimmed
+        assertThat(city2.chats).isEqualTo(listOf(
+            NotionCityChat("https://t.me/berlin_chat", "Berlin chat 1"),
+            NotionCityChat("https://t.me/berlin_work", "Berlin work")
+        ))
+
+        val chatsCount = NotionCityChats.countTotalChats(chats)
+        assertThat(chatsCount).isEqualTo(3)
     }
 }
