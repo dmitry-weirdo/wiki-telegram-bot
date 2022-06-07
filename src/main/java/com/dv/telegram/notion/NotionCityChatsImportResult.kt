@@ -1,12 +1,9 @@
-package com.dv.telegram.notion;
+package com.dv.telegram.notion
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
-public class NotionCityChatsImportResult {
-    public String pageId;
-    public String pageTitle;
-    public String toggleHeading1Text;
-    public int totalCities;
-    public int totalChats;
-}
+data class NotionCityChatsImportResult(
+    var pageId: String,
+    var pageTitle: String,
+    var toggleHeading1Text: String,
+    var totalCities: Int,
+    var totalChats: Int
+)
