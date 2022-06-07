@@ -133,12 +133,22 @@ public class NotionCityChats {
         }
 
         if (!url.startsWith(EXPECTED_URL_START)) {
-            log.warn("Url \"{}\" does not start with \"{}\".", url, EXPECTED_URL_START);
+            log.warn("Chat URL \"{}\" does not start with \"{}\".", url, EXPECTED_URL_START);
 
             return ChatParseResult.error(
                 chatUrlDoesNotStartWithHttps(chatString, url)
             );
         }
+
+        if (url.equals(EXPECTED_URL_START)) {
+            log.warn("Chat URL is only {}.", EXPECTED_URL_START);
+            return ChatParseResult.error(
+                emptyChatUrl(chatString)
+            );
+        }
+
+        // todo: probably check the URL format correctness
+        // todo: in the best case, go to URL and check that it exists
 
         if (StringUtils.isBlank(name)) {
             log.warn("Chat name for chat with url \"{}\" is empty. Please check that the chat exists and add its name.", url);
@@ -151,11 +161,11 @@ public class NotionCityChats {
         return ChatParseResult.correctChat(url, name);
     }
 
-    private static String emptyChatUrl(String chatString) {
+    public static String emptyChatUrl(String chatString) {
         return String.format("Описание чата \"%s\": пустой URL чата.", chatString);
     }
 
-    private static String noSeparatorInChatString(String chatString) {
+    public static String noSeparatorInChatString(String chatString) {
         return String.format(
             "Описание чата \"%s\" не содержит ни разделителя \"%s\", ни разделителя \"%s\".",
             chatString,
@@ -164,11 +174,11 @@ public class NotionCityChats {
         );
     }
 
-    private static String chatUrlDoesNotStartWithHttps(String chatString, String url) {
+    public static String chatUrlDoesNotStartWithHttps(String chatString, String url) {
         return String.format("Описание чата \"%s\": URL чата \"%s\" не начинается с \"%s\".", chatString, url, EXPECTED_URL_START);
     }
 
-    private static String emptyChatName(String chatString) {
+    public static String emptyChatName(String chatString) {
         return String.format("Описание чата \"%s\": пустое имя чата. Проверьте, что чат существует, и добавьте его название в описание чата.", chatString);
     }
 }

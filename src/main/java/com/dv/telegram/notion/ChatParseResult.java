@@ -1,10 +1,12 @@
 package com.dv.telegram.notion;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.List;
 import java.util.Optional;
 
+@Data
 @AllArgsConstructor
 public class ChatParseResult {
     public final Optional<NotionCityChat> chat;
