@@ -1,3 +1,8 @@
+## Turned off for now since it fails on not finding the Java files,
+## and CodeQl does not support Kotlin for now.
+# see https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/
+# see https://github.com/github/roadmap/issues/207
+
 # For most projects, this workflow file will not need changing; you simply need
 # to commit it to your repository.
 #
