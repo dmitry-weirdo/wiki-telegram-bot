@@ -18,10 +18,10 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ never ] # CodeQL turned off (see above)
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ master ]
+    branches: [ never ] # CodeQL turned off (see above)
   schedule:
     - cron: '28 8 * * 5'
 
