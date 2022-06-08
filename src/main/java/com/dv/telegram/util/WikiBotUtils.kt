@@ -6,13 +6,9 @@ import com.dv.telegram.WikiBotConfigs
 object WikiBotUtils {
     private const val WIKI_BOT_CONFIG_FILE_PATH_ENV_NAME = "WIKI_BOT_CONFIG_FILE_PATH"
 
-    fun readConfig(): WikiBotConfig {
-        return JacksonUtils.parseConfig(configFilePath)
-    }
+    fun readConfig(): WikiBotConfig = JacksonUtils.parseConfig(configFilePath)
 
-    fun readConfigs(): WikiBotConfigs {
-        return JacksonUtils.parseConfigs(configFilePath)
-    }
+    fun readConfigs(): WikiBotConfigs = JacksonUtils.parseConfigs(configFilePath)
 
     private val configFilePath: String
         get() = getEnvVariable(WIKI_BOT_CONFIG_FILE_PATH_ENV_NAME)
