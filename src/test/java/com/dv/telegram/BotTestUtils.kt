@@ -5,15 +5,20 @@ import com.dv.telegram.data.CountryChatData
 import com.dv.telegram.data.WikiBotCommandData
 import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.util.JacksonUtils
+import org.assertj.core.api.Assertions
 
 object BotTestUtils {
+
+    private const val TEST_CONFIG_FILE_PATH = "/test-config.json"
 
     @JvmStatic
     fun getWikiBot(
         configUpdater: (config: WikiBotConfig) -> WikiBotConfig = { it } // by default, do not change config read from file
     ): WikiBot {
-        val configFilePath = BotGetResponseTest::class.java.getResource("/test-config.json")?.path
-        val configs = JacksonUtils.parseConfigs(configFilePath)
+        val configFilePath = BotGetResponseTest::class.java.getResource(TEST_CONFIG_FILE_PATH)?.path
+        Assertions.assertThat(configFilePath).isNotNull
+
+        val configs = JacksonUtils.parseConfigs(configFilePath!!)
         val config = configs.configs[0]
         val updatedConfig = configUpdater(config)
 

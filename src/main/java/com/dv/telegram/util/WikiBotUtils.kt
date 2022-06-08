@@ -1,14 +1,11 @@
 package com.dv.telegram.util
 
-import com.dv.telegram.WikiBotConfig
-import com.dv.telegram.WikiBotConfigs
-
 object WikiBotUtils {
     private const val WIKI_BOT_CONFIG_FILE_PATH_ENV_NAME = "WIKI_BOT_CONFIG_FILE_PATH"
 
-    fun readConfig(): WikiBotConfig = JacksonUtils.parseConfig(configFilePath)
+    fun readConfig() = JacksonUtils.parseConfig(configFilePath)
 
-    fun readConfigs(): WikiBotConfigs = JacksonUtils.parseConfigs(configFilePath)
+    fun readConfigs() = JacksonUtils.parseConfigs(configFilePath)
 
     private val configFilePath: String
         get() = getEnvVariable(WIKI_BOT_CONFIG_FILE_PATH_ENV_NAME)
