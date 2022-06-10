@@ -1,80 +1,72 @@
-package com.dv.telegram;
+package com.dv.telegram.excel
 
-import com.dv.telegram.data.DataUtils;
-import com.dv.telegram.data.WikiPageData;
-import lombok.extern.log4j.Log4j2;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.dv.telegram.data.DataUtils.parseWords
+import com.dv.telegram.data.WikiPageData
+import org.apache.logging.log4j.kotlin.Logging
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import java.io.IOException
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+object XlsxParser : Logging { // todo: this class has to read to WikiBotGoogleSheet (i.e. SheetData), like GoogleSheetReader
 
-@Log4j2
-public class XlsxParser {
+    private const val FILE_NAME = "Wiki-pages-and-keywords.xlsx"
 
-    private static final String FILE_NAME = "Wiki-pages-and-keywords.xlsx";
-
-    public static void main(String[] args) throws IOException {
-        parseWikiPagesData();
+    @JvmStatic
+    fun main(args: Array<String>) {
+        parseWikiPagesDataSafe()
     }
 
-    public static List<WikiPageData> parseWikiPagesDataSafe() {
-        try {
-            return parseWikiPagesData();
+    fun parseWikiPagesDataSafe(): List<WikiPageData> {
+        return try {
+            parseWikiPagesData()
         }
-        catch (IOException e) {
-            throw new RuntimeException(e);
+        catch (e: IOException) {
+            throw RuntimeException(e)
         }
     }
 
-    public static List<WikiPageData> parseWikiPagesData() throws IOException {
-        Workbook workbook = parseWorkbook(FILE_NAME);
+    @Throws(IOException::class)
+    fun parseWikiPagesData(): List<WikiPageData> {
+        val workbook = parseWorkbook(FILE_NAME)
 
-        Sheet sheet = workbook.getSheetAt(0);
+        val sheet = workbook.getSheetAt(0)
 
-        List<WikiPageData> pages = new ArrayList<>();
+        val pages: MutableList<WikiPageData> = ArrayList()
 
-        int firsRowNum = sheet.getFirstRowNum() + 1; // skip header row
-        int lastRowNum = sheet.getLastRowNum();
+        val firsRowNum = sheet.firstRowNum + 1 // skip header row
+        val lastRowNum = sheet.lastRowNum
 
-        for (int rowNum = firsRowNum; rowNum <= lastRowNum; rowNum++) {
-            Row row = sheet.getRow(rowNum);
+        for (rowNum in firsRowNum..lastRowNum) {
+            val row = sheet.getRow(rowNum)
 
-            String pageName = getStringSafe(row,0);
-            String pageUrl = getStringSafe(row,1);
-            String wordsString = getStringSafe(row,2).toLowerCase(Locale.ROOT); // assure lowercase words
+            val pageName = getStringSafe(row, 0)
+            val pageUrl = getStringSafe(row, 1)
+            val wordsString = getStringSafe(row, 2).lowercase() // assure lowercase words
 
-            List<String> words = DataUtils.parseWords(wordsString);
+            val words = parseWords(wordsString)
 
-            WikiPageData pageData = new WikiPageData(pageName, pageUrl, wordsString, words);
-            pages.add(pageData);
+            val pageData = WikiPageData(pageName, pageUrl, wordsString, words)
+            pages.add(pageData)
 
-            log.info("Row {}: {} / {} / {}", rowNum, pageName, pageUrl, words);
+            logger.info("Row $rowNum: $pageName / $pageUrl / $words")
         }
 
-        log.info("Total pages collected: {}", pages.size());
-        return pages;
+        logger.info("Total pages collected: ${pages.size}")
+        return pages
     }
 
-    private static Workbook parseWorkbook(String fileName) throws IOException {
-        ClassLoader classLoader = XlsxParser.class.getClassLoader();
-        try (InputStream stream = classLoader.getResourceAsStream(fileName)) { // getResource does not work within jar!
-            return new XSSFWorkbook(stream);
+    @Throws(IOException::class)
+    private fun parseWorkbook(fileName: String): Workbook {
+        javaClass.classLoader.getResourceAsStream(fileName).use { stream ->  // getResource does not work within jar!
+            return XSSFWorkbook(stream)
         }
     }
 
-    private static String getStringSafe(Row row, int cellNumber) {
-        Cell cell = row.getCell(cellNumber);
-        if (cell == null) {
-            return "";
-        }
+    private fun getStringSafe(row: Row, cellNumber: Int): String {
+        val cell = row.getCell(cellNumber)
+            ?: return ""
 
-        return cell.getStringCellValue();
+        return cell.stringCellValue
     }
 }
