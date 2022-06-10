@@ -1,0 +1,9 @@
+Разных неудачных запросов: 6
+— Люба /ReplyWhenNoAnswer
+false
+— Люба ReplyWhenNoAnswer
+0
+— Люба ReplayWennNoAnswer=false
+— Люба /ReplayWennNoAnswer=false
+— Люба, где брать бланки на Kindergeld?
+— Люба, где брать бланки ?
