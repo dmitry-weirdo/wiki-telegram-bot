@@ -42,6 +42,7 @@ internal class BotListCommandsTest {
 
         // all bots commands
         val allBotsList = AllBotsList()
+        val allBotsReloadFromGoogleSheet = AllBotsReloadFromGoogleSheet()
 
         // execute /helpCommand /listSettings
         val listCommandsResult = wikiBot.processMessage("$botName ${listCommands.defaultCommandName}", botAdmin)
@@ -64,6 +65,7 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${getFailedRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${clearFailedRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsList.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${allBotsReloadFromGoogleSheet.defaultCommandName}`"
                 + "\n\nДля получения справки по команде используйте команду"
                 + "\n`${wikiBot.botName} ${helpCommand.defaultCommandName} <commandName>`",
             true
