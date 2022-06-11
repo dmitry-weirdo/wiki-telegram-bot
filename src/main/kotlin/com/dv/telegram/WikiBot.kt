@@ -133,8 +133,11 @@ class WikiBot(
 
         // command is for the bot and has the response -> send the response message
         try {
-            val sendMessage = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
-            execute(sendMessage) // Call method to send the message
+            val sendMessages = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
+
+            for (sendMessage in sendMessages) { // messages are split into 4096 characters
+                execute(sendMessage) // Call method to send the message
+            }
         }
         catch (e: TelegramApiException) {
             logger.error("TelegramApiException occurred on sending the bot response message", e) // todo: add which message has failed the bot
@@ -147,25 +150,35 @@ class WikiBot(
         replyToMessage: Message?,
         deleteBotCallMessage: Boolean,
         processingResult: MessageProcessingResult
-    ): SendMessage {
+    ): List<SendMessage> {
         val chatId = updateMessage.chatId.toString()
         val responseText = processingResult.getResponseOrFail()
 
-        val replyToMessageId =
-            if (deleteBotCallMessage) replyToMessage!!.messageId // reply to the original message
-            else updateMessage.messageId // reply to the "call bot" message
+        // todo: probably some more intellectual split like on new lines near the limits
+        val responseTexts = responseText.chunked(MAX_CHARACTERS_IN_MESSAGE)
 
-        val sendMessage = SendMessage()
-        sendMessage.chatId = chatId
-        sendMessage.replyToMessageId = replyToMessageId
-        sendMessage.text = responseText
-        sendMessage.disableWebPagePreview()
+        val messages = mutableListOf<SendMessage>()
 
-        if (processingResult.useMarkdown) {
-            sendMessage.parseMode = "Markdown"
+        for (messageText in responseTexts) {
+            val replyToMessageId =
+                if (deleteBotCallMessage) replyToMessage!!.messageId // reply to the original message
+                else updateMessage.messageId // reply to the "call bot" message
+
+            val sendMessage = SendMessage()
+            sendMessage.chatId = chatId
+            sendMessage.replyToMessageId = replyToMessageId
+            sendMessage.text = messageText
+            sendMessage.disableWebPagePreview()
+
+            // todo: markdown can be broken if it is split into different message parts. Probably turn it off if responseTexts.size > 1
+            if (processingResult.useMarkdown) {
+                sendMessage.parseMode = "Markdown"
+            }
+
+            messages.add(sendMessage)
         }
 
-        return sendMessage
+        return messages
     }
 
     private fun deleteBotCallMessage(updateMessage: Message) {
@@ -226,5 +239,9 @@ class WikiBot(
 
     fun loadBotDataFromGoogleSheet(): GoogleSheetBotData { // does NOT reload the bot data itself
         return GoogleSheetLoader.readGoogleSheet(config)
+    }
+
+    companion object {
+        private const val MAX_CHARACTERS_IN_MESSAGE = 4096
     }
 }
