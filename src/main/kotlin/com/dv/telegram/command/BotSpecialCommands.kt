@@ -9,6 +9,7 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
     val listCommands: ListCommands = getCommand(commands, ListCommands::class.java)
     val reloadFromGoogleSheetCommand: ReloadFromGoogleSheet = getCommand(commands, ReloadFromGoogleSheet::class.java)
     val cityChatsValidateCommand: CityChatsValidate = getCommand(commands, CityChatsValidate::class.java)
+    val getStatisticsCommand: GetStatistics = getCommand(commands, GetStatistics::class.java)
     val getFailedRequestsCommand: GetFailedRequests = getCommand(commands, GetFailedRequests::class.java)
 
     companion object {

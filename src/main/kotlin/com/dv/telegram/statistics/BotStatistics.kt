@@ -1,19 +1,32 @@
 package com.dv.telegram.statistics
 
 import com.dv.telegram.MessageProcessingResult
-import lombok.Data
 import java.time.ZonedDateTime
 
-@Data
-class BotStatistics {
-    val startTime: ZonedDateTime = ZonedDateTime.now()
-    var specialCommandsCount = 0L
-    var successfulRequestsCount = 0L
-    var failedRequestsCount = 0L
+data class BotStatistics(
+    val startTime: ZonedDateTime = ZonedDateTime.now(),
+    var specialCommandsCount: Long = 0L,
+    var successfulRequestsCount: Long = 0L,
+    var failedRequestsCount: Long = 0L,
     var failedRequests: MutableSet<String> = LinkedHashSet() // todo: add String -> count map if required
-
+) {
     companion object {
         private const val COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)"
+
+        fun getAggregateStatistics(statisticsList: List<BotStatistics>): BotStatistics {
+            val allFailedRequests = mutableSetOf<String>()
+            statisticsList.forEach {
+                allFailedRequests.addAll(it.failedRequests)
+            }
+
+            return BotStatistics(
+                statisticsList[0].startTime, // fill something
+                statisticsList.sumOf { it.specialCommandsCount },
+                statisticsList.sumOf { it.successfulRequestsCount },
+                statisticsList.sumOf { it.failedRequestsCount },
+                allFailedRequests
+            )
+        }
     }
 
     fun update(text: String, processingResult: MessageProcessingResult) {

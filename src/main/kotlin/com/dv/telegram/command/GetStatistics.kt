@@ -5,8 +5,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class GetStatistics : BasicBotCommand() {
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss") // todo: probably move to companion object
-
     override val name: String = javaClass.simpleName
 
     override fun getDescription(bot: WikiBot) =
@@ -29,12 +27,16 @@ class GetStatistics : BasicBotCommand() {
         return statisticsLines.joinToString("\n")
     }
 
-    private fun getStatisticsLine(name: String, count: Long) =
-        "— $name: $count"
+    companion object {
+        private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss")
 
-    private fun getStatisticsLine(name: String, value: String) =
-        "— $name: $value"
+        fun getStatisticsLine(name: String, count: Long) =
+            "— $name: $count"
 
-    private fun getStatisticsLine(name: String, time: ZonedDateTime) =
-        "— $name: ${dateTimeFormatter.format(time)}"
+        fun getStatisticsLine(name: String, value: String) =
+            "— $name: $value"
+
+        fun getStatisticsLine(name: String, time: ZonedDateTime) =
+            "— $name: ${dateTimeFormatter.format(time)}"
+    }
 }

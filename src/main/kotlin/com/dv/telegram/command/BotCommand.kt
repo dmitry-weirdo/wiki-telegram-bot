@@ -78,6 +78,7 @@ interface BotCommand {
             // all bots context
             AllBotsList(),
             AllBotsReloadFromGoogleSheet(),
+            AllBotsGetStatistics(),
             AllBotsGetFailedRequests()
         )
     }
