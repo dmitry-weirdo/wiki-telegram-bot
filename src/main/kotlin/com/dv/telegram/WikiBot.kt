@@ -6,6 +6,7 @@ import com.dv.telegram.data.*
 import com.dv.telegram.statistics.BotStatistics
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import org.telegram.telegrambots.meta.api.methods.GetMe
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.Message
@@ -43,6 +44,8 @@ class WikiBot(
     val statistics: BotStatistics
 
     val messageProcessor: WikiBotMessageProcessor
+
+    var telegramName: String? = null
 
     constructor(
         context: WikiBotsContext,
@@ -185,6 +188,25 @@ class WikiBot(
         statistics.update(text, result) // moved into this method to be updated in the test
 
         return result
+    }
+
+    fun getTelegramUserName(): String {
+        if (telegramName != null) {
+            return telegramName!!
+        }
+
+        return try {
+            val getMe = GetMe()
+            val getMeResult = execute(getMe)
+
+            telegramName = getMeResult.userName
+
+            telegramName!!
+        }
+        catch (e: Exception) {
+            logger.error("Error when getting Telegram user name for bot $botName", e)
+            "unknown"
+        }
     }
 
     fun reloadBotDataFromGoogleSheet(): Boolean {

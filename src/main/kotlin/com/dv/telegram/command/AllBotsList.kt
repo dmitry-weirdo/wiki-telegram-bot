@@ -21,9 +21,11 @@ class AllBotsList: BasicBotCommand() {
         lines.add("*Всего ботов: ${bots.size}*")
 
         for (contextBot in bots) {
-            // todo: bot telegram name (clickable form, as in ListAdmins)
+            val botTelegramName = contextBot.getTelegramUserName()
+            val botTelegramNameForMarkdown = getSettingValueForMarkdown(BotCommandUtils.getClickableUserName(botTelegramName))
+
             lines.add("""
-                *${contextBot.botName}*
+                *${contextBot.botName}* ($botTelegramNameForMarkdown)
                 Лист со списком команд: ${contextBot.commandSheetName}
                 Окружение: ${contextBot.environmentName}
             """.trimIndent())
