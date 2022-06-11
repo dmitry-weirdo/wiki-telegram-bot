@@ -73,7 +73,10 @@ interface BotCommand {
             // statistics
             GetStatistics(),
             GetFailedRequests(),
-            ClearFailedRequests()
+            ClearFailedRequests(),
+
+            // all bots context
+            AllBotsList()
         )
     }
 }

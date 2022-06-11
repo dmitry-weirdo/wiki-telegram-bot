@@ -40,6 +40,9 @@ internal class BotListCommandsTest {
         val getFailedRequests = GetFailedRequests()
         val clearFailedRequests = ClearFailedRequests()
 
+        // all bots commands
+        val allBotsList = AllBotsList()
+
         // execute /helpCommand /listSettings
         val listCommandsResult = wikiBot.processMessage("$botName ${listCommands.defaultCommandName}", botAdmin)
 
@@ -60,6 +63,7 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${getStatistics.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getFailedRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${clearFailedRequests.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${allBotsList.defaultCommandName}`"
                 + "\n\nДля получения справки по команде используйте команду"
                 + "\n`${wikiBot.botName} ${helpCommand.defaultCommandName} <commandName>`",
             true

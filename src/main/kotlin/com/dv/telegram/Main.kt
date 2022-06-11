@@ -29,9 +29,11 @@ class Main : Logging {
                 val threadsCount = wikiBotConfigs.configs.size
                 logger.info("Total bot configs: $threadsCount.")
 
+                val context = WikiBotsContext()
+
                 val callableTasks = wikiBotConfigs
                     .configs
-                    .map { this.createCallableTask(it) }
+                    .map { this.createCallableTask(it, context) }
 
                 val executorService = Executors.newFixedThreadPool(threadsCount)
                 executorService.invokeAll(callableTasks) // todo: this currently does not stop Main on exception in the thread
@@ -43,12 +45,12 @@ class Main : Logging {
             }
         }
 
-        private fun createCallableTask(config: WikiBotConfig): Callable<String> {
+        private fun createCallableTask(config: WikiBotConfig, context: WikiBotsContext): Callable<String> {
             return Callable {
                 try {
                     val botData = GoogleSheetLoader.readGoogleSheet(config)
 
-                    val wikiBot = WikiBot(config, botData)
+                    val wikiBot = WikiBot(context, config, botData)
 
                     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
                     botsApi.registerBot(wikiBot)

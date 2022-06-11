@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 class WikiBot(
+    val context: WikiBotsContext,
     private val config: WikiBotConfig,
     wikiPagesData: List<WikiPageData>,
     cityChatsData: List<CityChatData>,
@@ -44,9 +45,11 @@ class WikiBot(
     val messageProcessor: WikiBotMessageProcessor
 
     constructor(
+        context: WikiBotsContext,
         config: WikiBotConfig,
         botData: GoogleSheetBotData
     ) : this(
+        context,
         config,
         botData.pages,
         botData.cityChats,
@@ -55,6 +58,8 @@ class WikiBot(
     )
 
     init {
+        context.addBot(this)
+
         pages = WikiPagesDataList(wikiPagesData)
         cityChats = CityChatsDataList(cityChatsData)
         countryChats = CountryChatsDataList(countryChatsData)

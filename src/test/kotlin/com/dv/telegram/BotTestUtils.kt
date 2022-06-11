@@ -24,7 +24,10 @@ object BotTestUtils {
 
         val botData = getBotData()
 
+        val context = WikiBotsContext()
+
         return WikiBot(
+            context,
             updatedConfig,
             botData
         )
