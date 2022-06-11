@@ -73,6 +73,9 @@ class WikiBot(
     }
 
     // additional getters
+    val commandSheetName: String
+        get() = config.commandsSheetName
+
     val notionToken: String
         get() = config.notionToken
 

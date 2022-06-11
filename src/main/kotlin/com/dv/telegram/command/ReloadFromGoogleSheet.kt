@@ -12,10 +12,11 @@ class ReloadFromGoogleSheet : BasicBotCommand() {
 
     override fun getResponse(text: String, bot: WikiBot): String {
         val reloadedSuccessful = bot.reloadBotDataFromGoogleSheet()
+        val commandSheetName = bot.commandSheetName
 
         return if (reloadedSuccessful)
-            "Данные бота успешно загружены из Google Sheet."
+            "Данные бота успешно загружены из Google Sheet.\nЛист со списком команд бота: \"$commandSheetName\"."
         else
-            "При загрузке данных из Google Sheet произошла ошибка."
+            "При загрузке данных из Google Sheet произошла ошибка.\nЛист со списком команд бота: \"$commandSheetName\"."
     }
 }
