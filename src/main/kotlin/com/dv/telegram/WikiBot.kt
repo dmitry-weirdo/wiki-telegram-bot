@@ -110,7 +110,7 @@ class WikiBot(
         }
 
         val text = updateMessage.text
-        val userName = updateMessage.from.userName
+        val userName = updateMessage.from.userName ?: "" // userName is nullable, user can have no username in Telegram
 
         val processingResult = processMessage(text, userName)
 
