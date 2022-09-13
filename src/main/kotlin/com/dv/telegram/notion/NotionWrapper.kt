@@ -139,7 +139,13 @@ object NotionWrapper : Logging {
 
         // append toggles with city chats
         val cityChatToggles = NotionPageUtils.getCityChatToggles(cityChats)
-        NotionPageUtils.append(client, rootBlock, cityChatToggles)
+
+        // 13.09.2022: Notion API started to fail when adding more than 100 elements in one operation -> split to list of 100 and append chunk by chunk
+        val cityChatTogglesChunked = cityChatToggles.chunked(100)
+
+        cityChatTogglesChunked.forEach {
+            NotionPageUtils.append(client, rootBlock, it)
+        }
 
         logger.info("$totalChats chats for $totalCities cities appended to Notion page $pageId (\"$pageTitle\"), toggle header 1 \"$toggleHeading1Text\".")
 
