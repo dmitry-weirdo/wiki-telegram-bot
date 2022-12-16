@@ -2,15 +2,22 @@ package com.dv.telegram.notion
 
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
+import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.blocks.BlockType
+import notion.api.v1.model.common.Emoji
+import notion.api.v1.model.pages.PageParent
 import notion.api.v1.model.pages.PageProperty
 import org.apache.logging.log4j.kotlin.Logging
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 object NotionPageTree : Logging {
 
     private const val LEVEL_SEPARATOR = "--"
     private const val NOTION_TOKEN_ENV_NAME = "NOTION_TOKEN"
     private const val PAGE_ID_ENV_NAME = "PAGE_ID"
+
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss") // only primitives and Strings can be const o_O
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -25,12 +32,14 @@ object NotionPageTree : Logging {
             val page = NotionPageUtils.retrievePage(client, pageId)
             val pageTitle = NotionPageUtils.getPageTitle(page)
             logger.info("")
-            logger.info("$pageTitle")
+            logger.info(pageTitle)
 
-            tree.add("$pageTitle")
+            tree.add(pageTitle)
 
             // add page children tree, NOT including the child pages
             parseTree(client, tree, pageId, 0)
+
+            createPage(client, pageId, "[❗ Beta ❗] Тестовый автоперевод главной страницы")
         }
 
         val treeToPrint = tree.joinToString("\n")
@@ -165,5 +174,44 @@ object NotionPageTree : Logging {
                 }
             }
         }
+    }
+
+    private fun createPage(client: NotionClient, parentPageId: String, pageTitle: String) {
+        // todo: if child page with title exists, remove its children and just append the children
+
+        // todo: probably move this page title hell to NotionPageUtils
+        val title = PageProperty()
+        title.title = listOf(
+            PageProperty.RichText(
+                text = PageProperty.RichText.Text(content = pageTitle)
+            )
+        )
+
+        // todo: copy icon from the original page
+        val icon = Emoji(emoji = "\uD83E\uDD16") // robot
+
+        val parentPage = PageParent.page(parentPageId)
+
+        val properties = mapOf(
+            "title" to title
+            // todo: other properties if required. Eg template type?
+        )
+
+        // paragraph with refresh pages
+        val refreshTimeText = "Перевод страницы обновлён: ${ZonedDateTime.now().format(dateTimeFormatter)}"
+        val refreshTimeParagraph = NotionPageUtils.createParagraph(refreshTimeText)
+
+        val pageBlocks = listOf<Block>(refreshTimeParagraph)
+
+        val createdPage = client.createPage(
+            parentPage,
+            properties,
+            pageBlocks,
+            icon,
+            null // todo: may also set cover or copy it from the original page
+        )
+
+        logger.info("Created page with title = \"$pageTitle\"\n$createdPage")
+        logger.info("Created page id: ${createdPage.id}")
     }
 }
