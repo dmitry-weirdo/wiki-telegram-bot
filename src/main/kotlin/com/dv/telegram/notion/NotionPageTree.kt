@@ -21,6 +21,15 @@ object NotionPageTree : Logging {
         val tree = mutableListOf<String>()
 
         NotionPageUtils.execute(notionToken) { client ->
+            // add
+            val page = NotionPageUtils.retrievePage(client, pageId)
+            val pageTitle = NotionPageUtils.getPageTitle(page)
+            logger.info("")
+            logger.info("$pageTitle")
+
+            tree.add("$pageTitle")
+
+            // add page children tree, NOT including the child pages
             parseTree(client, tree, pageId, 0)
         }
 
