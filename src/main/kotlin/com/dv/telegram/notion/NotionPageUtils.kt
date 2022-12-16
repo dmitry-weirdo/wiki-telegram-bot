@@ -214,4 +214,12 @@ object NotionPageUtils : Logging {
             )
         )
     )
+
+    // Heading 1 methods
+    fun createHeading1(text: String, children: List<Block> = listOf()) = HeadingOneBlock(
+        HeadingOneBlock.Element(
+            richText = createRichTextList(text),
+            children = children
+        )
+    )
 }

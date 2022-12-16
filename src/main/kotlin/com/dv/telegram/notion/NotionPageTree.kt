@@ -39,11 +39,11 @@ object NotionPageTree : Logging {
             // add page children tree, NOT including the child pages
             parseTree(client, tree, pageId, 0)
 
-            createPage(client, pageId, "[❗ Beta ❗] Тестовый автоперевод главной страницы")
-        }
+            val treeToPrint = tree.joinToString("\n")
+            logger.info("tree: \n$treeToPrint")
 
-        val treeToPrint = tree.joinToString("\n")
-        logger.info("tree: \n$treeToPrint")
+            createPage(client, pageId, "[❗ Beta ❗] Тестовый автоперевод главной страницы", treeToPrint)
+        }
     }
 
     private fun parseTree(client: NotionClient, tree: MutableList<String>, blockId: String, currentLevel: Int) {
@@ -176,7 +176,7 @@ object NotionPageTree : Logging {
         }
     }
 
-    private fun createPage(client: NotionClient, parentPageId: String, pageTitle: String) {
+    private fun createPage(client: NotionClient, parentPageId: String, pageTitle: String, tree: String) {
         // todo: if child page with title exists, remove its children and just append the children
 
         // todo: probably move this page title hell to NotionPageUtils
@@ -201,7 +201,17 @@ object NotionPageTree : Logging {
         val refreshTimeText = "Перевод страницы обновлён: ${ZonedDateTime.now().format(dateTimeFormatter)}"
         val refreshTimeParagraph = NotionPageUtils.createParagraph(refreshTimeText)
 
-        val pageBlocks = listOf<Block>(refreshTimeParagraph)
+        // translation toggles
+        val ruToggle = createToggle("Оригинальная страница (RU)", tree)
+        val ruUkToggle = createTranslationToggle(tree, "ru", "uk") // see https://www.labnol.org/code/19899-google-translate-languages
+        val ruDeToggle = createTranslationToggle(tree, "ru", "de") // see https://www.labnol.org/code/19899-google-translate-languages
+
+        val pageBlocks = listOf(
+            refreshTimeParagraph,
+            ruToggle,
+            ruUkToggle,
+            ruDeToggle
+        )
 
         val createdPage = client.createPage(
             parentPage,
@@ -213,5 +223,71 @@ object NotionPageTree : Logging {
 
         logger.info("Created page with title = \"$pageTitle\"\n$createdPage")
         logger.info("Created page id: ${createdPage.id}")
+    }
+
+    private fun createTranslationToggle(
+        tree: String,
+        sourceLanguage: String,
+        targetLanguage: String
+    ): Block {
+        val toggleHeader = "Перевод $sourceLanguage → $targetLanguage"
+
+        val paragraphText = translate(tree, sourceLanguage, targetLanguage);
+
+        return createToggle(toggleHeader, paragraphText)
+    }
+
+    private fun createToggle(
+        toggleText: String,
+        innerParagraphText: String,
+    ): Block {
+        // todo: these hacks have to be solved, just save the original paragraph structure
+        // paragraph can have up 2000 characters
+        // children size is up to 100
+
+        val maxParagraphCharsCount = 2000
+
+        val separator = "\n\n"
+
+        val splitByNewLines = innerParagraphText.split(separator)
+
+        var paragraphText = "";
+
+        val paragraphs = mutableListOf<Block>()
+
+        for ((index, part) in splitByNewLines.withIndex()) {
+            val next = if (index < splitByNewLines.size - 1)
+                splitByNewLines[index + 1]
+            else
+                ""
+
+            if (paragraphText.length + separator.length + next.length <= maxParagraphCharsCount) {
+                paragraphText = paragraphText + separator + next
+            }
+            else {
+                paragraphs.add(NotionPageUtils.createParagraph(paragraphText))
+                paragraphText = ""
+            }
+        }
+
+        if (paragraphText.isNotBlank()) { // add the last part
+            paragraphs.add(NotionPageUtils.createParagraph(paragraphText))
+        }
+
+//        val paragraph = NotionPageUtils.createParagraph(innerParagraphText)
+
+        return NotionPageUtils.createHeading1(
+            toggleText,
+            paragraphs
+        );
+    }
+
+    private fun translate(
+        text: String,
+        sourceLanguage: String,
+        targetLanguage: String
+    ): String {
+        // todo: translate with Google Translate
+        return text + "\n\n$sourceLanguage → $targetLanguage";
     }
 }
