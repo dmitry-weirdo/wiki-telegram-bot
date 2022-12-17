@@ -16,6 +16,15 @@ object GoogleCloudTranslateApp : Logging {
             -- Телеграм-бота Дюсю
         """.trimIndent()
 
+    // todo: make able to override with the env variable
+    private const val DEFAULT_PROJECT_ID = "wiki-bot-project"
+
+    // todo: is there constants within API? Or move to a separate object.
+    // see https://www.labnol.org/code/19899-google-translate-languages
+    const val LANGUAGE_RUSSIAN = "RU"
+    const val LANGUAGE_UKRAINIAN = "UK"
+    const val LANGUAGE_GERMAN = "DE"
+
     @JvmStatic
     fun main(args: Array<String>) {
         // java.io.IOException: The Application Default Credentials are not available. They are available if running in Google Compute Engine.
@@ -31,9 +40,9 @@ object GoogleCloudTranslateApp : Logging {
 
     @Throws(IOException::class)
     fun translateText() {
-        val projectId = "wiki-bot-project"
-        val sourceLanguage = "ru"
-        val targetLanguage = "uk" // see https://www.labnol.org/code/19899-google-translate-languages
+        val projectId = DEFAULT_PROJECT_ID
+        val sourceLanguage = LANGUAGE_RUSSIAN
+        val targetLanguage = LANGUAGE_UKRAINIAN // see https://www.labnol.org/code/19899-google-translate-languages
         //        String targetLanguage = "de"; // see https://www.labnol.org/code/19899-google-translate-languages
 
 
@@ -42,6 +51,10 @@ object GoogleCloudTranslateApp : Logging {
 //        String text = "Чтобы добавлять информацию в эту вики, пишите и скидывайте ссылки в чат https://t.me/wiki_ukraine_links_chat.";
         val text = TEXT
         translateText(projectId, sourceLanguage, targetLanguage, text)
+    }
+
+    fun translateText(sourceLanguage: String, targetLanguage: String, text: String): String {
+        return translateText(DEFAULT_PROJECT_ID, sourceLanguage, targetLanguage, text)
     }
 
     @Throws(IOException::class)
