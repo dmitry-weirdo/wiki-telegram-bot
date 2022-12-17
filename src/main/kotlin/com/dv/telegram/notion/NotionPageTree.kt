@@ -1,5 +1,6 @@
 package com.dv.telegram.notion
 
+import com.dv.telegram.google.GoogleCloudTranslateApp
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
@@ -201,9 +202,9 @@ object NotionPageTree : Logging {
         val refreshTimeParagraph = NotionPageUtils.createParagraph(refreshTimeText)
 
         // translation toggles
-        val ruToggle = createToggle("Оригинальная страница (RU)", tree)
-        val ruUkToggle = createTranslationToggle(tree, "ru", "uk") // see https://www.labnol.org/code/19899-google-translate-languages
-        val ruDeToggle = createTranslationToggle(tree, "ru", "de") // see https://www.labnol.org/code/19899-google-translate-languages
+        val ruToggle = createToggle("Оригинальная страница (${GoogleCloudTranslateApp.LANGUAGE_RUSSIAN})", tree)
+        val ruUkToggle = createTranslationToggle(tree, GoogleCloudTranslateApp.LANGUAGE_RUSSIAN, GoogleCloudTranslateApp.LANGUAGE_UKRAINIAN)
+        val ruDeToggle = createTranslationToggle(tree, GoogleCloudTranslateApp.LANGUAGE_RUSSIAN, GoogleCloudTranslateApp.LANGUAGE_GERMAN)
 
         val pageBlocks = listOf(
             refreshTimeParagraph,
@@ -244,13 +245,14 @@ object NotionPageTree : Logging {
         // paragraph can have up 2000 characters
         // children size is up to 100
 
+        // todo: move to constant in NotionPageUtils
         val maxParagraphCharsCount = 2000
 
         val separator = "\n\n"
 
         val splitByNewLines = innerParagraphText.split(separator)
 
-        var paragraphText = ""
+        var paragraphText = splitByNewLines[0] // todo: check that there is at least 1 element
 
         val paragraphs = mutableListOf<Block>()
 
@@ -288,7 +290,7 @@ object NotionPageTree : Logging {
         sourceLanguage: String,
         targetLanguage: String
     ): String {
-        // todo: translate with Google Translate
-        return text + "\n\n$sourceLanguage → $targetLanguage"
+        return GoogleCloudTranslateApp.translateText(sourceLanguage, targetLanguage, text)
+//        return text + "\n\n$sourceLanguage → $targetLanguage"
     }
 }
