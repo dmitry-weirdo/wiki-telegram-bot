@@ -38,12 +38,53 @@ object NotionPageTree : Logging {
             tree.add(pageTitle)
 
             // add page children tree, NOT including the child pages
-            parseTree(client, tree, pageId, 0)
+//            parseTree(client, tree, pageId, 0)
+
+            // find the child pages tree
+            collectPagesTree(client, tree, pageId, 0)
 
             val treeToPrint = tree.joinToString("\n")
             logger.info("tree: \n$treeToPrint")
 
-            createPage(client, pageId, "[❗ Beta ❗] Тестовый автоперевод главной страницы", treeToPrint)
+//            createPage(client, pageId, "[❗ Beta ❗] Тестовый автоперевод главной страницы", treeToPrint)
+        }
+    }
+
+    private fun collectPagesTree(client: NotionClient, tree: MutableList<String>, blockId: String, currentLevel: Int) {
+        val separator = LEVEL_SEPARATOR.repeat(currentLevel)
+        val separatorNextLevel = LEVEL_SEPARATOR.repeat(currentLevel + 1)
+
+        val children = try {
+            client.retrieveBlockChildren(blockId)
+        }
+        catch (e: Exception) {
+            logger.error("Error when getting children for block $blockId", e)
+            logger.error("$separator ERROR GETTING CHILDREN FOR BLOCK $blockId")
+            return;
+        }
+
+        if (children.hasMore) {
+            // todo: handle
+//        children.nextCursor
+
+            logger.warn("Block $blockId has more child pages! Next cursor: \"${children.nextCursor}\".")
+        }
+
+        children.results.forEach {
+            if (it.type == BlockType.ChildPage) { // only proceed if the child page is found
+                val childPage = it.asChildPage()
+
+                logger.info("$separatorNextLevel child page title: ${childPage.childPage.title}")
+
+                tree.add("$separatorNextLevel ${childPage.childPage.title}")
+            }
+
+            if (
+//                it.type != BlockType.ChildPage && // do NOT parse into the child pages
+                it.hasChildren == true
+            ) { // block has child blocks -> handle them at the next level
+                collectPagesTree(client, tree, it.id!!, currentLevel + 1)
+            }
         }
     }
 
