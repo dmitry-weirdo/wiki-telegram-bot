@@ -8,6 +8,11 @@ import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.blocks.HeadingOneBlock
+import notion.api.v1.model.blocks.ParagraphBlock
+import notion.api.v1.model.common.RichTextMentionType
+import notion.api.v1.model.common.RichTextType
+import notion.api.v1.model.pages.Page
+import notion.api.v1.model.pages.PageProperty.RichText
 import org.apache.logging.log4j.kotlin.Logging
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -21,7 +26,7 @@ object NotionWrapper : Logging {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val wikiBotConfigs = WikiBotUtils.readConfigs()
+/*        val wikiBotConfigs = WikiBotUtils.readConfigs()
 
         val threadsCount = wikiBotConfigs.configs.size
         logger.info("Total bot configs: $threadsCount")
@@ -37,14 +42,20 @@ object NotionWrapper : Logging {
         val cityChats = NotionCityChats.from(cityChatsData)
 //        val cityChats = getCityChats(); // use test data
 
-        logger.info("$cityChats.size city chats read from Google Sheet.")
+        logger.info("$cityChats.size city chats read from Google Sheet.")*/
 
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 
 //        val pageId = NotionPageIds.MAIN_PAGE // Помощь украинцам в Германии
-//        val pageId = NotionPageIds.NOTION_API_TEST_PAGE // Test page for Notion API
+        val pageId = NotionPageIds.NOTION_API_TEST_PAGE // Test page for Notion API
 //        val pageId = NotionPageIds.GERMAN_CITY_CHATS_RU // список чатов по городам (german-city-chats)
-        val pageId = "67sadfsadfjlkfdsaj" // incorrect page
+//        val pageId = "67sadfsadfjlkfdsaj" // incorrect page
+
+        if (true) {
+            appendPageMention(notionToken, pageId)
+            return
+        }
+
 
 /*
         if (true) {
@@ -62,12 +73,67 @@ object NotionWrapper : Logging {
         );
 */
 
+/*
         appendCityChats(
             notionToken,
             pageId,
             TOGGLE_HEADER_1_TO_APPEND_TEXT,
             cityChats
         )
+*/
+    }
+
+    private fun appendPageMention(notionToken: String, pageId: String) {
+
+        NotionPageUtils.execute(notionToken) {
+//            val page = NotionPageUtils.retrievePage(it, pageId)
+
+            val mentionedPageId = NotionPageIds.MAIN_PAGE
+
+            val mentionedPage = NotionPageUtils.retrievePage(it, mentionedPageId)
+
+/*
+            val mentionPage = Page(
+                id = "2b4f00e80cb94440af00e8d83b758f27",
+                icon = null,
+                cover = null,
+
+            )
+*/
+
+            val mention = RichText.Mention(
+                type = RichTextMentionType.Page,
+                page = mentionedPage,
+            )
+
+
+            val richText = RichText(
+                type = RichTextType.Mention,
+//                plainText = "My plain text page name override", // does not override the page name
+
+                // todo: do we need to set href manually?
+//                href = "https://www.notion.so/$mentionedPageId",
+
+                mention = mention
+            )
+
+            val textBeforeLink = NotionPageUtils.createRichText("This will be a mention link 2 — ")
+
+            val paragraph = ParagraphBlock(
+                ParagraphBlock.Element(
+                    listOf(textBeforeLink, richText)
+                )
+            )
+
+            it.appendBlockChildren(pageId, listOf(paragraph))
+
+/*
+            val simpleParagraph = NotionPageUtils.createParagraph("My test paragraph text")
+            it.appendBlockChildren(pageId, listOf(simpleParagraph))
+*/
+
+//            NotionPageUtils.append(it, page, paragraph)
+        }
     }
 
     private fun appendToggleHeadingOne(notionToken: String, pageId: String) {
