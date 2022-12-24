@@ -11,6 +11,7 @@ import notion.api.v1.model.blocks.HeadingOneBlock
 import notion.api.v1.model.blocks.ParagraphBlock
 import notion.api.v1.model.blocks.ToggleBlock
 import notion.api.v1.model.common.RichTextLinkType
+import notion.api.v1.model.common.RichTextMentionType
 import notion.api.v1.model.common.RichTextType
 import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageProperty.RichText
@@ -167,6 +168,35 @@ object NotionPageUtils : Logging {
         return RichText(
             RichTextType.Text,
             RichText.Text(text, link)
+        )
+    }
+
+    fun createRichTextWithPageMention(client: NotionClient, mentionedPageId: String): RichText {
+        // it's almost impossible to construct the Page object manually, we must not do this
+        /*
+                    val mentionPage = Page(
+                        id = mentionedPageId,
+                        icon = null,
+                        cover = null,
+
+                    )
+        */
+
+        val mentionedPage = retrievePage(client, mentionedPageId)
+
+        val mention = RichText.Mention(
+            type = RichTextMentionType.Page,
+            page = mentionedPage,
+        )
+
+        return RichText(
+            type = RichTextType.Mention,
+//                plainText = "My plain text page name override", // does not override the page name
+
+            // todo: do we need to set href manually?
+//                href = "https://www.notion.so/$mentionedPageId",
+
+            mention = mention
         )
     }
 
