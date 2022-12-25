@@ -184,6 +184,10 @@ object NotionPageUtils : Logging {
 
         val mentionedPage = retrievePage(client, mentionedPageId)
 
+        return createRichTextWithPageMention(mentionedPage)
+    }
+
+    fun createRichTextWithPageMention(mentionedPage: Page): RichText {
         val mention = RichText.Mention(
             type = RichTextMentionType.Page,
             page = mentionedPage,

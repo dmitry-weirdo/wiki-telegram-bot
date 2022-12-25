@@ -5,6 +5,7 @@ import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.blocks.BlockType
+import notion.api.v1.model.blocks.ParagraphBlock
 import notion.api.v1.model.common.Emoji
 import notion.api.v1.model.pages.PageParent
 import notion.api.v1.model.pages.PageProperty
@@ -24,7 +25,8 @@ object NotionPageTree : Logging {
     fun main(args: Array<String>) {
         // todo: may also read from bot json config
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
-        val pageId = WikiBotUtils.getEnvVariable(PAGE_ID_ENV_NAME)
+//        val pageId = WikiBotUtils.getEnvVariable(PAGE_ID_ENV_NAME)
+        val pageId = NotionPageIds.FIRST_STEPS_RU
 
         val tree = mutableListOf<String>()
 
@@ -37,11 +39,16 @@ object NotionPageTree : Logging {
 
             tree.add(pageTitle)
 
+            val node = NotionPageNode(pageId, "", pageTitle)
+
             // add page children tree, NOT including the child pages
 //            parseTree(client, tree, pageId, 0)
 
             // find the child pages tree
-            collectPagesTree(client, tree, pageId, 0)
+            collectPagesTree(client, tree, node, pageId, 0)
+
+//            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
+            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
 
             val treeToPrint = tree.joinToString("\n")
             logger.info("tree: \n$treeToPrint")
@@ -50,7 +57,38 @@ object NotionPageTree : Logging {
         }
     }
 
-    private fun collectPagesTree(client: NotionClient, tree: MutableList<String>, blockId: String, currentLevel: Int) {
+    private fun appendTree(client: NotionClient, parentBlockId: String, node: NotionPageNode, level: Int) {
+        val page = NotionPageUtils.retrievePage(client, node.id)
+
+        val separatorText = "        ".repeat(level)
+
+        val separatorBeforeLink = NotionPageUtils.createRichText(separatorText)
+
+        val lastEditTime = ZonedDateTime.parse(page.lastEditedTime)
+        val lastEditTimeString = lastEditTime.format(dateTimeFormatter)
+
+        val lastEditText = NotionPageUtils.createRichText("  (edited: $lastEditTimeString)")
+
+        val mentionRichText = NotionPageUtils.createRichTextWithPageMention(page)
+
+        val paragraph = ParagraphBlock(
+            ParagraphBlock.Element(
+                listOf(
+                    separatorBeforeLink,
+                    mentionRichText,
+                    lastEditText
+                )
+            )
+        )
+
+        client.appendBlockChildren(parentBlockId, listOf(paragraph))
+
+        for (child in node.children) {
+            appendTree(client, parentBlockId, child, level + 1)
+        }
+    }
+
+    private fun collectPagesTree(client: NotionClient, tree: MutableList<String>, parent: NotionPageNode, blockId: String, currentLevel: Int) {
         val separator = LEVEL_SEPARATOR.repeat(currentLevel)
         val separatorNextLevel = LEVEL_SEPARATOR.repeat(currentLevel + 1)
 
@@ -71,19 +109,26 @@ object NotionPageTree : Logging {
         }
 
         children.results.forEach {
+            var childNode: NotionPageNode? = null
+
             if (it.type == BlockType.ChildPage) { // only proceed if the child page is found
                 val childPage = it.asChildPage()
 
                 logger.info("$separatorNextLevel child page title: ${childPage.childPage.title}")
 
                 tree.add("$separatorNextLevel ${childPage.childPage.title}")
+
+                childNode = NotionPageNode(childPage.id!!, parent.id, childPage.childPage.title)
+                parent.children.add(childNode)
             }
 
             if (
 //                it.type != BlockType.ChildPage && // do NOT parse into the child pages
                 it.hasChildren == true
             ) { // block has child blocks -> handle them at the next level
-                collectPagesTree(client, tree, it.id!!, currentLevel + 1)
+                val node = childNode ?: parent
+
+                collectPagesTree(client, tree, node, it.id!!, currentLevel + 1)
             }
         }
     }
