@@ -26,7 +26,8 @@ object NotionPageTree : Logging {
         // todo: may also read from bot json config
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 //        val pageId = WikiBotUtils.getEnvVariable(PAGE_ID_ENV_NAME)
-        val pageId = NotionPageIds.FIRST_STEPS_RU
+//        val pageId = NotionPageIds.FIRST_STEPS_RU
+        val pageId = NotionPageIds.MAIN_PAGE
 
         val tree = mutableListOf<String>()
 
@@ -48,7 +49,8 @@ object NotionPageTree : Logging {
             collectPagesTree(client, tree, node, pageId, 0)
 
 //            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
-            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
+//            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
+            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
 
             val treeToPrint = tree.joinToString("\n")
             logger.info("tree: \n$treeToPrint")
