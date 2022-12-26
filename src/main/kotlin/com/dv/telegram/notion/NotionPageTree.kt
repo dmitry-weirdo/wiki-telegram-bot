@@ -26,8 +26,8 @@ object NotionPageTree : Logging {
         // todo: may also read from bot json config
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 //        val pageId = WikiBotUtils.getEnvVariable(PAGE_ID_ENV_NAME)
-//        val pageId = NotionPageIds.FIRST_STEPS_RU
-        val pageId = NotionPageIds.MAIN_PAGE
+        val pageId = NotionPageIds.FIRST_STEPS_RU
+//        val pageId = NotionPageIds.MAIN_PAGE
 
         val tree = mutableListOf<String>()
 
@@ -40,17 +40,17 @@ object NotionPageTree : Logging {
 
             tree.add(pageTitle)
 
-            val node = NotionPageNode(pageId, "", pageTitle)
+            val node = NotionPageNode(NotionPageNode.ROOT_LEVEL, pageId, "", pageTitle, null)
 
             // add page children tree, NOT including the child pages
 //            parseTree(client, tree, pageId, 0)
 
             // find the child pages tree
-            collectPagesTree(client, tree, node, pageId, 0)
+            collectPagesTree(client, tree, node, pageId, node.level)
 
 //            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
-//            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
-            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
+            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
+//            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
 
             val treeToPrint = tree.joinToString("\n")
             logger.info("tree: \n$treeToPrint")
@@ -62,7 +62,7 @@ object NotionPageTree : Logging {
     private fun appendTree(client: NotionClient, parentBlockId: String, node: NotionPageNode, level: Int) {
         val page = NotionPageUtils.retrievePage(client, node.id)
 
-        val separatorText = "        ".repeat(level)
+        val separatorText = node.getSeparator()
 
         val separatorBeforeLink = NotionPageUtils.createRichText(separatorText)
 
@@ -120,7 +120,7 @@ object NotionPageTree : Logging {
 
                 tree.add("$separatorNextLevel ${childPage.childPage.title}")
 
-                childNode = NotionPageNode(childPage.id!!, parent.id, childPage.childPage.title)
+                childNode = NotionPageNode(parent.level + 1, childPage.id!!, parent.id, childPage.childPage.title, parent)
                 parent.children.add(childNode)
             }
 
