@@ -1,5 +1,6 @@
 package com.dv.telegram.notion
 
+import com.dv.telegram.excel.PageTreeXlsxWriter
 import com.dv.telegram.google.GoogleCloudTranslateApp
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
@@ -56,8 +57,10 @@ object NotionPageTree : Logging {
             collectPagesTree(client, tree, node, pageId, node.level)
 
 //            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
-            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
+//            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
 //            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
+
+            exportRowsToExcelFile(node)
 
             val treeToPrint = tree.joinToString("\n")
             logger.info("tree: \n$treeToPrint")
@@ -95,6 +98,26 @@ object NotionPageTree : Logging {
 
         for (child in node.children) {
             appendTree(client, parentBlockId, child, level + 1)
+        }
+    }
+
+    private fun exportRowsToExcelFile(root: NotionPageNode) {
+        val nodes = mutableListOf<NotionPageNode>()
+
+        fillRowsForExcelFile(root, nodes)
+        logger.info("Total page rows: ${nodes.size}")
+
+        val directory = "c:/java/wiki-telegram-bot"
+        val filePath = PageTreeXlsxWriter.getFilePath(directory, root.id, ZonedDateTime.now())
+
+        PageTreeXlsxWriter.createXlsxFile(filePath, nodes)
+    }
+
+    private fun fillRowsForExcelFile(node: NotionPageNode, nodes: MutableList<NotionPageNode>) {
+        nodes.add(node)
+
+        for (child in node.children) {
+            fillRowsForExcelFile(child, nodes)
         }
     }
 
