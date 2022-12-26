@@ -16,6 +16,7 @@ import notion.api.v1.model.common.RichTextType
 import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageProperty.RichText
 import org.apache.logging.log4j.kotlin.Logging
+import java.time.ZonedDateTime
 
 @Suppress("TooManyFunctions")
 object NotionPageUtils : Logging {
@@ -77,6 +78,10 @@ object NotionPageUtils : Logging {
         val pageIdWithoutHyphens = pageId.replace("-", "")
 
         return "https://www.notion.so/$pageIdWithoutHyphens"
+    }
+
+    fun parseNotionDateTimeString(dateString: String): ZonedDateTime {
+        return ZonedDateTime.parse(dateString)
     }
 
     fun deleteToggleHeading1Content(client: NotionClient, blocks: Blocks, heading1Text: String): HeadingOneBlock {
