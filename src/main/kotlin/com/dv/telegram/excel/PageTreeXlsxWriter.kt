@@ -3,9 +3,11 @@ package com.dv.telegram.excel
 import com.dv.telegram.notion.NotionPageNode
 import org.apache.logging.log4j.kotlin.Logging
 import org.apache.poi.common.usermodel.HyperlinkType
+import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFFont
+import org.apache.poi.xssf.usermodel.XSSFRichTextString
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
@@ -70,6 +72,7 @@ object PageTreeXlsxWriter : Logging {
         val sheet = workbook.createSheet(SHEET_NAME)
 
         // create styles
+        val defaultStyle = createDefaultStyle(workbook)
         val headerStyle = createHeaderStyle(workbook)
         val linkStyle = createLinkStyle(workbook)
         val dateStyle = createDateTimeStyle(workbook)
@@ -88,7 +91,7 @@ object PageTreeXlsxWriter : Logging {
             cell.setCellValue(it)
         }
 
-        val context = RowGenerationContext(workbook, sheet, linkStyle, dateStyle)
+        val context = RowGenerationContext(workbook, sheet, defaultStyle, headerStyle, linkStyle, dateStyle)
 
         rowsAppender(context)
 
@@ -104,13 +107,20 @@ object PageTreeXlsxWriter : Logging {
         val pageRow = context.sheet.createRow(rowNum++)
 
         // link to page cell
+        val pageLinkRichValue = XSSFRichTextString()
+
+        pageLinkRichValue.append("--- bold ---", context.headerStyle.font)
+        pageLinkRichValue.append("        ", context.defaultStyle.font)
+        pageLinkRichValue.append("A link to Google", context.linkStyle.font)
+
         val pageLink = context.workbook.creationHelper.createHyperlink(HyperlinkType.URL)
         pageLink.address = "https://google.com"
 
         val pageLinkCell = pageRow.createCell(0)
         pageLinkCell.hyperlink = pageLink
-        pageLinkCell.cellStyle = context.linkStyle
-        pageLinkCell.setCellValue("${NotionPageNode.DEFAULT_SEPARATOR}A link to google 1")
+//        pageLinkCell.cellStyle = context.linkStyle // do NOT set the link style as cell style, only override it in the link part (after the separator)
+//        pageLinkCell.setCellValue("${NotionPageNode.DEFAULT_SEPARATOR}A link to google 1")
+        pageLinkCell.setCellValue(pageLinkRichValue) // rich value with multiple font styles
 
         // last edit date/time cell
         val date = ZonedDateTime.now()
@@ -140,12 +150,19 @@ object PageTreeXlsxWriter : Logging {
                 val pageLink = context.workbook.creationHelper.createHyperlink(HyperlinkType.URL)
                 pageLink.address = it.getLink()
 
-                val pageLinkCell = pageRow.createCell(0)
-                pageLinkCell.hyperlink = pageLink
-                pageLinkCell.cellStyle = context.linkStyle
+                val pageLinkRichValue = XSSFRichTextString()
 
                 val separator = it.getSeparator("    ")
-                pageLinkCell.setCellValue("$separator${it.title}")
+                if (separator.isNotEmpty()) { // putting an empty string to a rich value breaks Excel (it will display a warning on file opening)
+                    pageLinkRichValue.append(separator, context.defaultStyle.font)
+                }
+
+                pageLinkRichValue.append(it.title, context.linkStyle.font)
+
+                val pageLinkCell = pageRow.createCell(0)
+                pageLinkCell.hyperlink = pageLink
+//                pageLinkCell.cellStyle = context.linkStyle // do NOT set the link style as cell style, only override it in the link part (after the separator)
+                pageLinkCell.setCellValue(pageLinkRichValue)
 
                 // last edit date/time cell
                 val dateCell = pageRow.createCell(1)
@@ -169,9 +186,23 @@ object PageTreeXlsxWriter : Logging {
         }
     }
 
+    private fun createDefaultStyle(workbook: XSSFWorkbook): XSSFCellStyle {
+        val font = workbook.createFont()
+        font.bold = false // override header style
+        font.underline = XSSFFont.U_NONE // override link style
+        font.color = Font.COLOR_NORMAL // override link style
+
+        val defaultStyle = workbook.createCellStyle()
+        defaultStyle.setFont(font)
+
+        return defaultStyle
+    }
+
     private fun createHeaderStyle(workbook: XSSFWorkbook): XSSFCellStyle {
         val font = workbook.createFont()
         font.bold = true
+        font.underline = XSSFFont.U_NONE // override link style
+        font.color = Font.COLOR_NORMAL // override link style
 
         val headerStyle = workbook.createCellStyle()
         headerStyle.setFont(font)
@@ -181,6 +212,7 @@ object PageTreeXlsxWriter : Logging {
 
     private fun createLinkStyle(workbook: XSSFWorkbook): XSSFCellStyle {
         val linkFont = workbook.createFont()
+        linkFont.bold = false // override header style
         linkFont.underline = XSSFFont.U_SINGLE
         linkFont.color = IndexedColors.BLUE.index
 
@@ -210,6 +242,8 @@ object PageTreeXlsxWriter : Logging {
 data class RowGenerationContext (
     val workbook: XSSFWorkbook,
     val sheet: XSSFSheet,
+    val defaultStyle: XSSFCellStyle,
+    val headerStyle: XSSFCellStyle,
     val linkStyle: XSSFCellStyle,
     val dateStyle: XSSFCellStyle,
 )
