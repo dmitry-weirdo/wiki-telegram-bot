@@ -1,10 +1,13 @@
 package com.dv.telegram.notion
 
+import java.time.ZonedDateTime
+
 data class NotionPageNode(
     var level: Int,
     val id: String,
     val parentId: String,
     val title: String,
+    val lastEditedTime: ZonedDateTime,
 
     val parent: NotionPageNode?,
     val children: MutableList<NotionPageNode> = mutableListOf()

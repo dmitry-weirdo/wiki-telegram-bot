@@ -40,7 +40,14 @@ object NotionPageTree : Logging {
 
             tree.add(pageTitle)
 
-            val node = NotionPageNode(NotionPageNode.ROOT_LEVEL, pageId, "", pageTitle, null)
+            val node = NotionPageNode(
+                NotionPageNode.ROOT_LEVEL,
+                pageId,
+                "",
+                pageTitle,
+                NotionPageUtils.parseNotionDateTimeString(page.lastEditedTime),
+                null
+            )
 
             // add page children tree, NOT including the child pages
 //            parseTree(client, tree, pageId, 0)
@@ -60,14 +67,15 @@ object NotionPageTree : Logging {
     }
 
     private fun appendTree(client: NotionClient, parentBlockId: String, node: NotionPageNode, level: Int) {
-        val page = NotionPageUtils.retrievePage(client, node.id)
+        val page = NotionPageUtils.retrievePage(client, node.id) // retrieve the complete Page object is  required for page mention
 
         val separatorText = node.getSeparator()
 
         val separatorBeforeLink = NotionPageUtils.createRichText(separatorText)
 
-        val lastEditTime = ZonedDateTime.parse(page.lastEditedTime)
-        val lastEditTimeString = lastEditTime.format(dateTimeFormatter)
+//        val lastEditTime = NotionPageUtils.parseNotionDateTimeString(page.lastEditedTime)
+//        val lastEditTimeString = lastEditTime.format(dateTimeFormatter)
+        val lastEditTimeString = node.lastEditedTime.format(dateTimeFormatter)
 
         val lastEditText = NotionPageUtils.createRichText("  (edited: $lastEditTimeString)")
 
@@ -120,7 +128,15 @@ object NotionPageTree : Logging {
 
                 tree.add("$separatorNextLevel ${childPage.childPage.title}")
 
-                childNode = NotionPageNode(parent.level + 1, childPage.id!!, parent.id, childPage.childPage.title, parent)
+                childNode = NotionPageNode(
+                    parent.level + 1,
+                    childPage.id!!,
+                    parent.id,
+                    childPage.childPage.title,
+                    NotionPageUtils.parseNotionDateTimeString(childPage.lastEditedTime!!),
+                    parent
+                )
+
                 parent.children.add(childNode)
             }
 
