@@ -69,6 +69,16 @@ object NotionPageUtils : Logging {
             ?: throw CommandException("Не удалось получить название страницы ${page.id}.")
     }
 
+    fun getPageNotionLink(pageId: String?): String? {
+        if (pageId == null) {
+            return null
+        }
+
+        val pageIdWithoutHyphens = pageId.replace("-", "")
+
+        return "https://www.notion.so/$pageIdWithoutHyphens"
+    }
+
     fun deleteToggleHeading1Content(client: NotionClient, blocks: Blocks, heading1Text: String): HeadingOneBlock {
         val heading1ToAppend = getToggleHeading1Content(blocks, heading1Text)
 
