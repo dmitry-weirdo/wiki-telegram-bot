@@ -39,14 +39,21 @@ internal class BotListCommandsTest {
 
         // statistics
         val getStatistics = GetStatistics()
+        val getSuccessfulRequests = GetSuccessfulRequests()
         val getFailedRequests = GetFailedRequests()
+        val clearSuccessfulRequests = ClearSuccessfulRequests()
         val clearFailedRequests = ClearFailedRequests()
 
         // all bots commands
         val allBotsList = AllBotsList()
         val allBotsReloadFromGoogleSheet = AllBotsReloadFromGoogleSheet()
         val allBotsGetStatistics = AllBotsGetStatistics()
+        val allBotsGetSuccessfulRequests = AllBotsGetSuccessfulRequests()
         val allBotsGetFailedRequests = AllBotsGetFailedRequests()
+
+        // Telegram API wrappers
+        val getChatInfo = GetChatInfo()
+        val getUserInfo = GetUserInfo()
 
         // execute /helpCommand /listSettings
         val listCommandsResult = wikiBot.processMessage(
@@ -70,12 +77,17 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${getSetting.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${setSetting.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getStatistics.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${getSuccessfulRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getFailedRequests.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${clearSuccessfulRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${clearFailedRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsList.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsReloadFromGoogleSheet.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsGetStatistics.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${allBotsGetSuccessfulRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsGetFailedRequests.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${getChatInfo.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${getUserInfo.defaultCommandName}`"
                 + "\n\nДля получения справки по команде используйте команду"
                 + "\n`${wikiBot.botName} ${helpCommand.defaultCommandName} <commandName>`",
             true
