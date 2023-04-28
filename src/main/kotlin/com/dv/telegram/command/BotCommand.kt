@@ -83,7 +83,8 @@ interface BotCommand {
             AllBotsGetFailedRequests(),
 
             // telegram API wrappers
-            GetChatInfo()
+            GetChatInfo(),
+            GetUserInfo()
         )
     }
 }
