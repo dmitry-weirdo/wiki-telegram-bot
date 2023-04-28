@@ -2,6 +2,7 @@ package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
 import com.dv.telegram.exception.CommandException
+import org.telegram.telegrambots.meta.api.objects.Update
 
 interface BotCommand {
     val name: String // english name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
@@ -24,7 +25,7 @@ interface BotCommand {
         return true
     }
 
-    fun getResponse(text: String, bot: WikiBot): String
+    fun getResponse(text: String, bot: WikiBot, update: Update): String
 
     fun textContainsCommand(text: String): Boolean {
         return text.contains(
@@ -79,7 +80,10 @@ interface BotCommand {
             AllBotsList(),
             AllBotsReloadFromGoogleSheet(),
             AllBotsGetStatistics(),
-            AllBotsGetFailedRequests()
+            AllBotsGetFailedRequests(),
+
+            // telegram API wrappers
+            GetChatInfo()
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class ClearFailedRequests : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -10,7 +11,7 @@ class ClearFailedRequests : BasicBotCommand() {
 
     override val defaultCommandName = "/clearFailedRequests"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val clearedFailedRequestsCount = bot.statistics.failedRequests.size
 
         bot.statistics.clearFailedRequests()

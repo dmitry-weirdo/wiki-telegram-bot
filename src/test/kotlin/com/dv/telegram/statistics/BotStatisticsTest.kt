@@ -21,6 +21,8 @@ internal class BotStatisticsTest {
         val botName = wikiBot.botName.uppercase() // match must be case-insensitive
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
+        val update = BotTestUtils.getUpdate()
+
         val statistics = wikiBot.statistics
         val startTime = statistics.startTime
         assertThat(startTime).isBefore(ZonedDateTime.now())
@@ -39,7 +41,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.totalCallsWithSpecialCommands).isZero
 
         // message not for the bot must not affect stats
-        val notForTheBotResult = wikiBot.processMessage("Not for the bot", botAdmin)
+        val notForTheBotResult = wikiBot.processMessage("Not for the bot", botAdmin, update)
         assertThat(notForTheBotResult).isEqualTo(MessageProcessingResult.notForTheBot())
 
         assertThat(statistics.startTime).isEqualTo(startTime)
@@ -55,10 +57,14 @@ internal class BotStatisticsTest {
 
         // execute special command
         val getEnvironment = GetEnvironment()
-        val getEnvironmentResult = wikiBot.processMessage("$botName ${getEnvironment.defaultCommandName}", botAdmin)
+        val getEnvironmentResult = wikiBot.processMessage(
+            "$botName ${getEnvironment.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedGetEnvironmentResult = MessageProcessingResult.specialCommand(
-            getEnvironment.getResponse("", wikiBot),
+            getEnvironment.getResponse("", wikiBot, update),
             false
         )
 
@@ -76,7 +82,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(1) // updated
 
         // execute successful request
-        val successfulRequestResult = wikiBot.processMessage("$botName Айзенах", botAdmin)
+        val successfulRequestResult = wikiBot.processMessage("$botName Айзенах", botAdmin, update)
 
         val expectedSuccessfulRequestResult = MessageProcessingResult.answerFound(
             "Eisenach чаты:" +
@@ -98,7 +104,7 @@ internal class BotStatisticsTest {
 
         // execute failed request
         val failedRequestText = "$botName bad request"
-        val failedRequestResult = wikiBot.processMessage(failedRequestText, botAdmin)
+        val failedRequestResult = wikiBot.processMessage(failedRequestText, botAdmin, update)
 
         val expectedFailedRequestResult = MessageProcessingResult.answerNotFound(
             wikiBot.messageProcessor.getNoResultAnswer(failedRequestText)
@@ -120,7 +126,11 @@ internal class BotStatisticsTest {
         // execute /getFailedRequests
         val getFailedRequests = GetFailedRequests()
 
-        val getFailedRequestsResult = wikiBot.processMessage("$botName ${getFailedRequests.defaultCommandName}", botAdmin)
+        val getFailedRequestsResult = wikiBot.processMessage(
+            "$botName ${getFailedRequests.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedGetFailedRequestsResult = MessageProcessingResult.specialCommand(
             "Разных неудачных запросов: 1" +
@@ -145,7 +155,11 @@ internal class BotStatisticsTest {
         // execute /getStats
         val getStatistics = GetStatistics()
 
-        val getStatisticsResult = wikiBot.processMessage("$botName ${getStatistics.defaultCommandName}", botAdmin)
+        val getStatisticsResult = wikiBot.processMessage(
+            "$botName ${getStatistics.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val startTimeString = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss").format(startTime)
 
@@ -176,8 +190,11 @@ internal class BotStatisticsTest {
         // execute /clearFailedRequests
         val clearFailedRequests = ClearFailedRequests()
 
-        val clearFailedRequestsResult =
-            wikiBot.processMessage("$botName ${clearFailedRequests.defaultCommandName}", botAdmin)
+        val clearFailedRequestsResult = wikiBot.processMessage(
+            "$botName ${clearFailedRequests.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedClearFailedRequestsResult = MessageProcessingResult.specialCommand(
             "Список из 1 неудачных запросов к боту очищен.",

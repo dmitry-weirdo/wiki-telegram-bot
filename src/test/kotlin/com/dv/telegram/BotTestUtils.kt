@@ -6,6 +6,9 @@ import com.dv.telegram.data.WikiBotCommandData
 import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.util.JacksonUtils
 import org.assertj.core.api.Assertions
+import org.telegram.telegrambots.meta.api.objects.Chat
+import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Update
 
 object BotTestUtils {
 
@@ -115,5 +118,21 @@ object BotTestUtils {
             countryChats,
             commands
         )
+    }
+
+    @JvmStatic
+    fun getUpdate(): Update {
+        val chat = Chat()
+        chat.id = 123456789
+        chat.type = "private"
+        chat.title = "Test fake chat title"
+
+        val message = Message()
+        message.chat = chat
+
+        val update = Update()
+        update.message = message
+
+        return update
     }
 }

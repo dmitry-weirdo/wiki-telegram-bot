@@ -5,6 +5,7 @@ import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionCityChats
 import com.dv.telegram.notion.NotionWrapper
 import org.apache.logging.log4j.kotlin.Logging
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class CityChatsExportToNotion : BasicBotCommand(), Logging {
     override val name: String = javaClass.simpleName
@@ -28,7 +29,7 @@ class CityChatsExportToNotion : BasicBotCommand(), Logging {
 
     override val defaultCommandName = "/cityChatsExportToNotion"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         return try {
             val botData = bot.loadBotDataFromGoogleSheet()
 

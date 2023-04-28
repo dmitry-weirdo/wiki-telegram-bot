@@ -4,6 +4,7 @@ import com.dv.telegram.WikiBot
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionCityChats
 import org.apache.logging.log4j.kotlin.Logging
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class CityChatsValidate : BasicBotCommand(), Logging {
     override val name: String = javaClass.simpleName
@@ -18,7 +19,7 @@ class CityChatsValidate : BasicBotCommand(), Logging {
 
     override val defaultCommandName = "/cityChatsValidate"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         return try {
             val botData = bot.loadBotDataFromGoogleSheet()
 

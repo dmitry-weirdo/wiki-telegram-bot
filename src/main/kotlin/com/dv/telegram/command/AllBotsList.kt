@@ -1,8 +1,9 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import org.telegram.telegrambots.meta.api.objects.Update
 
-class AllBotsList: BasicBotCommand() {
+class AllBotsList : BasicBotCommand() {
     override val name: String = javaClass.simpleName
 
     override fun getDescription(bot: WikiBot) =
@@ -12,7 +13,7 @@ class AllBotsList: BasicBotCommand() {
 
     override val defaultCommandName = "/allBotsList"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots

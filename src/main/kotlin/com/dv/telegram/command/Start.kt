@@ -2,6 +2,7 @@ package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
 import com.dv.telegram.config.StartMessage
+import org.telegram.telegrambots.meta.api.objects.Update
 import java.text.MessageFormat
 
 class Start : BasicBotCommand() {
@@ -23,7 +24,7 @@ class Start : BasicBotCommand() {
 
     override fun requiresBotAdminRights() = false // /start command should be available for non-admin users too
 
-    override fun getResponse(text: String, bot: WikiBot): String = // class defined explicitly because of Java -> Kotlin class conversion
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String = // class defined explicitly because of Java -> Kotlin class conversion
         // todo: use some Kotlin formatter instead of Java if exists and possible
         MessageFormat.format(
             bot.settings.startMessage,

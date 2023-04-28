@@ -15,11 +15,17 @@ internal class BotHelpCommandsTest {
         val botName = wikiBot.botName.uppercase() // match must be case-insensitive
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
+        val update = BotTestUtils.getUpdate()
+
         val listSettings = ListSettings()
         val helpCommand = HelpCommand()
 
         // execute /helpCommand /listSettings
-        val helpCommandResult = wikiBot.processMessage("$botName ${helpCommand.defaultCommandName} ${listSettings.defaultCommandName}", botAdmin)
+        val helpCommandResult = wikiBot.processMessage(
+            "$botName ${helpCommand.defaultCommandName} ${listSettings.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedHelpCommandResult = MessageProcessingResult.specialCommand(
             "*${listSettings.defaultCommandName}*"
@@ -37,17 +43,27 @@ internal class BotHelpCommandsTest {
         val botName = wikiBot.botName.uppercase() // match must be case-insensitive
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
+        val update = BotTestUtils.getUpdate()
+
         val helpCommand = HelpCommand()
 
         // no command name
-        val noCommandNameResult = wikiBot.processMessage("$botName ${helpCommand.defaultCommandName}", botAdmin)
+        val noCommandNameResult = wikiBot.processMessage(
+            "$botName ${helpCommand.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedNoCommandNameResult = MessageProcessingResult.specialCommand("Неизвестное имя команды.", true)
 
         Assertions.assertThat(noCommandNameResult).isEqualTo(expectedNoCommandNameResult)
 
         // incorrect command name
-        val incorrectCommandNameResult = wikiBot.processMessage("$botName ${helpCommand.defaultCommandName} BadCommand", botAdmin)
+        val incorrectCommandNameResult = wikiBot.processMessage(
+            "$botName ${helpCommand.defaultCommandName} BadCommand",
+            botAdmin,
+            update
+        )
 
         val expectedIncorrectCommandNameResult = MessageProcessingResult.specialCommand("Неизвестное имя команды.", true)
 

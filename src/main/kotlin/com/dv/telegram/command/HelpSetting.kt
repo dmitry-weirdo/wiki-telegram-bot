@@ -1,6 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class HelpSetting : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -12,7 +13,7 @@ class HelpSetting : BasicBotCommand() {
 
     override val defaultCommandName = "/helpSetting"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val commandStartIndex = text.indexOf(commandText)
         if (commandStartIndex < 0) {
             return unknownSettingResponse()

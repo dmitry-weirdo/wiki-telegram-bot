@@ -15,6 +15,8 @@ internal class BotListCommandsTest {
         val botName = wikiBot.botName.uppercase() // match must be case-insensitive
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
+        val update = BotTestUtils.getUpdate()
+
         // order of commands defined by BotCommands.getAllCommands
         val helpCommand = HelpCommand()
         val listCommands = ListCommands()
@@ -47,7 +49,11 @@ internal class BotListCommandsTest {
         val allBotsGetFailedRequests = AllBotsGetFailedRequests()
 
         // execute /helpCommand /listSettings
-        val listCommandsResult = wikiBot.processMessage("$botName ${listCommands.defaultCommandName}", botAdmin)
+        val listCommandsResult = wikiBot.processMessage(
+            "$botName ${listCommands.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedListCommandsResult = MessageProcessingResult.specialCommand(
             "Список команд бота:"

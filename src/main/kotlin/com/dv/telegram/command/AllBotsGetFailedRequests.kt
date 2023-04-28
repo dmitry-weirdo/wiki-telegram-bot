@@ -1,6 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class AllBotsGetFailedRequests : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -10,7 +11,7 @@ class AllBotsGetFailedRequests : BasicBotCommand() {
 
     override val defaultCommandName = "/allBotsGetFailedRequests"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
@@ -28,7 +29,7 @@ class AllBotsGetFailedRequests : BasicBotCommand() {
             val botGetFailedRequestsResponse = contextBot
                 .specialCommands
                 .getFailedRequestsCommand
-                .getResponse("", contextBot)
+                .getResponse("", contextBot, update)
 
             // no multi-line string because of indent problems when parameter string itself contains the line breaks
             lines.add("${contextBot.botName} ($botTelegramNameForResponse)\n$botGetFailedRequestsResponse")

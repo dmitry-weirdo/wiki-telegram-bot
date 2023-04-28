@@ -2,6 +2,7 @@ package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
 import com.dv.telegram.WikiBotConfig
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotCommand>) {
     val startCommand: Start = getCommand(commands, Start::class.java)
@@ -39,7 +40,7 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
             it.textContainsCommand(text) && it.useMarkdownInResponse()
         }
 
-    fun getResponse(text: String, userName: String, bot: WikiBot): SpecialCommandResponse {
+    fun getResponse(text: String, userName: String, bot: WikiBot, update: Update): SpecialCommandResponse {
         val userHasBotAdminRights = userHasRightsToExecuteSpecialCommands(userName)
 
         val command = commands
@@ -49,7 +50,7 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
             }
             ?: return SpecialCommandResponse.noResponse() // no rights on command -> return "special command unknown" response
 
-        val response = command.getResponse(text, bot)
+        val response = command.getResponse(text, bot, update)
         val useMarkdownInResponse = command.useMarkdownInResponse()
 
         return SpecialCommandResponse.withResponse(response, useMarkdownInResponse)

@@ -1,6 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import org.telegram.telegrambots.meta.api.objects.Update
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -12,7 +13,7 @@ class GetStatistics : BasicBotCommand() {
 
     override val defaultCommandName = "/getStats"
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val statistics = bot.statistics
 
         val statisticsLines = listOf(

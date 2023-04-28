@@ -15,9 +15,15 @@ internal class BotListAdminsTest {
         val botName = wikiBot.botName.uppercase() // match must be case-insensitive
         val botAdmin = wikiBot.specialCommands.botAdmins.iterator().next()
 
+        val update = BotTestUtils.getUpdate()
+
         val listAdmins = ListAdmins()
 
-        val result = wikiBot.processMessage("$botName ${listAdmins.defaultCommandName}", botAdmin)
+        val result = wikiBot.processMessage(
+            "$botName ${listAdmins.defaultCommandName}",
+            botAdmin,
+            update
+        )
 
         val expectedResult = MessageProcessingResult.specialCommand(
             "— @dmitry\\_weirdo"

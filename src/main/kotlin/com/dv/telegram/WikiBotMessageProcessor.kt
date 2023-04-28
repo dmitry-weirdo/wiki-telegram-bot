@@ -2,6 +2,7 @@ package com.dv.telegram
 
 import com.dv.telegram.config.BotTriggerMode
 import org.apache.logging.log4j.kotlin.Logging
+import org.telegram.telegrambots.meta.api.objects.Update
 import java.text.MessageFormat
 import java.util.regex.Pattern
 
@@ -21,7 +22,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         }
     }
 
-    fun processMessage(text: String, userName: String): MessageProcessingResult { // non-private for testing
+    fun processMessage(text: String, userName: String, update: Update): MessageProcessingResult { // non-private for testing
         if (text.isBlank()) {
             return MessageProcessingResult.notForTheBot()
         }
@@ -33,7 +34,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         }
 
         // special commands - not configured in the Google Sheet
-        val specialCommandResponse = wikiBot.specialCommands.getResponse(text, userName, wikiBot)
+        val specialCommandResponse = wikiBot.specialCommands.getResponse(text, userName, wikiBot, update)
         if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
             return MessageProcessingResult.specialCommand(
                 specialCommandResponse.response,

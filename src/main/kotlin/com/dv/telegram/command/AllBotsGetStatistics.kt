@@ -2,6 +2,7 @@ package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
 import com.dv.telegram.statistics.BotStatistics
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class AllBotsGetStatistics : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -13,7 +14,7 @@ class AllBotsGetStatistics : BasicBotCommand() {
 
     override fun useMarkdownInResponse() = true
 
-    override fun getResponse(text: String, bot: WikiBot): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
@@ -26,7 +27,7 @@ class AllBotsGetStatistics : BasicBotCommand() {
             val botGetStatisticsResponse = contextBot
                 .specialCommands
                 .getStatisticsCommand
-                .getResponse("", contextBot)
+                .getResponse("", contextBot, update)
 
             // no multi-line string because of indent problems when parameter string itself contains the line breaks
             lines.add("*${contextBot.botName}* ($botTelegramNameForMarkdown)\n$botGetStatisticsResponse")

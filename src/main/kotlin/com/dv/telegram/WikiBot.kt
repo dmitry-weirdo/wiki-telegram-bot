@@ -112,7 +112,7 @@ class WikiBot(
         val text = updateMessage.text
         val userName = updateMessage.from.userName ?: "" // userName is nullable, user can have no username in Telegram
 
-        val processingResult = processMessage(text, userName)
+        val processingResult = processMessage(text, userName, update)
 
         if (!processingResult.messageIsForTheBot) { // message is not for the bot -> do nothing
             return
@@ -195,8 +195,8 @@ class WikiBot(
         }
     }
 
-    fun processMessage(text: String, userName: String): MessageProcessingResult { // non-private for testing
-        val result = messageProcessor.processMessage(text, userName)
+    fun processMessage(text: String, userName: String, update: Update): MessageProcessingResult { // non-private for testing
+        val result = messageProcessor.processMessage(text, userName, update)
 
         statistics.update(text, result) // moved into this method to be updated in the test
 

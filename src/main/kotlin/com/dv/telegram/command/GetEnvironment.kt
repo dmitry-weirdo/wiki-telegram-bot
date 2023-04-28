@@ -1,6 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import org.telegram.telegrambots.meta.api.objects.Update
 
 class GetEnvironment : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -10,6 +11,6 @@ class GetEnvironment : BasicBotCommand() {
 
     override val defaultCommandName = "/getEnvironment"
 
-    override fun getResponse(text: String, bot: WikiBot) =
+    override fun getResponse(text: String, bot: WikiBot, update: Update) =
         "${bot.botName} живёт здесь: ${bot.environmentName}."
 }
