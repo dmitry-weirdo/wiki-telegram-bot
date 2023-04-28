@@ -3,9 +3,11 @@ package com.dv.telegram.statistics
 import com.dv.telegram.BotTestUtils
 import com.dv.telegram.MessageProcessingResult
 import com.dv.telegram.command.ClearFailedRequests
+import com.dv.telegram.command.ClearSuccessfulRequests
 import com.dv.telegram.command.GetEnvironment
 import com.dv.telegram.command.GetFailedRequests
 import com.dv.telegram.command.GetStatistics
+import com.dv.telegram.command.GetSuccessfulRequests
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -15,7 +17,7 @@ import java.time.format.DateTimeFormatter
 internal class BotStatisticsTest {
 
     @Test
-    @DisplayName("Test bot statistics")
+    @DisplayName("Test bot statistics.")
     fun testBotStatistics() {
         val wikiBot = BotTestUtils.getWikiBot()
         val botName = wikiBot.botName.uppercase() // match must be case-insensitive
@@ -32,6 +34,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isZero
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
+        assertThat(statistics.successfulRequests).isEmpty()
         assertThat(statistics.failedRequestsCount).isZero
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
         assertThat(statistics.failedRequests).isEmpty()
@@ -47,6 +50,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isZero
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
+        assertThat(statistics.successfulRequests).isEmpty()
         assertThat(statistics.failedRequestsCount).isZero
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
         assertThat(statistics.failedRequests).isEmpty()
@@ -73,6 +77,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isZero
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
+        assertThat(statistics.successfulRequests).isEmpty()
         assertThat(statistics.failedRequestsCount).isZero
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
         assertThat(statistics.failedRequests).isEmpty()
@@ -82,7 +87,8 @@ internal class BotStatisticsTest {
         assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(1) // updated
 
         // execute successful request
-        val successfulRequestResult = wikiBot.processMessage("$botName Айзенах", botAdmin, update)
+        val successfulRequestText = "$botName Айзенах"
+        val successfulRequestResult = wikiBot.processMessage(successfulRequestText, botAdmin, update)
 
         val expectedSuccessfulRequestResult = MessageProcessingResult.answerFound(
             "Eisenach чаты:" +
@@ -94,6 +100,7 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isEqualTo(1) // updated
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (100.00 %)") // updated
+        assertThat(statistics.successfulRequests).containsExactly(successfulRequestText) // updated
         assertThat(statistics.failedRequestsCount).isZero
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
         assertThat(statistics.failedRequests).isEmpty()
@@ -101,6 +108,36 @@ internal class BotStatisticsTest {
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("1 (100.00 %)") // updated
         assertThat(statistics.specialCommandsCount).isEqualTo(1)
         assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(2) // updated
+
+        // execute /getSuccessfulRequests
+        val getSuccessfulRequests = GetSuccessfulRequests()
+
+        val getSuccessfulRequestsResult = wikiBot.processMessage(
+            "$botName ${getSuccessfulRequests.defaultCommandName}",
+            botAdmin,
+            update
+        )
+
+        val expectedGetSuccessfulRequestsResult = MessageProcessingResult.specialCommand(
+            "Разных удачных запросов: 1" +
+                "\n— $successfulRequestText",
+            false
+        )
+
+        assertThat(getSuccessfulRequestsResult).isEqualTo(expectedGetSuccessfulRequestsResult)
+
+        // /getSuccessfulRequests is also a special command
+        assertThat(statistics.startTime).isEqualTo(startTime)
+        assertThat(statistics.successfulRequestsCount).isEqualTo(1)
+        assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (100.00 %)")
+        assertThat(statistics.successfulRequests).containsExactly(successfulRequestText)
+        assertThat(statistics.failedRequestsCount).isZero()
+        assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("0 (0.00 %)")
+        assertThat(statistics.failedRequests).isEmpty()
+        assertThat(statistics.totalCalls).isEqualTo(1)
+        assertThat(statistics.totalCallsWithPercentage).isEqualTo("1 (100.00 %)")
+        assertThat(statistics.specialCommandsCount).isEqualTo(2) // updated
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(3) // updated
 
         // execute failed request
         val failedRequestText = "$botName bad request"
@@ -115,13 +152,14 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isEqualTo(1)
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (50.00 %)") // updated
+        assertThat(statistics.successfulRequests).containsExactly(successfulRequestText)
         assertThat(statistics.failedRequestsCount).isEqualTo(1) // updated
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("1 (50.00 %)") // updated
         assertThat(statistics.failedRequests).containsExactly(failedRequestText) // updated
         assertThat(statistics.totalCalls).isEqualTo(2) // updated
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)") // updated
-        assertThat(statistics.specialCommandsCount).isEqualTo(1)
-        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(3) // updated
+        assertThat(statistics.specialCommandsCount).isEqualTo(2)
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(4) // updated
 
         // execute /getFailedRequests
         val getFailedRequests = GetFailedRequests()
@@ -144,13 +182,14 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isEqualTo(1)
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
+        assertThat(statistics.successfulRequests).containsExactly(successfulRequestText)
         assertThat(statistics.failedRequestsCount).isEqualTo(1)
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
         assertThat(statistics.failedRequests).containsExactly(failedRequestText)
         assertThat(statistics.totalCalls).isEqualTo(2)
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
-        assertThat(statistics.specialCommandsCount).isEqualTo(2) // updated
-        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(4) // updated
+        assertThat(statistics.specialCommandsCount).isEqualTo(3) // updated
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(5) // updated
 
         // execute /getStats
         val getStatistics = GetStatistics()
@@ -168,8 +207,8 @@ internal class BotStatisticsTest {
                 "\n— Успешных запросов: 1 (50.00 %)" +
                 "\n— Неуспешных запросов: 1 (50.00 %)" +
                 "\n— Всего запросов: 2 (100.00 %)" +
-                "\n— Вызовов специальных команд: 2" + // stats updated after the /getStatistics execution
-                "\n— Всего запросов (вместе со специальными командами): 4", // stats updated after the /getStatistics execution
+                "\n— Вызовов специальных команд: 3" + // stats updated after the /getStatistics execution
+                "\n— Всего запросов (вместе со специальными командами): 5", // stats updated after the /getStatistics execution
             false
         )
 
@@ -179,13 +218,14 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isEqualTo(1)
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
+        assertThat(statistics.successfulRequests).containsExactly(successfulRequestText)
         assertThat(statistics.failedRequestsCount).isEqualTo(1)
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
         assertThat(statistics.failedRequests).containsExactly(failedRequestText)
         assertThat(statistics.totalCalls).isEqualTo(2)
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
-        assertThat(statistics.specialCommandsCount).isEqualTo(3) // updated
-        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(5) // updated
+        assertThat(statistics.specialCommandsCount).isEqualTo(4) // updated
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(6) // updated
 
         // execute /clearFailedRequests
         val clearFailedRequests = ClearFailedRequests()
@@ -207,12 +247,42 @@ internal class BotStatisticsTest {
         assertThat(statistics.startTime).isEqualTo(startTime)
         assertThat(statistics.successfulRequestsCount).isEqualTo(1)
         assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
+        assertThat(statistics.successfulRequests).containsExactly(successfulRequestText)
         assertThat(statistics.failedRequestsCount).isEqualTo(1) // NOT changed
         assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("1 (50.00 %)") // NOT changed
         assertThat(statistics.failedRequests).isEmpty() // cleared
         assertThat(statistics.totalCalls).isEqualTo(2)
         assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
-        assertThat(statistics.specialCommandsCount).isEqualTo(4) // updated
-        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(6) // updated
+        assertThat(statistics.specialCommandsCount).isEqualTo(5) // updated
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(7) // updated
+
+        // execute /clearSuccessfulRequests
+        val clearSuccessfulRequests = ClearSuccessfulRequests()
+
+        val clearSuccessfulRequestsResult = wikiBot.processMessage(
+            "$botName ${clearSuccessfulRequests.defaultCommandName}",
+            botAdmin,
+            update
+        )
+
+        val expectedClearSuccessfulRequestsResult = MessageProcessingResult.specialCommand(
+            "Список из 1 удачных запросов к боту очищен.",
+            false
+        )
+
+        assertThat(clearSuccessfulRequestsResult).isEqualTo(expectedClearSuccessfulRequestsResult)
+
+        // /clearSuccessfulRequests is also a special command
+        assertThat(statistics.startTime).isEqualTo(startTime)
+        assertThat(statistics.successfulRequestsCount).isEqualTo(1) // NOT changed
+        assertThat(statistics.successfulRequestsCountWithPercentage).isEqualTo("1 (50.00 %)") // NOT changed
+        assertThat(statistics.successfulRequests).isEmpty() // cleared
+        assertThat(statistics.failedRequestsCount).isEqualTo(1)
+        assertThat(statistics.failedRequestsCountWithPercentage).isEqualTo("1 (50.00 %)")
+        assertThat(statistics.failedRequests).isEmpty() // cleared
+        assertThat(statistics.totalCalls).isEqualTo(2)
+        assertThat(statistics.totalCallsWithPercentage).isEqualTo("2 (100.00 %)")
+        assertThat(statistics.specialCommandsCount).isEqualTo(6) // updated
+        assertThat(statistics.totalCallsWithSpecialCommands).isEqualTo(8) // updated
     }
 }

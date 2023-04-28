@@ -8,12 +8,18 @@ data class BotStatistics(
     var specialCommandsCount: Long = 0L,
     var successfulRequestsCount: Long = 0L,
     var failedRequestsCount: Long = 0L,
+    var successfulRequests: MutableSet<String> = LinkedHashSet(), // todo: add String -> count map if required
     var failedRequests: MutableSet<String> = LinkedHashSet() // todo: add String -> count map if required
 ) {
     companion object {
         private const val COUNT_PERCENTAGE_FORMAT = "%d (%.02f %%)"
 
         fun getAggregateStatistics(statisticsList: List<BotStatistics>): BotStatistics {
+            val allSuccessfulRequests = mutableSetOf<String>()
+            statisticsList.forEach {
+                allSuccessfulRequests.addAll(it.successfulRequests)
+            }
+
             val allFailedRequests = mutableSetOf<String>()
             statisticsList.forEach {
                 allFailedRequests.addAll(it.failedRequests)
@@ -24,6 +30,7 @@ data class BotStatistics(
                 statisticsList.sumOf { it.specialCommandsCount },
                 statisticsList.sumOf { it.successfulRequestsCount },
                 statisticsList.sumOf { it.failedRequestsCount },
+                allSuccessfulRequests,
                 allFailedRequests
             )
         }
@@ -37,9 +44,9 @@ data class BotStatistics(
         if (processingResult.isSpecialCommand) {
             specialCommandsCount++
         }
-
         else if (processingResult.answerIsFound) {
             successfulRequestsCount++
+            addSuccessfulRequest(text)
         }
         else {
             failedRequestsCount++
@@ -71,8 +78,16 @@ data class BotStatistics(
     val totalCallsWithSpecialCommands: Long
         get() = specialCommandsCount + totalCalls
 
+    private fun addSuccessfulRequest(successfulRequest: String) {
+        successfulRequests.add(successfulRequest)
+    }
+
     private fun addFailedRequest(failedRequest: String) {
         failedRequests.add(failedRequest)
+    }
+
+    fun clearSuccessfulRequests() {
+        successfulRequests.clear()
     }
 
     fun clearFailedRequests() {

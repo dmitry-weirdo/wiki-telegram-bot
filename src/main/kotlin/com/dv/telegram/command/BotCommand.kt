@@ -73,13 +73,16 @@ interface BotCommand {
 
             // statistics
             GetStatistics(),
+            GetSuccessfulRequests(),
             GetFailedRequests(),
+            ClearSuccessfulRequests(),
             ClearFailedRequests(),
 
             // all bots context
             AllBotsList(),
             AllBotsReloadFromGoogleSheet(),
             AllBotsGetStatistics(),
+            AllBotsGetSuccessfulRequests(),
             AllBotsGetFailedRequests(),
 
             // telegram API wrappers

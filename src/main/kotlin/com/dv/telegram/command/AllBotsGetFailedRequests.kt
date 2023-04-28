@@ -7,7 +7,7 @@ class AllBotsGetFailedRequests : BasicBotCommand() {
     override val name: String = javaClass.simpleName
 
     override fun getDescription(bot: WikiBot) =
-        "`${bot.botName} $commandText` — получить список разных неуспешных вызовов всех бота с момента текущего запуска окружения или с момента очистки этих списков в том или ином боте."
+        "`${bot.botName} $commandText` — получить список разных неуспешных вызовов всех ботов с момента текущего запуска окружения или с момента очистки этих списков в том или ином боте."
 
     override val defaultCommandName = "/allBotsGetFailedRequests"
 
