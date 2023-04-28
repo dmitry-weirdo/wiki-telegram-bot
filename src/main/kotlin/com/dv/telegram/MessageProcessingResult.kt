@@ -12,7 +12,7 @@ data class MessageProcessingResult(
     }
 
     fun getResponseOrFail(): String {
-        return response ?: throw IllegalStateException("getResponse called on an empty response.")
+        return response ?: error("getResponse called on an empty response.")
     }
 
     companion object { // factory methods

@@ -25,7 +25,7 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
             return commands
                 .firstOrNull { commandClass.isInstance(it) }
                 .let { commandClass.cast(it) }
-                ?: throw IllegalStateException("No ${commandClass.simpleName} in the list of commands.")
+                ?: error("No ${commandClass.simpleName} in the list of commands.")
         }
     }
 
