@@ -2,6 +2,7 @@ package com.dv.telegram.statistics
 
 import com.dv.telegram.BotTestUtils
 import com.dv.telegram.MessageProcessingResult
+import com.dv.telegram.ResponseType
 import com.dv.telegram.command.ClearFailedRequests
 import com.dv.telegram.command.ClearSuccessfulRequests
 import com.dv.telegram.command.GetEnvironment
@@ -92,7 +93,8 @@ internal class BotStatisticsTest {
 
         val expectedSuccessfulRequestResult = MessageProcessingResult.answerFound(
             "Eisenach чаты:" +
-                "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA"
+                "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA",
+            listOf(ResponseType.CITY_CHAT)
         )
 
         assertThat(successfulRequestResult).isEqualTo(expectedSuccessfulRequestResult)

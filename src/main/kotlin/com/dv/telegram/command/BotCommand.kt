@@ -77,6 +77,7 @@ interface BotCommand {
             GetFailedRequests(),
             ClearSuccessfulRequests(),
             ClearFailedRequests(),
+            GetLastMessageLog(),
 
             // all bots context
             AllBotsList(),

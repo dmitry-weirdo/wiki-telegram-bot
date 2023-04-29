@@ -139,7 +139,10 @@ internal class BotGetResponseTest {
             update
         )
 
-        val expectedResult = MessageProcessingResult.answerFound("Override of the special command!")
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Override of the special command!",
+            listOf(ResponseType.COMMAND) // NOT special command
+        )
 
         assertThat(result).isEqualTo(expectedResult)
     }
@@ -178,7 +181,10 @@ internal class BotGetResponseTest {
         val text = "$botName, добрый вечер, дай вики Аугсбург Болгария"
         val result = wikiBot.processMessage(text, botAdmin, update)
 
-        val expectedResult = MessageProcessingResult.answerFound("Добрый")
+        val expectedResult = MessageProcessingResult.answerFound(
+            "Добрый",
+            listOf(ResponseType.COMMAND)
+        )
 
         assertThat(result).isEqualTo(expectedResult)
     }
@@ -199,7 +205,8 @@ internal class BotGetResponseTest {
         val command1 = wikiBot.commands.answers[1]
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}"
+            "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}",
+            listOf(ResponseType.COMMAND)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -218,7 +225,8 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, botAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "Правила безопасности — https://uahelp.wiki/safety"
+            "Правила безопасности — https://uahelp.wiki/safety",
+            listOf(ResponseType.WIKI_PAGE)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -238,7 +246,8 @@ internal class BotGetResponseTest {
 
         val expectedResult = MessageProcessingResult.answerFound(
             "— Стартовая страница вики — https://uahelp.wiki" +
-                    "\n— Правила безопасности — https://uahelp.wiki/safety"
+                    "\n— Правила безопасности — https://uahelp.wiki/safety",
+            listOf(ResponseType.WIKI_PAGE)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -260,7 +269,8 @@ internal class BotGetResponseTest {
             "Augsburg чаты:" +
                     "\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине" +
                     "\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины" +
-                    "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg"
+                    "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg",
+            listOf(ResponseType.CITY_CHAT)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -284,7 +294,8 @@ internal class BotGetResponseTest {
                     "\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины" +
                     "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg" +
                     "\n\nEisenach чаты:" +
-                    "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA"
+                    "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA",
+            listOf(ResponseType.CITY_CHAT)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -306,7 +317,8 @@ internal class BotGetResponseTest {
             "Португалия чаты:" +
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
-                    "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи"
+                    "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
+            listOf(ResponseType.COUNTRY_CHAT)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -330,7 +342,8 @@ internal class BotGetResponseTest {
                     "\n\nПортугалия чаты:" +
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
-                    "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи"
+                    "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
+            listOf(ResponseType.COUNTRY_CHAT)
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -357,7 +370,8 @@ internal class BotGetResponseTest {
                     "\n\nПортугалия чаты:" + // country chats
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
-                    "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи"
+                    "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
+            listOf(ResponseType.WIKI_PAGE, ResponseType.CITY_CHAT, ResponseType.COUNTRY_CHAT)
         )
 
         assertThat(result).isEqualTo(expectedResult)

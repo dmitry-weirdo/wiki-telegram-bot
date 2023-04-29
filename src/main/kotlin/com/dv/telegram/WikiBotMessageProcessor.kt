@@ -45,16 +45,15 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         // normal commands - configured in the Google Sheet
         val commandsAnswerText = wikiBot.commands.getResponseText(lowerText)
         if (commandsAnswerText?.isNotBlank() == true) { // matching command found -> only handle the command
-            return MessageProcessingResult.answerFound(commandsAnswerText)
+            return MessageProcessingResult.answerFoundAsCommand(commandsAnswerText)
         }
 
-        val answers = listOf(
+        return processMessage(
+            text,
             wikiBot.pages.getResponseText(lowerText), // wiki pages - configured in the Google Sheet
             wikiBot.cityChats.getResponseText(lowerText), // city chats - configured in the Google Sheet
             wikiBot.countryChats.getResponseText(lowerText) // country chats - configured in the Google Sheet
         )
-
-        return processMessage(text, answers)
     }
 
     private fun messageIsForTheBot(lowerText: String): Boolean {
@@ -69,7 +68,25 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         }
     }
 
-    private fun processMessage(text: String, answerOptionals: List<String?>): MessageProcessingResult {
+    private fun processMessage(
+        text: String,
+        pagesResponse: String?,
+        cityChatsResponse: String?,
+        countryChatsResponse: String?,
+
+    ): MessageProcessingResult {
+        val responseTypes = getResponseTypes(
+            pagesResponse,
+            cityChatsResponse,
+            countryChatsResponse
+        )
+
+        val answerOptionals: List<String?> = listOf(
+            pagesResponse,
+            cityChatsResponse,
+            countryChatsResponse
+        )
+
         val answers = answerOptionals
             .filter { it?.isNotBlank() == true }
 
@@ -79,7 +96,29 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         }
 
         val combinedAnswers = answers.joinToString("\n\n")
-        return MessageProcessingResult.answerFound(combinedAnswers)
+        return MessageProcessingResult.answerFound(combinedAnswers, responseTypes)
+    }
+
+    private fun getResponseTypes(
+        pagesResponse: String?,
+        cityChatsResponse: String?,
+        countryChatsResponse: String?
+    ): List<ResponseType> {
+        val responseTypes = mutableListOf<ResponseType>()
+
+        if (pagesResponse?.isNotBlank() == true) {
+            responseTypes.add(ResponseType.WIKI_PAGE)
+        }
+
+        if (cityChatsResponse?.isNotBlank() == true) {
+            responseTypes.add(ResponseType.CITY_CHAT)
+        }
+
+        if (countryChatsResponse?.isNotBlank() == true) {
+            responseTypes.add(ResponseType.COUNTRY_CHAT)
+        }
+
+        return responseTypes
     }
 
     private fun getNoResultResponse(text: String): String? {

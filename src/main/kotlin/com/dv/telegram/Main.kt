@@ -55,7 +55,7 @@ class Main : Logging {
                     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
                     botsApi.registerBot(wikiBot)
                     logger.info(
-                        "(Kotlin!) The bot \"${wikiBot.botUsername}\" has started on \"${wikiBot.environmentName}\" environment!",
+                        "The bot \"${wikiBot.botUsername}\" (${wikiBot.botName}) has started on \"${wikiBot.environmentName}\" environment!",
                     )
 
                     "The bot ${wikiBot.botUsername} has started on \"${wikiBot.environmentName}\" environment!"

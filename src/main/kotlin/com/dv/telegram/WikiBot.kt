@@ -45,6 +45,8 @@ class WikiBot(
 
     val messageProcessor: WikiBotMessageProcessor
 
+    var lastMessageLog: MessageProcessingLog? = null
+
     var telegramName: String? = null
 
     constructor(
@@ -199,6 +201,10 @@ class WikiBot(
         val result = messageProcessor.processMessage(text, userName, update)
 
         statistics.update(text, result) // moved into this method to be updated in the test
+
+        if (result.messageIsForTheBot) {
+            lastMessageLog = MessageProcessingLog.create(this, update, result)
+        }
 
         return result
     }
