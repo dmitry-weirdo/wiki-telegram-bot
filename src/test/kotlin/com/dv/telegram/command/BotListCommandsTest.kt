@@ -43,6 +43,7 @@ internal class BotListCommandsTest {
         val getFailedRequests = GetFailedRequests()
         val clearSuccessfulRequests = ClearSuccessfulRequests()
         val clearFailedRequests = ClearFailedRequests()
+        val getLastMessageLog = GetLastMessageLog()
 
         // all bots commands
         val allBotsList = AllBotsList()
@@ -81,6 +82,7 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${getFailedRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${clearSuccessfulRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${clearFailedRequests.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${getLastMessageLog.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsList.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsReloadFromGoogleSheet.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsGetStatistics.defaultCommandName}`"

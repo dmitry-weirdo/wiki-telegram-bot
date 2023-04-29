@@ -29,11 +29,15 @@ object BotTestUtils {
 
         val context = WikiBotsContext()
 
-        return WikiBot(
+        val bot = WikiBot(
             context,
             updatedConfig,
             botData
         )
+
+        bot.telegramName = "test_telegram_wiki_bot"
+
+        return bot
     }
 
     private fun getBotData(): GoogleSheetBotData {
@@ -129,6 +133,8 @@ object BotTestUtils {
 
         val message = Message()
         message.chat = chat
+        message.date = 123456
+        message.text = "Test fake message text"
 
         val update = Update()
         update.message = message
