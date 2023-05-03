@@ -7,7 +7,8 @@ import com.dv.telegram.data.WikiBotCommandsParser
 import com.dv.telegram.data.WikiPagesParser
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.google.GoogleSheetReader
-import com.dv.telegram.google.WikiBotGoogleSheetTabsData
+import com.dv.telegram.google.TabSheetData
+import com.dv.telegram.tabs.TabData
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -33,7 +34,7 @@ object GoogleSheetLoader : Logging {
     }
 
     @JvmStatic
-    fun readGoogleSheetTabs(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
+    fun readGoogleSheetTabs(config: WikiBotConfig): GoogleSheetBotTabsData {
         try {
             logger.info("Loading bot tabs data from the Google Sheet...")
             val botData = reloadGoogleSheetTabsUnsafe(config)
@@ -63,25 +64,20 @@ object GoogleSheetLoader : Logging {
         )
     }
 
-    private fun reloadGoogleSheetTabsUnsafe(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
+    private fun reloadGoogleSheetTabsUnsafe(config: WikiBotConfig): GoogleSheetBotTabsData {
         val tabsDataRaw = GoogleSheetReader.readGoogleSheetNew(config)
 
-        tabsDataRaw.commandSheets.map {
-            when (it.config.tabFormat) {
-                TabFormat.WIKI_PAGES -> WikiPagesParser().parse(it.sheet)
-                TabFormat.CHATS -> CityChatsParser().parse(it.sheet) // todo: use common ChatsParser
-                TabFormat.COMMANDS -> WikiBotCommandsParser().parse(it.sheet)
-            }
+        val commandTabs = parseSheetData(tabsDataRaw.commandSheets)
+        val dataTabs = parseSheetData(tabsDataRaw.dataSheets)
+
+        return GoogleSheetBotTabsData(commandTabs, dataTabs)
+    }
+
+    private fun parseSheetData(sheets: List<TabSheetData>) = sheets.map {
+        when (it.config.tabFormat) {
+            TabFormat.WIKI_PAGES -> TabData(it.config, WikiPagesParser().parse(it.sheet))
+            TabFormat.CHATS -> TabData(it.config, CityChatsParser().parse(it.sheet)) // todo: use common ChatsParser instead of CityChatsParser
+            TabFormat.COMMANDS -> TabData(it.config, WikiBotCommandsParser().parse(it.sheet))
         }
-
-        // todo: same for dataSheets
-        tabsDataRaw.dataSheets
-
-
-        // todo: do we need an intermediate level with parsing -> probably yes
-        // the commands should be in the list
-        // data sheets should be generalized and in the order
-
-        return tabsDataRaw
     }
 }

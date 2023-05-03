@@ -10,7 +10,6 @@ import com.dv.telegram.data.WikiBotCommandData
 import com.dv.telegram.data.WikiBotCommandsDataList
 import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.data.WikiPagesDataList
-import com.dv.telegram.google.WikiBotGoogleSheetTabsData
 import com.dv.telegram.statistics.BotStatistics
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
@@ -259,7 +258,7 @@ class WikiBot(
         return GoogleSheetLoader.readGoogleSheet(config)
     }
 
-    fun loadBotDataFromGoogleSheetTabs(): WikiBotGoogleSheetTabsData { // does NOT reload the bot data itself
+    fun loadBotDataFromGoogleSheetTabs(): GoogleSheetBotTabsData { // does NOT reload the bot data itself
         return GoogleSheetLoader.readGoogleSheetTabs(config)
     }
 
