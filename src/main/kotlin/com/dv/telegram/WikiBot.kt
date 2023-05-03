@@ -163,8 +163,12 @@ class WikiBot(
 
         for (messageText in responseTexts) {
             val replyToMessageId =
-                if (deleteBotCallMessage) replyToMessage!!.messageId // reply to the original message
-                else updateMessage.messageId // reply to the "call bot" message
+                if (deleteBotCallMessage) { // reply to the original message
+                    replyToMessage!!.messageId
+                }
+                else { // reply to the "call bot" message
+                    updateMessage.messageId
+                }
 
             val sendMessage = SendMessage()
             sendMessage.chatId = chatId
