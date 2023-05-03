@@ -1,6 +1,7 @@
 package com.dv.telegram.tabs
 
 import com.dv.telegram.util.JacksonUtils
+import java.io.File
 
 data class TabConfigs(
     val commandTabs: List<TabConfig> = listOf(),
@@ -45,6 +46,18 @@ object TestTabConfigs {
 
         val outputFilePath = "C:\\java\\wiki-telegram-bot\\.ignoreme\\test-bot-config.json"
         JacksonUtils.serializeToFile(outputFilePath, tabConfigs, true)
+
+        val parsed = JacksonUtils.parse(File(outputFilePath), TabConfigs::class.java)
+        println(parsed)
+
+        /*
+                // just the enum serialization is working!
+                val outputFilePath = "C:\\java\\wiki-telegram-bot\\.ignoreme\\test-enum.json"
+                val tabFormat = TabFormat.WIKI_PAGES
+                JacksonUtils.serializeToFile(outputFilePath, tabFormat, true)
+
+                val parsed = JacksonUtils.parse(File(outputFilePath), TabFormat::class.java)
+                println(parsed)
+        */
     }
 }
-

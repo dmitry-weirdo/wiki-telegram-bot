@@ -13,7 +13,8 @@ object WikiBotUtils {
     fun getEnvVariable(name: String): String {
         val value = System.getenv(name)
 
-        check(!value.isNullOrBlank()) { "Environment variable $name is not set." } // check will throw ISE if check not passed
+        // check will throw ISE if the check has not passed
+        check(!value.isNullOrBlank()) { "Environment variable $name is not set." }
 
         return value
     }

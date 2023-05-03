@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.File
@@ -82,8 +84,14 @@ object JacksonUtils : Logging {
     }
 
     private fun createObjectMapper(prettyPrint: Boolean = false): ObjectMapper {
+        val kotlinModule: KotlinModule = KotlinModule
+            .Builder()
+            .enable(KotlinFeature.StrictNullChecks)
+            .build()
+
         val mapper = ObjectMapper() // serialize LocalDateTime not as object, but as date string
             .registerModule(JavaTimeModule())
+            .registerModule(kotlinModule)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false) // do not lose timezone when de-serializing OffsetDateTime
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false) // because of _id / id clash in /get-summary response, see https://github.com/OpenAPITools/openapi-generator/issues/8291

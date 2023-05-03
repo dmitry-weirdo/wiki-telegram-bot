@@ -1,5 +1,8 @@
 package com.dv.telegram
 
+import com.dv.telegram.tabs.TabConfigs
+
+@Suppress("LongParameterList")
 class WikiBotConfig(
     val botName: String = "",
     val botToken: String = "",
@@ -11,6 +14,8 @@ class WikiBotConfig(
 
     // see https://developers.google.com/sheets/api/guides/concepts
     // todo: use sheets by number instead if it is possible with A1 or R1C1 notation
+    val sheets: TabConfigs = TabConfigs(),
+
     val wikiPagesSheetName: String = "Страницы вики и ключевые слова",
     val cityChatsSheetName: String = "Список чатов по городам",
     val countryChatsSheetName: String = "Список чатов по странам",

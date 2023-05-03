@@ -1,6 +1,7 @@
 package com.dv.telegram.google
 
 import com.dv.telegram.WikiBotConfig
+import com.dv.telegram.tabs.TabConfigs
 import com.dv.telegram.util.WikiBotUtils
 import com.google.api.client.http.HttpExecuteInterceptor
 import com.google.api.client.http.HttpRequest
@@ -63,7 +64,59 @@ object GoogleSheetReader : Logging {
         )
     }
 
-    private fun wrapSheetName(sheetName: String) = "'${sheetName}'"
+    fun readGoogleSheetNew(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
+        val allTabNames = getAllTabNames(config.sheets!!)
+
+        val sheetsService = getSheets(config.googleSheetsApiKey)
+
+        // read all tabs in one iteration
+        val ranges = createRanges(config.sheets!!)
+
+        val readResult = sheetsService
+            .spreadsheets()
+            .values()
+            .batchGet(config.googleSpreadsheetId)
+            .setRanges(ranges)
+            .execute()
+
+        val valueRanges = readResult.valueRanges
+
+        val allSheetsData = allTabNames.mapIndexed {
+            index, value -> parseSheetData(valueRanges[index], value)
+        }
+
+        // map allSheetsData and tab configs to WikiBotGoogleSheetTabsData
+        var sheetIndex = 0
+
+        val commandSheets = config
+            .sheets
+            .commandTabs
+            .map { TabSheetData(it, allSheetsData[sheetIndex++]) }
+
+        val dataSheets = config
+            .sheets
+            .dataTabs
+            .map { TabSheetData(it, allSheetsData[sheetIndex++]) }
+
+        return WikiBotGoogleSheetTabsData(commandSheets, dataSheets)
+    }
+
+    private fun getAllTabNames(configs: TabConfigs): List<String> {
+        val commandTabNames = configs.commandTabs.map { it.tabName }
+        val dataTabNames = configs.dataTabs.map { it.tabName }
+
+        return commandTabNames + dataTabNames
+    }
+
+    private fun createRanges(configs: TabConfigs): List<String> {
+        val commandTabsRange = configs.commandTabs.map { wrapSheetName(it.tabName) }
+
+        val dataTabsRange = configs.dataTabs.map { wrapSheetName(it.tabName) }
+
+        return commandTabsRange + dataTabsRange
+    }
+
+    private fun wrapSheetName(sheetName: String) = "'$sheetName'"
 
     private fun parseSheetData(sheet: ValueRange, sheetName: String): SheetData {
         logger.info("Parsing sheet \"$sheetName\"...")
