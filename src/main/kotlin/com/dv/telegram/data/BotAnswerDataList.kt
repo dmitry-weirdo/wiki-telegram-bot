@@ -1,5 +1,9 @@
 package com.dv.telegram.data
 
+/**
+ * Finds the matches within the multiple rows from the same config tab
+ * and groups them into one response string.
+ */
 abstract class BotAnswerDataList<T : BotAnswerData>(
     val answers: List<T>
 ) {
