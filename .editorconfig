@@ -1,3 +1,10 @@
+[*]
+ij_any_catch_on_new_line = true
+ij_any_finally_on_new_line = true
+ij_any_else_on_new_line = true
+ij_continuation_indent_size = 4
+
+
 [{*.kt,*.kts}]
 indent_size = 4
 tab_width = 4
@@ -14,6 +21,8 @@ ij_kotlin_continuation_indent_size = 4
 max_line_length = off
 
 ij_any_catch_on_new_line = true
+ij_any_finally_on_new_line = true
+ij_any_else_on_new_line = true
 
 ktlint_standard_indent = disabled
 
