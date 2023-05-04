@@ -3,6 +3,7 @@ ij_any_catch_on_new_line = true
 ij_any_finally_on_new_line = true
 ij_any_else_on_new_line = true
 ij_continuation_indent_size = 4
+max_line_length = 200
 
 
 [{*.kt,*.kts}]
