@@ -19,7 +19,7 @@ data class MessageProcessingLog( // to be logged in a JSON
     val response: String?, // can be pretty big, but who cares
     var responseTypes: List<ResponseType>,
     // todo: do we need separate "tab names" or "responseTypes" is enough?
-    val answerIsFound: Boolean,
+    val answerIsFound: Boolean
 ) {
     companion object { // factory methods
 
@@ -27,7 +27,7 @@ data class MessageProcessingLog( // to be logged in a JSON
         fun create(
             bot: WikiBot,
             update: Update,
-            result: MessageProcessingResult,
+            result: MessageProcessingResult
         ): MessageProcessingLog {
             return MessageProcessingLog(
                 botName = bot.botName,
@@ -41,7 +41,7 @@ data class MessageProcessingLog( // to be logged in a JSON
 
                 response = result.response,
                 responseTypes = result.responseTypes,
-                answerIsFound = result.answerIsFound,
+                answerIsFound = result.answerIsFound
             )
         }
     }

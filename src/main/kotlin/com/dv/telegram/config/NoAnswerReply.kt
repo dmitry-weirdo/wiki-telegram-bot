@@ -11,7 +11,7 @@ class NoAnswerReply : BotSetting<String> {
 
     override val name = NAME
 
-    override val description =  """
+    override val description = """
         Сообщение бота, которое выдаётся, если бот не нашёл ответа на сообщение пользователя.
         В параметр `{0}` будет заполняться имя бота.
         В параметр `{1}` будет заполняться сообщение пользователя, на которое бот не нашёл ответа.

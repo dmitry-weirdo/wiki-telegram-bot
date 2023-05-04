@@ -6,7 +6,7 @@ data class MessageProcessingResult(
     val useMarkdown: Boolean,
     val answerIsFound: Boolean,
     val response: String?,
-    var responseTypes: List<ResponseType>,
+    var responseTypes: List<ResponseType>
 ) {
     fun hasNoResponse(): Boolean {
         return response == null
@@ -25,7 +25,7 @@ data class MessageProcessingResult(
                 useMarkdown = false,
                 answerIsFound = false,
                 response = null,
-                responseTypes = listOf(ResponseType.NOT_FOR_THE_BOT),
+                responseTypes = listOf(ResponseType.NOT_FOR_THE_BOT)
             )
         }
 

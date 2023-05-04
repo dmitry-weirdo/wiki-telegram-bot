@@ -72,8 +72,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         text: String,
         pagesResponse: String?,
         cityChatsResponse: String?,
-        countryChatsResponse: String?,
-
+        countryChatsResponse: String?
     ): MessageProcessingResult {
         val responseTypes = getResponseTypes(
             pagesResponse,

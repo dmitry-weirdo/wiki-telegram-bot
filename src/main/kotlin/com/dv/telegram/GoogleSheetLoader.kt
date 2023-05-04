@@ -60,7 +60,7 @@ object GoogleSheetLoader : Logging {
             wikiPages,
             cityChatsData,
             countryChatsData,
-            botCommands,
+            botCommands
         )
     }
 

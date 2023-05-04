@@ -58,7 +58,7 @@ object XlsxParser : Logging { // todo: this class has to read to WikiBotGoogleSh
 
     @Throws(IOException::class)
     private fun parseWorkbook(fileName: String): Workbook {
-        javaClass.classLoader.getResourceAsStream(fileName).use { stream ->  // getResource does not work within jar!
+        javaClass.classLoader.getResourceAsStream(fileName).use { stream -> // getResource does not work within jar!
             return XSSFWorkbook(stream)
         }
     }
