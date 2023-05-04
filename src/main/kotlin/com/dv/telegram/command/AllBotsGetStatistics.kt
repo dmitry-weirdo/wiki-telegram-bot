@@ -35,7 +35,7 @@ class AllBotsGetStatistics : BasicBotCommand() {
 
         // calculate aggregate statistics
         val statisticsFromAllBots = bots
-            .map{ it.statistics }
+            .map { it.statistics }
 
         val aggregateStatistics = BotStatistics.getAggregateStatistics(statisticsFromAllBots)
 

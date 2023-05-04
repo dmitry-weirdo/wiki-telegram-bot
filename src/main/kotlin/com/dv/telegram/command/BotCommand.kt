@@ -38,7 +38,7 @@ interface BotCommand {
 
         // no bold markdown in the header, because we can return the user input data in the error messages
         allErrors.add("При выполнении команды возникли следующие ошибки:")
-        e.errorMessages.forEach{
+        e.errorMessages.forEach {
             allErrors.add("— $it\n")
         }
 
