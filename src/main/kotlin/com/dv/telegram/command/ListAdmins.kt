@@ -21,8 +21,8 @@ class ListAdmins : BasicBotCommand() {
 
         for (botAdmin in bot.specialCommands.botAdmins) {
             adminLines.add(
-                "— ${ getSettingValueForMarkdown( 
-                    BotCommandUtils.getClickableUserName(botAdmin) 
+                "— ${ getSettingValueForMarkdown(
+                    BotCommandUtils.getClickableUserName(botAdmin)
                 ) }" // escape _ in user names like "dmitry_weirdo"
             )
         }

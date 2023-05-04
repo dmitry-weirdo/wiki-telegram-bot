@@ -15,9 +15,11 @@ class ReloadFromGoogleSheet : BasicBotCommand() {
         val reloadedSuccessful = bot.reloadBotDataFromGoogleSheet()
         val commandSheetName = bot.commandSheetName
 
-        return if (reloadedSuccessful)
+        return if (reloadedSuccessful) {
             "Данные бота успешно загружены из Google Sheet.\nЛист со списком команд бота: \"$commandSheetName\"."
-        else
+        }
+        else {
             "При загрузке данных из Google Sheet произошла ошибка.\nЛист со списком команд бота: \"$commandSheetName\"."
+        }
     }
 }
