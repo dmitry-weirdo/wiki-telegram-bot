@@ -27,4 +27,7 @@ ij_any_else_on_new_line = true
 
 ktlint_standard_indent = disabled
 
+# disable the goddamned warnings on "else on new line, catch on new line", etc.
+ktlint_standard_keyword-spacing = disabled
+
 ktlint_code_style = intellij_idea
