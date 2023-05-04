@@ -67,7 +67,7 @@ internal class BotTriggerModeTest {
         val result = wikiBot.processMessage(text, notBotAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerNotFound(
-            wikiBot.messageProcessor.getNoResultAnswer(text),
+            wikiBot.messageProcessor.getNoResultAnswer(text)
         )
 
         assertThat(result).isEqualTo(expectedResult)

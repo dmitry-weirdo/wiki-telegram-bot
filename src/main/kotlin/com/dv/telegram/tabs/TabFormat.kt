@@ -22,5 +22,5 @@ enum class TabFormat {
      * * Answer
      * * Keywords
      */
-    COMMANDS,
+    COMMANDS
 }

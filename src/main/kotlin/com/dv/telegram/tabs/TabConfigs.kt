@@ -5,7 +5,7 @@ import java.io.File
 
 data class TabConfigs(
     val commandTabs: List<TabConfig> = listOf(),
-    val dataTabs: List<TabConfig> = listOf(),
+    val dataTabs: List<TabConfig> = listOf()
 )
 
 object TestTabConfigs {
@@ -16,32 +16,32 @@ object TestTabConfigs {
             commandTabs = listOf(
                 TabConfig(
                     "Дюся болталка",
-                    TabFormat.COMMANDS,
+                    TabFormat.COMMANDS
                 ),
                 TabConfig(
                     "Общая болталка",
-                    TabFormat.COMMANDS,
-                ),
+                    TabFormat.COMMANDS
+                )
             ),
 
             dataTabs = listOf(
                 TabConfig(
                     "Страницы вики",
-                    TabFormat.WIKI_PAGES,
+                    TabFormat.WIKI_PAGES
                 ),
                 TabConfig(
                     "UAHelp YouTube",
-                    TabFormat.COMMANDS,
+                    TabFormat.COMMANDS
                 ),
                 TabConfig(
                     "Список чатов по городам Германии",
-                    TabFormat.CHATS,
+                    TabFormat.CHATS
                 ),
                 TabConfig(
                     "Список чатов по странам",
-                    TabFormat.CHATS,
-                ),
-            ),
+                    TabFormat.CHATS
+                )
+            )
         )
 
         val outputFilePath = "C:\\java\\wiki-telegram-bot\\.ignoreme\\test-bot-config.json"
@@ -50,14 +50,14 @@ object TestTabConfigs {
         val parsed = JacksonUtils.parse(File(outputFilePath), TabConfigs::class.java)
         println(parsed)
 
-        /*
-                // just the enum serialization is working!
-                val outputFilePath = "C:\\java\\wiki-telegram-bot\\.ignoreme\\test-enum.json"
-                val tabFormat = TabFormat.WIKI_PAGES
-                JacksonUtils.serializeToFile(outputFilePath, tabFormat, true)
+/*
+        // just the enum serialization is working!
+        val outputFilePath = "C:\\java\\wiki-telegram-bot\\.ignoreme\\test-enum.json"
+        val tabFormat = TabFormat.WIKI_PAGES
+        JacksonUtils.serializeToFile(outputFilePath, tabFormat, true)
 
-                val parsed = JacksonUtils.parse(File(outputFilePath), TabFormat::class.java)
-                println(parsed)
-        */
+        val parsed = JacksonUtils.parse(File(outputFilePath), TabFormat::class.java)
+        println(parsed)
+*/
     }
 }

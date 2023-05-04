@@ -53,7 +53,7 @@ object BotTestUtils {
                 "https://uahelp.wiki/safety",
                 "безопасност, безпек",
                 listOf("безопасност", "безпек")
-            ),
+            )
         )
 
         val cityChats = listOf(

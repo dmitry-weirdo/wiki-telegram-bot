@@ -2,7 +2,11 @@ package com.dv.telegram.command
 
 import com.dv.telegram.BotTestUtils
 import com.dv.telegram.MessageProcessingResult
-import com.dv.telegram.config.*
+import com.dv.telegram.config.BotTriggerMode
+import com.dv.telegram.config.DeleteBotCallMessageOnMessageReply
+import com.dv.telegram.config.NoAnswerReply
+import com.dv.telegram.config.ReplyWhenNoAnswer
+import com.dv.telegram.config.StartMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

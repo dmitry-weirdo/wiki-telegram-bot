@@ -3,13 +3,20 @@ package com.dv.telegram.notion
 import com.dv.telegram.exception.CommandException
 import notion.api.v1.NotionClient
 import notion.api.v1.http.OkHttp4Client
-import notion.api.v1.model.blocks.*
+import notion.api.v1.model.blocks.Block
+import notion.api.v1.model.blocks.BlockType
+import notion.api.v1.model.blocks.Blocks
+import notion.api.v1.model.blocks.BulletedListItemBlock
+import notion.api.v1.model.blocks.HeadingOneBlock
+import notion.api.v1.model.blocks.ParagraphBlock
+import notion.api.v1.model.blocks.ToggleBlock
 import notion.api.v1.model.common.RichTextLinkType
 import notion.api.v1.model.common.RichTextType
 import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageProperty.RichText
 import org.apache.logging.log4j.kotlin.Logging
 
+@Suppress("TooManyFunctions")
 object NotionPageUtils : Logging {
 
     private const val MAX_PAGE_SIZE = 100 // setting more also returns 100

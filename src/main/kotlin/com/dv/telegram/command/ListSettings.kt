@@ -18,7 +18,7 @@ class ListSettings : BasicBotCommand() {
 
         for (setting in bot.settings.settings.values) {
             settingsLines.add(
-                "— *${setting.name}*:\n${getSettingValueForMarkdown(setting)}",
+                "— *${setting.name}*:\n${getSettingValueForMarkdown(setting)}"
             )
         }
 

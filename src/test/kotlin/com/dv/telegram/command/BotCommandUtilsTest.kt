@@ -60,7 +60,7 @@ internal class BotCommandUtilsTest {
                 "@Anna543210",
                 "DmRodionov",
                 "dmitry_weirdo",
-                "anutikin",
+                "anutikin"
             )
         )
 
@@ -83,7 +83,7 @@ internal class BotCommandUtilsTest {
         val config = WikiBotConfig(
             commands = mapOf( // override a couple of command names
                 "ReloadFromGoogleSheet" to "/reloadFromGoogleSheet",
-                "ListAdmins" to "/getAdmins",
+                "ListAdmins" to "/getAdmins"
             )
         )
 

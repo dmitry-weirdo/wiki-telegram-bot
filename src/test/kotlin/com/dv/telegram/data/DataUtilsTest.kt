@@ -35,14 +35,14 @@ internal class DataUtilsTest {
         Assertions.assertThat(multipleWords).containsExactly(
             "first word",
             "second word",
-            "third word",
+            "third word"
         )
 
         val multipleWordsBlankAtTheEnd = DataUtils.parseWords("FirST worD  , SeCOnD wOrd   , , third word,    \t  ")
         Assertions.assertThat(multipleWordsBlankAtTheEnd).containsExactly(
             "first word",
             "second word",
-            "third word",
+            "third word"
         )
     }
 }

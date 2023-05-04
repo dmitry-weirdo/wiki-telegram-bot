@@ -34,9 +34,9 @@ object NotionWrapper : Logging {
 
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 
-//        val pageId = "2b4f00e80cb94440af00e8d83b758f27"; // Помощь украинцам в Германии
-//        val pageId = "24ec680a988441698efe1003a304ded1"; // Test page for Notion API
-//        val pageId = "9a0effe48cf34cd49c849a9e05c61fb9"; // список чатов по городам (german-city-chats)
+//        val pageId = "2b4f00e80cb94440af00e8d83b758f27" // Помощь украинцам в Германии
+//        val pageId = "24ec680a988441698efe1003a304ded1" // Test page for Notion API
+//        val pageId = "9a0effe48cf34cd49c849a9e05c61fb9" // список чатов по городам (german-city-chats)
         val pageId = "67sadfsadfjlkfdsaj" // incorrect page
 
 /*

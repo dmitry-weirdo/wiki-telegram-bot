@@ -56,7 +56,7 @@ object NotionPageTree : Logging {
         catch (e: Exception) {
             logger.error("Error when getting children for block $blockId", e)
             logger.error("$separator ERROR GETTING CHILDREN FOR BLOCK $blockId")
-            return;
+            return
         }
 
         children.results.forEach {
@@ -94,7 +94,7 @@ object NotionPageTree : Logging {
                 val callout = it.asCallout()
 
                 val icon = callout.callout?.icon
-                logger.info("- ${icon}")
+                logger.info("- $icon")
 
                 val richTexts = callout.callout?.richText
 
@@ -147,7 +147,6 @@ object NotionPageTree : Logging {
 
     private fun printRichTexts(richTexts: List<PageProperty.RichText>?, separator: String, tree: MutableList<String>) {
         richTexts?.forEach {
-
             // mention text (e.g. link on another page has plainText instead of text
             val hasPlainText = it.plainText?.isNotBlank() == true
             val hasContent = it.text?.content?.isNotBlank() == true
@@ -232,14 +231,14 @@ object NotionPageTree : Logging {
     ): Block {
         val toggleHeader = "Перевод $sourceLanguage → $targetLanguage"
 
-        val paragraphText = translate(tree, sourceLanguage, targetLanguage);
+        val paragraphText = translate(tree, sourceLanguage, targetLanguage)
 
         return createToggle(toggleHeader, paragraphText)
     }
 
     private fun createToggle(
         toggleText: String,
-        innerParagraphText: String,
+        innerParagraphText: String
     ): Block {
         // todo: these hacks have to be solved, just save the original paragraph structure
         // paragraph can have up 2000 characters
@@ -251,15 +250,17 @@ object NotionPageTree : Logging {
 
         val splitByNewLines = innerParagraphText.split(separator)
 
-        var paragraphText = "";
+        var paragraphText = ""
 
         val paragraphs = mutableListOf<Block>()
 
         for ((index, part) in splitByNewLines.withIndex()) {
-            val next = if (index < splitByNewLines.size - 1)
+            val next = if (index < splitByNewLines.size - 1) {
                 splitByNewLines[index + 1]
-            else
+            }
+            else {
                 ""
+            }
 
             if (paragraphText.length + separator.length + next.length <= maxParagraphCharsCount) {
                 paragraphText = paragraphText + separator + next
@@ -279,7 +280,7 @@ object NotionPageTree : Logging {
         return NotionPageUtils.createHeading1(
             toggleText,
             paragraphs
-        );
+        )
     }
 
     private fun translate(
@@ -288,6 +289,6 @@ object NotionPageTree : Logging {
         targetLanguage: String
     ): String {
         // todo: translate with Google Translate
-        return text + "\n\n$sourceLanguage → $targetLanguage";
+        return text + "\n\n$sourceLanguage → $targetLanguage"
     }
 }

@@ -25,7 +25,7 @@ class ListCommands : BasicBotCommand() {
         }
 
         lines.add(
-            "Для получения справки по команде используйте команду\n`${bot.botName} ${bot.specialCommands.helpCommand.commandText} <commandName>`",
+            "Для получения справки по команде используйте команду\n`${bot.botName} ${bot.specialCommands.helpCommand.commandText} <commandName>`"
         )
 
         return lines.joinToString("\n\n")

@@ -94,7 +94,7 @@ data class NotionCityChats (
             }
             else {
                 logger.warn(
-                    "City chat string \"$chatString\" does not contain neither separator \"$CHAT_LINK_AND_NAME_SEPARATOR_1\" nor separator \"$CHAT_LINK_AND_NAME_SEPARATOR_2\".",
+                    "City chat string \"$chatString\" does not contain neither separator \"$CHAT_LINK_AND_NAME_SEPARATOR_1\" nor separator \"$CHAT_LINK_AND_NAME_SEPARATOR_2\"."
                 )
 
                 return ChatParseResult.noSeparatorInChatString(chatString)

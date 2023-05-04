@@ -164,7 +164,7 @@ internal class NotionCityChatsTest {
                 "Duisburg",
                 listOf("Duisburg"),
                 listOf(
-                    "https://t.me/duisburg_chat / Duisburg chat", // no correct separator
+                    "https://t.me/duisburg_chat / Duisburg chat" // no correct separator
                 )
             )
         )
@@ -216,7 +216,7 @@ internal class NotionCityChatsTest {
                 listOf(
                     "https://t.me/augsburg_chat - Augsburg good chat"
                 )
-            ),
+            )
         )
 
         val chats = NotionCityChats.from(cityChatsData)
