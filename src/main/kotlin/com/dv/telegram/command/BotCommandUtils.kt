@@ -54,6 +54,6 @@ object BotCommandUtils {
         }
 
         // append "@" if it is NOT present
-        return "${USER_NAME_PREFIX}${userName}"
+        return "$USER_NAME_PREFIX$userName"
     }
 }

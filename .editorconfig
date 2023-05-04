@@ -30,4 +30,7 @@ ktlint_standard_indent = disabled
 # disable the goddamned warnings on "else on new line, catch on new line", etc.
 ktlint_standard_keyword-spacing = disabled
 
+# allow additional spacing with the parentheses
+ktlint_standard_paren-spacing = disabled
+
 ktlint_code_style = intellij_idea
