@@ -4,6 +4,7 @@ ij_any_finally_on_new_line = true
 ij_any_else_on_new_line = true
 ij_continuation_indent_size = 4
 max_line_length = 200
+ij_kotlin_packages_to_use_import_on_demand = 99
 
 
 [{*.kt,*.kts}]
