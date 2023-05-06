@@ -16,30 +16,36 @@ object TestTabConfigs {
             commandTabs = listOf(
                 TabConfig(
                     "Дюся болталка",
-                    TabFormat.COMMANDS
+                    TabFormat.COMMANDS,
+                    TabType.COMMANDS
                 ),
                 TabConfig(
                     "Общая болталка",
-                    TabFormat.COMMANDS
+                    TabFormat.COMMANDS,
+                    TabType.COMMANDS
                 )
             ),
 
             dataTabs = listOf(
                 TabConfig(
                     "Страницы вики",
-                    TabFormat.WIKI_PAGES
+                    TabFormat.WIKI_PAGES,
+                    TabType.WIKI_PAGES
                 ),
                 TabConfig(
                     "UAHelp YouTube",
-                    TabFormat.COMMANDS
+                    TabFormat.COMMANDS,
+                    TabType.YOUTUBE_VIDEOS
                 ),
                 TabConfig(
                     "Список чатов по городам Германии",
-                    TabFormat.CHATS
+                    TabFormat.CHATS,
+                    TabType.CITY_CHATS
                 ),
                 TabConfig(
                     "Список чатов по странам",
-                    TabFormat.CHATS
+                    TabFormat.CHATS,
+                    TabType.COUNTRY_CHATS
                 )
             )
         )
