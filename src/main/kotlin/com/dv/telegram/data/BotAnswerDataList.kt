@@ -10,11 +10,6 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
     val answers: List<T>,
     val responseType: ResponseType
 ) {
-    private fun findMatchedAnswers(text: String): List<T> { // returns list of answers
-        return answers
-            .filter { it.isPresentIn(text) }
-    }
-
     private fun findMatches(text: String): List<BotAnswerMatch> { // returns list of matches including answers
         return answers
             .map { it.getMatch(text) }
@@ -22,12 +17,6 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
     }
 
     abstract fun getResponseText(matches: List<T>): String?
-
-    fun getResponseText(text: String): String? {
-        val matches = findMatchedAnswers(text)
-
-        return getResponseText(matches)
-    }
 
     @Suppress("UNCHECKED_CAST")
     fun getResponse(text: String): BotAnswerDataListResponse {
@@ -37,7 +26,7 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
             return BotAnswerDataListResponse.noMatchFound(responseType)
         }
 
-        // todo: maybe a nicer code (type it.answer to <T> somehow)
+        // todo: maybe a nicer code (typed-cast it.answer to <T> somehow)
         val matchedAnswers = matches.map { it.answer!! as T }
 
         val responseText = getResponseText(matchedAnswers)
