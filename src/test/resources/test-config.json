@@ -8,10 +8,6 @@
       // Google Sheets
       "googleSheetsApiKey": "testApiKey",
       "googleSpreadsheetId": "testSpreadSheetId",
-      //      "wikiPagesSheetName": "Страницы вики и ключевые слова",
-      //      "cityChatsSheetName": "Список чатов по городам",
-      //      "countryChatsSheetName": "Список чатов по странам",
-      //      "commandsSheetName": "Список болталки",
 
       // Notion
       "notionToken": "testNotionToken",
