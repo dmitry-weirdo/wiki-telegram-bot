@@ -16,11 +16,6 @@ class WikiBotConfig(
     // todo: use sheets by number instead if it is possible with A1 or R1C1 notation
     val sheets: TabConfigs = TabConfigs(),
 
-    val wikiPagesSheetName: String = "Страницы вики и ключевые слова",
-    val cityChatsSheetName: String = "Список чатов по городам",
-    val countryChatsSheetName: String = "Список чатов по странам",
-    val commandsSheetName: String = "Список болталки",
-
     // Notion
     val notionToken: String = "",
     val cityChatsPageId: String = "9a0effe48cf34cd49c849a9e05c61fb9", // список чатов по городам (https://uahelp.wiki/german-city-chats)

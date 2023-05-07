@@ -33,7 +33,7 @@ object GoogleSheetLoader : Logging {
     }
 
     private fun reloadGoogleSheetTabsUnsafe(config: WikiBotConfig): GoogleSheetBotTabsData {
-        val tabsDataRaw = GoogleSheetReader.readGoogleSheetNew(config)
+        val tabsDataRaw = GoogleSheetReader.readGoogleSheet(config)
 
         val commandTabs = parseSheetData(tabsDataRaw.commandSheets)
         val dataTabs = parseSheetData(tabsDataRaw.dataSheets)

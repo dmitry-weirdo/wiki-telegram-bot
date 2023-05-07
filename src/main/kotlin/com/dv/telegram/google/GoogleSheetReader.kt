@@ -22,7 +22,7 @@ object GoogleSheetReader : Logging {
         readGoogleSheetSafe(config)
     }
 
-    fun readGoogleSheetSafe(config: WikiBotConfig): WikiBotGoogleSheet {
+    fun readGoogleSheetSafe(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
         try {
             return readGoogleSheet(config)
         }
@@ -31,40 +31,7 @@ object GoogleSheetReader : Logging {
         }
     }
 
-    @Throws(IOException::class)
-    fun readGoogleSheet(config: WikiBotConfig): WikiBotGoogleSheet {
-        val sheetsService = getSheets(config.googleSheetsApiKey)
-
-        val ranges = listOf(
-            wrapSheetName(config.wikiPagesSheetName),
-            wrapSheetName(config.cityChatsSheetName),
-            wrapSheetName(config.countryChatsSheetName),
-            wrapSheetName(config.commandsSheetName)
-        )
-
-        val readResult = sheetsService
-            .spreadsheets()
-            .values()
-            .batchGet(config.googleSpreadsheetId)
-            .setRanges(ranges)
-            .execute()
-
-        val valueRanges = readResult.valueRanges
-
-        val wikiPagesSheet = parseSheetData(valueRanges[0], config.wikiPagesSheetName)
-        val cityChatsSheet = parseSheetData(valueRanges[1], config.cityChatsSheetName)
-        val countryChatsSheet = parseSheetData(valueRanges[2], config.countryChatsSheetName)
-        val commandsSheet = parseSheetData(valueRanges[3], config.commandsSheetName)
-
-        return WikiBotGoogleSheet(
-            wikiPagesSheet,
-            cityChatsSheet,
-            countryChatsSheet,
-            commandsSheet
-        )
-    }
-
-    fun readGoogleSheetNew(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
+    fun readGoogleSheet(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
         val allTabNames = getAllTabNames(config.sheets)
 
         val sheetsService = getSheets(config.googleSheetsApiKey)
