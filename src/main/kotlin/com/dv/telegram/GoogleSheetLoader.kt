@@ -1,7 +1,7 @@
 package com.dv.telegram
 
 import com.dv.telegram.data.BotAnswerData
-import com.dv.telegram.data.CityChatsParser
+import com.dv.telegram.data.ChatsParser
 import com.dv.telegram.data.WikiBotCommandsParser
 import com.dv.telegram.data.WikiPagesParser
 import com.dv.telegram.exception.CommandException
@@ -44,7 +44,7 @@ object GoogleSheetLoader : Logging {
     private fun parseSheetData(sheets: List<TabSheetData>) = sheets.map {
         when (it.config.tabFormat) {
             TabFormat.WIKI_PAGES -> TabData(it.config, WikiPagesParser().parse(it.sheet))
-            TabFormat.CHATS -> TabData(it.config, CityChatsParser().parse(it.sheet)) // todo: use common ChatsParser instead of CityChatsParser
+            TabFormat.CHATS -> TabData(it.config, ChatsParser().parse(it.sheet))
             TabFormat.COMMANDS -> TabData(it.config, WikiBotCommandsParser().parse(it.sheet))
         }
     }

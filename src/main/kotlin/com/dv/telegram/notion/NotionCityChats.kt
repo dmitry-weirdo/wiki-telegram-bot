@@ -1,6 +1,6 @@
 package com.dv.telegram.notion
 
-import com.dv.telegram.data.CityChatData
+import com.dv.telegram.data.ChatData
 import com.dv.telegram.exception.CommandException
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -25,7 +25,7 @@ data class NotionCityChats (
 
         fun countTotalChats(cityChats: List<NotionCityChats>) = cityChats.sumOf { it.chats.size }
 
-        fun from(cityChatsData: List<CityChatData>): List<NotionCityChats> {
+        fun from(cityChatsData: List<ChatData>): List<NotionCityChats> {
             val errors: MutableList<String> = ArrayList()
 
             val chats = cityChatsData.mapNotNull {
@@ -42,8 +42,8 @@ data class NotionCityChats (
                 .sortedBy { it.cityName }
         }
 
-        fun from(cityChatData: CityChatData, errors: MutableList<String>): NotionCityChats? {
-            val cityName = cityChatData.cityName.trim()
+        fun from(cityChatData: ChatData, errors: MutableList<String>): NotionCityChats? {
+            val cityName = cityChatData.chatLabel.trim()
             if (cityName.isBlank()) {
                 // todo: error on empty city name + non-empty chats?
                 logger.warn("Empty city name.")

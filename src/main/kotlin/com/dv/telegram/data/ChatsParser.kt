@@ -1,25 +1,22 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.google.RowData
-import com.dv.telegram.google.WikiBotGoogleSheet
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
 
-class CityChatsParser : SheetDataParser<CityChatData>, Logging {
-
-    override fun getSheetData(sheet: WikiBotGoogleSheet) = sheet.cityChatsSheet
+class ChatsParser : SheetDataParser<ChatData>, Logging {
 
     override fun getTabFormat(): TabFormat {
         return TabFormat.CHATS
     }
 
-    override fun parse(rows: List<RowData>): List<CityChatData> {
-        val chatsData = mutableListOf<CityChatData>()
+    override fun parse(rows: List<RowData>): List<ChatData> {
+        val chatsData = mutableListOf<ChatData>()
 
         var rowNum = 1
 
         for (row in rows) {
-            val cityName = row.getCellOrBlank(0)
+            val chatLabel = row.getCellOrBlank(0)
 
             // words
             val wordsString = row.getCellOrBlank(1)
@@ -34,15 +31,15 @@ class CityChatsParser : SheetDataParser<CityChatData>, Logging {
                 }
             }
 
-            val cityChat = CityChatData(cityName, wordsString, words, chats)
-            chatsData.add(cityChat)
+            val chatData = ChatData(chatLabel, wordsString, words, chats)
+            chatsData.add(chatData)
 
-            logger.info("Row $rowNum: / $cityName / $words / $chats")
-            logger.info(cityChat.chatsAnswer)
+            logger.info("Row $rowNum: / $chatLabel / $words / $chats")
+            logger.info(chatData.chatsAnswer)
             rowNum++
         }
 
-        logger.info("Total ${chatsData.size} city chats parsed.")
+        logger.info("Total ${chatsData.size} chats parsed.")
 
         return chatsData
     }

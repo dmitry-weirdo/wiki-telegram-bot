@@ -2,8 +2,8 @@ package com.dv.telegram.tabs
 
 import com.dv.telegram.data.BotAnswerData
 import com.dv.telegram.data.BotAnswerDataList
-import com.dv.telegram.data.CityChatData
-import com.dv.telegram.data.CityChatsDataList
+import com.dv.telegram.data.ChatData
+import com.dv.telegram.data.ChatsDataList
 import com.dv.telegram.data.WikiBotCommandData
 import com.dv.telegram.data.WikiBotCommandsDataList
 import com.dv.telegram.data.WikiPageData
@@ -37,12 +37,12 @@ data class BotAnswerTabData<T : BotAnswerData> (
                 }
 
                 TabFormat.CHATS -> {
-                    val answers = tabData.answers as (List<CityChatData>) // todo: use common ChatData instead of CityChatData
-                    val tabAnswers = CityChatsDataList(answers, tabData.responseType)
+                    val answers = tabData.answers as (List<ChatData>)
+                    val tabAnswers = ChatsDataList(answers, tabData.responseType)
 
                     BotAnswerTabData(
                         tabData.tabConfig,
-                        tabAnswers as BotAnswerDataList<CityChatData>
+                        tabAnswers as BotAnswerDataList<ChatData>
                     ) as BotAnswerTabData<T>
                 }
 

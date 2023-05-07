@@ -1,7 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
-import com.dv.telegram.data.CityChatData
+import com.dv.telegram.data.ChatData
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionCityChats
 import com.dv.telegram.notion.NotionWrapper
@@ -39,7 +39,7 @@ class CityChatsExportToNotion : BasicBotCommand(), Logging {
                 .getCityChats()
                 ?: throw CommandException("В конфиге бота нет вкладок с типом ${TabType.CITY_CHATS}.")
 
-            val cityChatAnswers = cityChatsTab.answers as List<CityChatData>
+            val cityChatAnswers = cityChatsTab.answers as List<ChatData>
 
             val cityChats = NotionCityChats.from(cityChatAnswers)
             val totalChats = NotionCityChats.countTotalChats(cityChats)

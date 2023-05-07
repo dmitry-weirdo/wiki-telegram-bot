@@ -1,6 +1,6 @@
 package com.dv.telegram
 
-import com.dv.telegram.data.CityChatData
+import com.dv.telegram.data.ChatData
 import com.dv.telegram.data.WikiBotCommandData
 import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.tabs.TabConfig
@@ -99,7 +99,7 @@ object BotTestUtils {
                 TabType.CITY_CHATS
             ),
             listOf(
-                CityChatData(
+                ChatData(
                     "Augsburg",
                     "Augsburg, Аугсбург, Аугбург, Augburg, аугзбург",
                     listOf("аугсбург", "аугсбург", "аугбург", "augburg", "аугзбург"),
@@ -109,7 +109,7 @@ object BotTestUtils {
                         "https://t.me/Ukr_Augsburg_help — Українці Augsburg"
                     )
                 ),
-                CityChatData(
+                ChatData(
                     "Eisenach",
                     "Eisenach, Айзенах",
                     listOf("eisenach", "айзенах"),
@@ -127,7 +127,7 @@ object BotTestUtils {
                 TabType.COUNTRY_CHATS
             ),
             listOf(
-                CityChatData( // todo: use common ChatData
+                ChatData(
                     "Болгария",
                     "Болгария, Болгарія, Bulgaria, Bulgarien, Bolgaria, Bulgaria",
                     listOf("болгария", "болгарія", "bulgaria", "bulgarien", "bolgaria", "bulgaria"),
@@ -135,7 +135,7 @@ object BotTestUtils {
                         "https://t.me/UAhelpinfo/28 — Общая информация"
                     )
                 ),
-                CityChatData( // todo: use common ChatData
+                ChatData(
                     "Португалия",
                     "Португалия, Португалія, Portugal, Portugalia",
                     listOf("португалия", "португалія", "portugal", "portugalia"),

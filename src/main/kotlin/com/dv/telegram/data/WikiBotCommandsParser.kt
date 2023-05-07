@@ -1,13 +1,10 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.google.RowData
-import com.dv.telegram.google.WikiBotGoogleSheet
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
 
 class WikiBotCommandsParser : SheetDataParser<WikiBotCommandData>, Logging {
-
-    override fun getSheetData(sheet: WikiBotGoogleSheet) = sheet.commandsSheet
 
     override fun getTabFormat(): TabFormat {
         return TabFormat.COMMANDS

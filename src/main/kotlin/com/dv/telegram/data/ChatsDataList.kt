@@ -2,9 +2,9 @@ package com.dv.telegram.data
 
 import com.dv.telegram.ResponseType
 
-class CityChatsDataList(answers: List<CityChatData>, responseType: ResponseType) : BotAnswerDataList<CityChatData>(answers, responseType) {
+class ChatsDataList(answers: List<ChatData>, responseType: ResponseType) : BotAnswerDataList<ChatData>(answers, responseType) {
 
-    override fun getResponseText(matches: List<CityChatData>): String? {
+    override fun getResponseText(matches: List<ChatData>): String? {
         if (matches.isEmpty()) {
             return null
         }

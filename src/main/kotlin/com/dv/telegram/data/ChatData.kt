@@ -1,9 +1,9 @@
 package com.dv.telegram.data
 
-data class CityChatData(
-    val cityName: String,
+data class ChatData(
+    val chatLabel: String, // common label for one row in the config
     val wordsString: String,
-    val words: List<String>, // multiple chats possible for the same city are possible
+    val words: List<String>, // multiple chats for the same city/country etc. are possible
     val chats: List<String>
 ) : BotAnswerData {
     val chatsAnswer: String = fillChatsAnswer() // pre-fill the bot answer to join the strings only once
@@ -15,7 +15,7 @@ data class CityChatData(
     private fun fillChatsAnswer(): String {
         val chatsList = getChatLines()
 
-        return "$cityName чаты:\n$chatsList" // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
+        return "$chatLabel чаты:\n$chatsList" // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
     }
 
     private fun getChatLines(): String {

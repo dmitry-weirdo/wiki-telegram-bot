@@ -1,6 +1,6 @@
 package com.dv.telegram.notion
 
-import com.dv.telegram.data.CityChatData
+import com.dv.telegram.data.ChatData
 import com.dv.telegram.exception.CommandException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -121,7 +121,7 @@ internal class NotionCityChatsTest {
     @DisplayName("Test List<CityChatData> → List<NotionCityChats> conversion: errors, expect a thrown exception.")
     fun testFromWithErrors() {
         val cityChatsData = listOf(
-            CityChatData(
+            ChatData(
                 "   ", // empty city name -> will be just skipped
                 "keywords",
                 listOf("keywords"),
@@ -130,7 +130,7 @@ internal class NotionCityChatsTest {
                     "chats"
                 )
             ),
-            CityChatData(
+            ChatData(
                 "Aachen",
                 "Aachen",
                 listOf("Aachen"),
@@ -140,7 +140,7 @@ internal class NotionCityChatsTest {
                     "  \t  "
                 )
             ),
-            CityChatData(
+            ChatData(
                 "Berlin", // good chat -> no errors
                 "Berlin",
                 listOf("Berlin"),
@@ -149,7 +149,7 @@ internal class NotionCityChatsTest {
                     "https://t.me/berlin_work - Berlin work"
                 )
             ),
-            CityChatData(
+            ChatData(
                 "Augsburg", // 2 of 3 chats have errors
                 "Augsburg",
                 listOf("Augsburg"),
@@ -159,7 +159,7 @@ internal class NotionCityChatsTest {
                     "http://t.me/augsburg_parents - Parents chats" // not https
                 )
             ),
-            CityChatData(
+            ChatData(
                 "Duisburg", // 1 of 1 chats has errors
                 "Duisburg",
                 listOf("Duisburg"),
@@ -183,13 +183,13 @@ internal class NotionCityChatsTest {
     @DisplayName("Test List<CityChatData> → List<NotionCityChats> conversion: successful conversion.")
     fun testFromWithoutErrors() {
         val cityChatsData = listOf(
-            CityChatData(
+            ChatData(
                 "   ", // empty city name -> will be just skipped
                 "keywords",
                 listOf("keywords"),
                 listOf("bad", "chats")
             ),
-            CityChatData(
+            ChatData(
                 "Aachen",
                 "Aachen",
                 listOf("Aachen"),
@@ -199,7 +199,7 @@ internal class NotionCityChatsTest {
                     "  \t  "
                 )
             ),
-            CityChatData(
+            ChatData(
                 " Berlin  \t", // good chats
                 "Berlin",
                 listOf("Berlin"),
@@ -209,7 +209,7 @@ internal class NotionCityChatsTest {
                     "  \t " // empty chat must be ignored
                 )
             ),
-            CityChatData(
+            ChatData(
                 "Augsburg", // 1 of 1 chats is good
                 "Augsburg",
                 listOf("Augsburg"),
