@@ -2,6 +2,7 @@ package com.dv.telegram
 
 import com.dv.telegram.command.BotSpecialCommands
 import com.dv.telegram.config.BotSettings
+import com.dv.telegram.data.BotAnswerData
 import com.dv.telegram.data.CityChatData
 import com.dv.telegram.data.CityChatsDataList
 import com.dv.telegram.data.CountryChatData
@@ -11,6 +12,7 @@ import com.dv.telegram.data.WikiBotCommandsDataList
 import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.data.WikiPagesDataList
 import com.dv.telegram.statistics.BotStatistics
+import com.dv.telegram.tabs.BotAnswerTabData
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.GetMe
@@ -28,6 +30,12 @@ class WikiBot(
     countryChatsData: List<CountryChatData>,
     commandsData: List<WikiBotCommandData>
 ) : TelegramLongPollingBot(), Logging {
+    var commandTabs: List<BotAnswerTabData<BotAnswerData>> // can be reloaded from Google Sheet
+        private set
+
+    var dataTabs: List<BotAnswerTabData<BotAnswerData>> // can be reloaded from Google Sheet
+        private set
+
     var pages: WikiPagesDataList // can be reloaded from Google Sheet
         private set
 
@@ -71,6 +79,10 @@ class WikiBot(
 
     init {
         context.addBot(this)
+
+        // todo: parse from the input parameters
+        commandTabs = listOf()
+        dataTabs = listOf()
 
         pages = WikiPagesDataList(wikiPagesData)
         cityChats = CityChatsDataList(cityChatsData)
@@ -246,6 +258,23 @@ class WikiBot(
             cityChats = CityChatsDataList(botData)
             countryChats = CountryChatsDataList(botData)
             commands = WikiBotCommandsDataList(botData)
+
+            true
+        }
+        catch (e: Exception) {
+            false
+        }
+    }
+
+    fun reloadBotDataFromGoogleSheetTabs(): Boolean {
+        return try {
+            val botData = loadBotDataFromGoogleSheetTabs()
+
+            commandTabs = botData.commandTabs
+                .map { BotAnswerTabData.fromTabData(it) }
+
+            dataTabs = botData.dataTabs
+                .map { BotAnswerTabData.fromTabData(it) }
 
             true
         }
