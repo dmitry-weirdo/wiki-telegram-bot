@@ -13,6 +13,7 @@ import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.data.WikiPagesDataList
 import com.dv.telegram.statistics.BotStatistics
 import com.dv.telegram.tabs.BotAnswerTabData
+import com.dv.telegram.tabs.TabData
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.GetMe
@@ -22,13 +23,16 @@ import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
+@Suppress("TooManyFunctions")
 class WikiBot(
     val context: WikiBotsContext,
     private val config: WikiBotConfig,
     wikiPagesData: List<WikiPageData>,
     cityChatsData: List<CityChatData>,
     countryChatsData: List<CountryChatData>,
-    commandsData: List<WikiBotCommandData>
+    commandsData: List<WikiBotCommandData>,
+    commandTabsData: List<TabData>,
+    dataTabsData: List<TabData>
 ) : TelegramLongPollingBot(), Logging {
     var commandTabs: List<BotAnswerTabData<BotAnswerData>> // can be reloaded from Google Sheet
         private set
@@ -67,22 +71,24 @@ class WikiBot(
     constructor(
         context: WikiBotsContext,
         config: WikiBotConfig,
-        botData: GoogleSheetBotData
+        botData: GoogleSheetBotData,
+        botTabsData: GoogleSheetBotTabsData
     ) : this(
         context,
         config,
         botData.pages,
         botData.cityChats,
         botData.countryChats,
-        botData.commands
+        botData.commands,
+        botTabsData.commandTabs,
+        botTabsData.dataTabs
     )
 
     init {
         context.addBot(this)
 
-        // todo: parse from the input parameters
-        commandTabs = listOf()
-        dataTabs = listOf()
+        commandTabs = BotAnswerTabData.fromTabDataList(commandTabsData)
+        dataTabs = BotAnswerTabData.fromTabDataList(dataTabsData)
 
         pages = WikiPagesDataList(wikiPagesData)
         cityChats = CityChatsDataList(cityChatsData)
@@ -270,11 +276,8 @@ class WikiBot(
         return try {
             val botData = loadBotDataFromGoogleSheetTabs()
 
-            commandTabs = botData.commandTabs
-                .map { BotAnswerTabData.fromTabData(it) }
-
-            dataTabs = botData.dataTabs
-                .map { BotAnswerTabData.fromTabData(it) }
+            commandTabs = BotAnswerTabData.fromTabDataList(botData.commandTabs)
+            dataTabs = BotAnswerTabData.fromTabDataList(botData.dataTabs)
 
             true
         }

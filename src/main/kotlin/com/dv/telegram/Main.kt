@@ -9,18 +9,16 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
-class TestKotlinMain {
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            println("Kotlin is Working from a class!")
-        }
+object TestKotlinMain {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        println("Kotlin is Working from a class!")
     }
 }
 
 class Main : Logging {
 
-    companion object X: Logging {
+    companion object X : Logging {
         @JvmStatic
         fun main(args: Array<String>) {
             try {
@@ -50,12 +48,14 @@ class Main : Logging {
                 try {
                     val botData = GoogleSheetLoader.readGoogleSheet(config)
 
-                    val wikiBot = WikiBot(context, config, botData)
+                    val botTabsData = GoogleSheetLoader.readGoogleSheetTabs(config)
+
+                    val wikiBot = WikiBot(context, config, botData, botTabsData)
 
                     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
                     botsApi.registerBot(wikiBot)
                     logger.info(
-                        "The bot \"${wikiBot.botUsername}\" (${wikiBot.botName}) has started on \"${wikiBot.environmentName}\" environment!",
+                        "The bot \"${wikiBot.botUsername}\" (${wikiBot.botName}) has started on \"${wikiBot.environmentName}\" environment!"
                     )
 
                     "The bot ${wikiBot.botUsername} has started on \"${wikiBot.environmentName}\" environment!"

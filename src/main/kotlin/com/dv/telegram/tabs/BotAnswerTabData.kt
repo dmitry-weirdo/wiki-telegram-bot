@@ -20,6 +20,9 @@ data class BotAnswerTabData<T : BotAnswerData> (
 ) {
     companion object { // factory methods
 
+        fun fromTabDataList(list: List<TabData>): List<BotAnswerTabData<BotAnswerData>> =
+            list.map { fromTabData(it) }
+
         fun <T : BotAnswerData> fromTabData(tabData: TabData): BotAnswerTabData<T> {
             // todo: fix the ugly casting
             return when (tabData.tabConfig.tabFormat) {
@@ -34,7 +37,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
                 }
 
                 TabFormat.CHATS -> {
-                    val answers = tabData.answers as (List<CityChatData>)
+                    val answers = tabData.answers as (List<CityChatData>) // todo: use common ChatData instead of CityChatData
                     val tabAnswers = CityChatsDataList(answers)
 
                     BotAnswerTabData(
