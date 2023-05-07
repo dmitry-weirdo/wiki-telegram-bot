@@ -5,6 +5,6 @@ data class TabConfig(
     val tabFormat: TabFormat,
     val tabType: TabType,
 
-    val showHeader: Boolean = true, // todo: think whether we need this
+    val showHeader: Boolean = false, // todo: think whether we need this
     val header: String? = null // todo: think whether we need this
 )

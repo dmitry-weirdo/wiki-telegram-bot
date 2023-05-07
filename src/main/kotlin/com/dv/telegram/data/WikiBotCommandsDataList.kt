@@ -1,8 +1,8 @@
 package com.dv.telegram.data
 
-import com.dv.telegram.ResponseType
+import com.dv.telegram.tabs.TabData
 
-class WikiBotCommandsDataList(answers: List<WikiBotCommandData>, responseType: ResponseType) : BotAnswerDataList<WikiBotCommandData>(answers, responseType) {
+class WikiBotCommandsDataList(answers: List<WikiBotCommandData>, tabData: TabData) : BotAnswerDataList<WikiBotCommandData>(answers, tabData) {
 
     override fun getResponseText(matches: List<WikiBotCommandData>): String {
         if (matches.size == 1) {

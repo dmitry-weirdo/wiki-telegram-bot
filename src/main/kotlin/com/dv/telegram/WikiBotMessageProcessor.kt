@@ -88,6 +88,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
             return MessageProcessingResult.answerNotFound(noResultResponse)
         }
 
+        // responses from different tabs are split with a blank line between them
         val combinedAnswers = answers.joinToString("\n\n")
 
         val matchedKeywordsAll: List<String> = responses

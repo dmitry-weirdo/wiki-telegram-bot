@@ -12,7 +12,7 @@ import com.dv.telegram.data.WikiPagesDataList
 /**
  * Conversion of [TabData]
  * to add the [BotAnswerDataList] functionality
- * instead of just [BotAnswerData].
+ * instead of just [BotAnswerData] in [TabData.answers].
  */
 data class BotAnswerTabData<T : BotAnswerData> (
     val tabConfig: TabConfig,
@@ -28,7 +28,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
             return when (tabData.tabConfig.tabFormat) {
                 TabFormat.WIKI_PAGES -> {
                     val answers = tabData.answers as (List<WikiPageData>)
-                    val tabAnswers = WikiPagesDataList(answers, tabData.responseType)
+                    val tabAnswers = WikiPagesDataList(answers, tabData)
 
                     BotAnswerTabData(
                         tabData.tabConfig,
@@ -38,7 +38,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
 
                 TabFormat.CHATS -> {
                     val answers = tabData.answers as (List<ChatData>)
-                    val tabAnswers = ChatsDataList(answers, tabData.responseType)
+                    val tabAnswers = ChatsDataList(answers, tabData)
 
                     BotAnswerTabData(
                         tabData.tabConfig,
@@ -48,7 +48,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
 
                 TabFormat.COMMANDS -> {
                     val answers = tabData.answers as (List<WikiBotCommandData>)
-                    val tabAnswers = WikiBotCommandsDataList(answers, tabData.responseType)
+                    val tabAnswers = WikiBotCommandsDataList(answers, tabData)
 
                     BotAnswerTabData(
                         tabData.tabConfig,

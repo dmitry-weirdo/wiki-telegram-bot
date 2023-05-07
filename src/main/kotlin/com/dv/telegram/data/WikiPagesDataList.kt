@@ -1,8 +1,8 @@
 package com.dv.telegram.data
 
-import com.dv.telegram.ResponseType
+import com.dv.telegram.tabs.TabData
 
-class WikiPagesDataList(answers: List<WikiPageData>, responseType: ResponseType) : BotAnswerDataList<WikiPageData>(answers, responseType) {
+class WikiPagesDataList(answers: List<WikiPageData>, tabData: TabData) : BotAnswerDataList<WikiPageData>(answers, tabData) {
 
     override fun getResponseText(matches: List<WikiPageData>): String? {
         if (matches.isEmpty()) {

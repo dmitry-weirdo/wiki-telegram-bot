@@ -1,8 +1,8 @@
 package com.dv.telegram.data
 
-import com.dv.telegram.ResponseType
+import com.dv.telegram.tabs.TabData
 
-class ChatsDataList(answers: List<ChatData>, responseType: ResponseType) : BotAnswerDataList<ChatData>(answers, responseType) {
+class ChatsDataList(answers: List<ChatData>, tabData: TabData) : BotAnswerDataList<ChatData>(answers, tabData) {
 
     override fun getResponseText(matches: List<ChatData>): String? {
         if (matches.isEmpty()) {
