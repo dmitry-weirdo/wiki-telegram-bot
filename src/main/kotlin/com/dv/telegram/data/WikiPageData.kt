@@ -6,19 +6,9 @@ data class WikiPageData(
     val wordsString: String,
     val words: List<String>
 ) : BotAnswerData {
-    override fun isPresentIn(text: String): Boolean {
-        if (text.isBlank()) {
-            return false
-        }
+    override fun isPresentIn(text: String) = isPresentIn(text, words)
 
-        for (word in words) {
-            if (text.contains(word)) {
-                return true
-            }
-        }
-
-        return false
-    }
+    override fun getMatch(text: String) = getMatch(text, words)
 
     fun getOneLineAnswer() = "$name — $url"
 
