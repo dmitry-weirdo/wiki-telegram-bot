@@ -42,6 +42,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
             )
         }
 
+        // todo: it is not perfect that we match by (responseText: String != null) instead of a clear flag
         // normal commands - configured in the Google Sheet
         val commandsAnswerText = wikiBot.commands.getResponseText(lowerText)
         if (commandsAnswerText?.isNotBlank() == true) { // matching command found -> only handle the command

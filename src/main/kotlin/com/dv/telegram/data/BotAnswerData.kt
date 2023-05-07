@@ -30,7 +30,7 @@ interface BotAnswerData {
 
         for (keyword in keywords) {
             if (text.contains(keyword)) {
-                return BotAnswerMatch.matchFound(keyword)
+                return BotAnswerMatch.matchFound(this, keyword)
             }
         }
 
