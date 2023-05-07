@@ -13,6 +13,7 @@ import com.dv.telegram.data.WikiPageData
 import com.dv.telegram.data.WikiPagesDataList
 import com.dv.telegram.statistics.BotStatistics
 import com.dv.telegram.tabs.BotAnswerTabData
+import com.dv.telegram.tabs.TabConfigs
 import com.dv.telegram.tabs.TabData
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
@@ -108,8 +109,8 @@ class WikiBot(
     }
 
     // additional getters
-    val commandSheetName: String
-        get() = config.commandsSheetName
+    val tabConfigs: TabConfigs
+        get() = config.sheets
 
     val notionToken: String
         get() = config.notionToken
@@ -257,22 +258,9 @@ class WikiBot(
         }
     }
 
+    fun getCommandTabNames(): List<String> = config.sheets.commandTabs.map { it.tabName }
+
     fun reloadBotDataFromGoogleSheet(): Boolean {
-        return try {
-            val botData = loadBotDataFromGoogleSheet()
-            pages = WikiPagesDataList(botData)
-            cityChats = CityChatsDataList(botData)
-            countryChats = CountryChatsDataList(botData)
-            commands = WikiBotCommandsDataList(botData)
-
-            true
-        }
-        catch (e: Exception) {
-            false
-        }
-    }
-
-    fun reloadBotDataFromGoogleSheetTabs(): Boolean {
         return try {
             val botData = loadBotDataFromGoogleSheetTabs()
 
@@ -286,6 +274,8 @@ class WikiBot(
         }
     }
 
+    // todo: still used by CityChatsExportToNotion and CityChatsValidate
+    @Deprecated("Used only by CityChatsExportToNotion and CityChatsValidate, should be replaced there.")
     fun loadBotDataFromGoogleSheet(): GoogleSheetBotData { // does NOT reload the bot data itself
         return GoogleSheetLoader.readGoogleSheet(config)
     }

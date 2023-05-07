@@ -23,13 +23,18 @@ class AllBotsList : BasicBotCommand() {
 
         for (contextBot in bots) {
             val botTelegramName = contextBot.getTelegramUserName()
-            val botTelegramNameForMarkdown = getSettingValueForMarkdown(BotCommandUtils.getClickableUserName(botTelegramName))
+            val clickableBotTelegramName = BotCommandUtils.getClickableUserName(botTelegramName)
+            val botTelegramNameForMarkdown = getSettingValueForMarkdown(clickableBotTelegramName)
 
-            lines.add("""
+            val botCommandTabNames = contextBot.getCommandTabNames()
+
+            lines.add(
+                """
                 *${contextBot.botName}* ($botTelegramNameForMarkdown)
-                Лист со списком команд: ${contextBot.commandSheetName}
+                Вкладки с командами: `$botCommandTabNames`
                 Окружение: ${contextBot.environmentName}
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
 
         return lines.joinToString("\n\n")
