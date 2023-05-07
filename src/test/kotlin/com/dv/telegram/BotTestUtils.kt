@@ -214,7 +214,7 @@ object BotTestUtils {
                 TabType.COUNTRY_CHATS
             ),
             listOf(
-                CountryChatData(
+                CityChatData( // todo: use common ChatData
                     "Болгария",
                     "Болгария, Болгарія, Bulgaria, Bulgarien, Bolgaria, Bulgaria",
                     listOf("болгария", "болгарія", "bulgaria", "bulgarien", "bolgaria", "bulgaria"),
@@ -222,7 +222,7 @@ object BotTestUtils {
                         "https://t.me/UAhelpinfo/28 — Общая информация"
                     )
                 ),
-                CountryChatData(
+                CityChatData( // todo: use common ChatData
                     "Португалия",
                     "Португалия, Португалія, Portugal, Portugalia",
                     listOf("португалия", "португалія", "portugal", "portugalia"),

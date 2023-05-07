@@ -16,7 +16,7 @@ enum class ResponseType {
     COUNTRY_CHAT;
 
     companion object {
-        fun fromTabType(tabConfig: TabConfig) = fromTabType(tabConfig.tabType)
+        fun fromTabConfig(tabConfig: TabConfig) = fromTabType(tabConfig.tabType)
 
         fun fromTabType(tabType: TabType) =
             when (tabType) {

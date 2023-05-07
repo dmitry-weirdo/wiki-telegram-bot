@@ -90,10 +90,10 @@ class WikiBot(
         commandTabs = BotAnswerTabData.fromTabDataList(commandTabsData)
         dataTabs = BotAnswerTabData.fromTabDataList(dataTabsData)
 
-        pages = WikiPagesDataList(wikiPagesData)
-        cityChats = CityChatsDataList(cityChatsData)
-        countryChats = CountryChatsDataList(countryChatsData)
-        commands = WikiBotCommandsDataList(commandsData)
+        pages = WikiPagesDataList(wikiPagesData, ResponseType.WIKI_PAGE)
+        cityChats = CityChatsDataList(cityChatsData, ResponseType.CITY_CHAT)
+        countryChats = CountryChatsDataList(countryChatsData, ResponseType.COUNTRY_CHAT)
+        commands = WikiBotCommandsDataList(commandsData, ResponseType.COMMAND)
 
         botName = config.botName
 

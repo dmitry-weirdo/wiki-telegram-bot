@@ -34,7 +34,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
             return MessageProcessingResult.notForTheBot()
         }
 
-        // special commands - not configured in the Google Sheet
+        // special commands - NOT configured in the Google Sheet
         val specialCommandResponse = wikiBot.specialCommands.getResponse(text, userName, wikiBot, update)
         if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
             return MessageProcessingResult.specialCommand(
@@ -52,12 +52,12 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
             }
         }
 
-        return processMessage(
-            text,
-            wikiBot.pages.getResponse(lowerText), // wiki pages - configured in the Google Sheet
-            wikiBot.cityChats.getResponse(lowerText), // city chats - configured in the Google Sheet
-            wikiBot.countryChats.getResponse(lowerText) // country chats - configured in the Google Sheet
-        )
+        // data answers - configured in the Google Sheet
+        val dataTabResponses = wikiBot
+            .dataTabs
+            .map { it.tabAnswers.getResponse(lowerText) }
+
+        return processMessage(text, dataTabResponses)
     }
 
     private fun messageIsForTheBot(lowerText: String): Boolean {
@@ -74,23 +74,13 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
     private fun processMessage(
         text: String,
-        pagesResponse: BotAnswerDataListResponse,
-        cityChatsResponse: BotAnswerDataListResponse,
-        countryChatsResponse: BotAnswerDataListResponse
+        responses: List<BotAnswerDataListResponse>
     ): MessageProcessingResult {
-        val responseTypes = getResponseTypes(
-            pagesResponse,
-            cityChatsResponse,
-            countryChatsResponse
-        )
+        val responseTypes = getResponseTypes(responses)
 
-        val answerOptionals: List<String?> = listOf(
-            pagesResponse.responseText,
-            cityChatsResponse.responseText,
-            countryChatsResponse.responseText
-        )
-
-        val answers = answerOptionals
+        val answers = responses
+            .filter { it.matchFound }
+            .map { it.responseText }
             .filter { it?.isNotBlank() == true }
 
         if (answers.isEmpty()) { // no answers found
@@ -100,10 +90,9 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
         val combinedAnswers = answers.joinToString("\n\n")
 
-        val matchedKeywordsAll: List<String> =
-            pagesResponse.matchedKeywords +
-            cityChatsResponse.matchedKeywords +
-            countryChatsResponse.matchedKeywords
+        val matchedKeywordsAll: List<String> = responses
+            .map { it.matchedKeywords }
+            .flatten()
 
         // some lists may be empty - filter our the empty values. Super-safe filter out the blank responses.
         val matchedKeywords = matchedKeywordsAll
@@ -113,27 +102,10 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         return MessageProcessingResult.answerFound(combinedAnswers, responseTypes, matchedKeywords)
     }
 
-    private fun getResponseTypes(
-        pagesResponse: BotAnswerDataListResponse,
-        cityChatsResponse: BotAnswerDataListResponse,
-        countryChatsResponse: BotAnswerDataListResponse
-    ): List<ResponseType> {
-        val responseTypes = mutableListOf<ResponseType>()
-
-        if (pagesResponse.matchFound) {
-            responseTypes.add(ResponseType.WIKI_PAGE)
-        }
-
-        if (cityChatsResponse.matchFound) {
-            responseTypes.add(ResponseType.CITY_CHAT)
-        }
-
-        if (countryChatsResponse.matchFound) {
-            responseTypes.add(ResponseType.COUNTRY_CHAT)
-        }
-
-        return responseTypes
-    }
+    private fun getResponseTypes(responses: List<BotAnswerDataListResponse>) = responses
+        .filter { it.matchFound }
+        .map { it.responseType }
+        .distinct() // in case of different tabs with the same response types, do not add the same response type multiple times
 
     private fun getNoResultResponse(text: String): String? {
         logger.info("Unknown command for the bot: $text")

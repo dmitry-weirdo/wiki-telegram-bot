@@ -28,7 +28,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
             return when (tabData.tabConfig.tabFormat) {
                 TabFormat.WIKI_PAGES -> {
                     val answers = tabData.answers as (List<WikiPageData>)
-                    val tabAnswers = WikiPagesDataList(answers)
+                    val tabAnswers = WikiPagesDataList(answers, tabData.responseType)
 
                     BotAnswerTabData(
                         tabData.tabConfig,
@@ -38,7 +38,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
 
                 TabFormat.CHATS -> {
                     val answers = tabData.answers as (List<CityChatData>) // todo: use common ChatData instead of CityChatData
-                    val tabAnswers = CityChatsDataList(answers)
+                    val tabAnswers = CityChatsDataList(answers, tabData.responseType)
 
                     BotAnswerTabData(
                         tabData.tabConfig,
@@ -48,7 +48,7 @@ data class BotAnswerTabData<T : BotAnswerData> (
 
                 TabFormat.COMMANDS -> {
                     val answers = tabData.answers as (List<WikiBotCommandData>)
-                    val tabAnswers = WikiBotCommandsDataList(answers)
+                    val tabAnswers = WikiBotCommandsDataList(answers, tabData.responseType)
 
                     BotAnswerTabData(
                         tabData.tabConfig,

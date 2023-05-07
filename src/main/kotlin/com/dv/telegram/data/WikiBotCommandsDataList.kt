@@ -1,10 +1,11 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.GoogleSheetBotData
+import com.dv.telegram.ResponseType
 
-class WikiBotCommandsDataList(answers: List<WikiBotCommandData>) : BotAnswerDataList<WikiBotCommandData>(answers) {
+class WikiBotCommandsDataList(answers: List<WikiBotCommandData>, responseType: ResponseType) : BotAnswerDataList<WikiBotCommandData>(answers, responseType) {
 
-    constructor(botData: GoogleSheetBotData) : this(botData.commands)
+    constructor(botData: GoogleSheetBotData) : this(botData.commands, ResponseType.COMMAND)
 
     override fun getResponseText(matches: List<WikiBotCommandData>): String {
         if (matches.size == 1) {

@@ -1,10 +1,11 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.GoogleSheetBotData
+import com.dv.telegram.ResponseType
 
-class CityChatsDataList(answers: List<CityChatData>) : BotAnswerDataList<CityChatData>(answers) {
+class CityChatsDataList(answers: List<CityChatData>, responseType: ResponseType) : BotAnswerDataList<CityChatData>(answers, responseType) {
 
-    constructor(botData: GoogleSheetBotData) : this(botData.cityChats)
+    constructor(botData: GoogleSheetBotData) : this(botData.cityChats, ResponseType.CITY_CHAT)
 
     override fun getResponseText(matches: List<CityChatData>): String? {
         if (matches.isEmpty()) {
