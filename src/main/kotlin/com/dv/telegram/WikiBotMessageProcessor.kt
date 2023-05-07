@@ -44,9 +44,12 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         }
 
         // normal commands - configured in the Google Sheet
-        val commandsAnswer = wikiBot.commands.getResponse(lowerText)
-        if (commandsAnswer.matchFound) { // matching command found -> only handle the command
-            return MessageProcessingResult.answerFoundAsCommand(commandsAnswer)
+        for (commandTab in wikiBot.commandTabs) { // iterate in order of priority
+            val commandTabAnswer = commandTab.tabAnswers.getResponse(lowerText)
+
+            if (commandTabAnswer.matchFound) { // matching command found -> only handle the command
+                return MessageProcessingResult.answerFoundAsCommand(commandTabAnswer)
+            }
         }
 
         return processMessage(
