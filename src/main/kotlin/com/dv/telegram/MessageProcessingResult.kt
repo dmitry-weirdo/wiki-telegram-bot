@@ -1,12 +1,15 @@
 package com.dv.telegram
 
+import com.dv.telegram.data.BotAnswerDataListResponse
+
 data class MessageProcessingResult(
     val messageIsForTheBot: Boolean,
     val isSpecialCommand: Boolean,
     val useMarkdown: Boolean,
     val answerIsFound: Boolean,
     val response: String?,
-    var responseTypes: List<ResponseType>
+    val responseTypes: List<ResponseType>,
+    val matchedKeywords: List<String>
 ) {
     fun hasNoResponse(): Boolean {
         return response == null
@@ -25,7 +28,8 @@ data class MessageProcessingResult(
                 useMarkdown = false,
                 answerIsFound = false,
                 response = null,
-                responseTypes = listOf(ResponseType.NOT_FOR_THE_BOT)
+                responseTypes = listOf(ResponseType.NOT_FOR_THE_BOT),
+                matchedKeywords = listOf()
             )
         }
 
@@ -37,24 +41,31 @@ data class MessageProcessingResult(
                 useMarkdown = useMarkdown,
                 answerIsFound = true,
                 response = response,
-                responseTypes = listOf(ResponseType.SPECIAL_COMMAND)
+                responseTypes = listOf(ResponseType.SPECIAL_COMMAND),
+                matchedKeywords = listOf() // todo: think about this, maybe set command name?
             )
         }
 
         @JvmStatic
-        fun answerFoundAsCommand(response: String): MessageProcessingResult {
-            return answerFound(response, listOf(ResponseType.COMMAND))
+        fun answerFoundAsCommand(response: BotAnswerDataListResponse): MessageProcessingResult {
+            return answerFoundAsCommand(response.responseText!!, response.matchedKeywords)
         }
 
         @JvmStatic
-        fun answerFound(response: String, responseTypes: List<ResponseType>): MessageProcessingResult {
+        fun answerFoundAsCommand(response: String, matchedKeywords: List<String>): MessageProcessingResult {
+            return answerFound(response, listOf(ResponseType.COMMAND), matchedKeywords)
+        }
+
+        @JvmStatic
+        fun answerFound(response: String, responseTypes: List<ResponseType>, matchedKeywords: List<String>): MessageProcessingResult {
             return MessageProcessingResult(
                 messageIsForTheBot = true,
                 isSpecialCommand = false,
                 useMarkdown = false,
                 answerIsFound = true,
                 response = response,
-                responseTypes = responseTypes
+                responseTypes = responseTypes,
+                matchedKeywords = matchedKeywords
             )
         }
 
@@ -66,7 +77,8 @@ data class MessageProcessingResult(
                 useMarkdown = false,
                 answerIsFound = false,
                 response = response,
-                responseTypes = listOf(ResponseType.ANSWER_NOT_FOUND)
+                responseTypes = listOf(ResponseType.ANSWER_NOT_FOUND),
+                matchedKeywords = listOf()
             )
         }
     }

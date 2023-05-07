@@ -14,10 +14,10 @@ data class MessageProcessingLog( // to be logged in a JSON
     val user: User?, // who called the bot, is nullable in the API
     // todo: think whether we need messages not for the bot
 
-    // todo: triggeredKeywords
     val request: String, // we don't handle the empty/bland message
     val response: String?, // can be pretty big, but who cares
     var responseTypes: List<ResponseType>,
+    var matchedKeywords: List<String>,
     // todo: do we need separate "tab names" or "responseTypes" is enough?
     val answerIsFound: Boolean
 ) {
@@ -41,6 +41,7 @@ data class MessageProcessingLog( // to be logged in a JSON
 
                 response = result.response,
                 responseTypes = result.responseTypes,
+                matchedKeywords = result.matchedKeywords,
                 answerIsFound = result.answerIsFound
             )
         }

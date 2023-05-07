@@ -94,7 +94,8 @@ internal class BotStatisticsTest {
         val expectedSuccessfulRequestResult = MessageProcessingResult.answerFound(
             "Eisenach чаты:" +
                 "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA",
-            listOf(ResponseType.CITY_CHAT)
+            listOf(ResponseType.CITY_CHAT),
+            listOf("айзенах")
         )
 
         assertThat(successfulRequestResult).isEqualTo(expectedSuccessfulRequestResult)

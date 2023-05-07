@@ -141,7 +141,8 @@ internal class BotGetResponseTest {
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Override of the special command!",
-            listOf(ResponseType.COMMAND) // NOT special command
+            listOf(ResponseType.COMMAND), // NOT special command
+            listOf("/getenvironment") // keyword of a NOT special command
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -183,7 +184,8 @@ internal class BotGetResponseTest {
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Добрый",
-            listOf(ResponseType.COMMAND)
+            listOf(ResponseType.COMMAND),
+            listOf("добрый вечер")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -206,7 +208,8 @@ internal class BotGetResponseTest {
 
         val expectedResult = MessageProcessingResult.answerFound(
             "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}",
-            listOf(ResponseType.COMMAND)
+            listOf(ResponseType.COMMAND),
+            listOf("добрый вечер", "слава україні")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -226,7 +229,8 @@ internal class BotGetResponseTest {
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Правила безопасности — https://uahelp.wiki/safety",
-            listOf(ResponseType.WIKI_PAGE)
+            listOf(ResponseType.WIKI_PAGE),
+            listOf("безопасност")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -247,7 +251,8 @@ internal class BotGetResponseTest {
         val expectedResult = MessageProcessingResult.answerFound(
             "— Стартовая страница вики — https://uahelp.wiki" +
                     "\n— Правила безопасности — https://uahelp.wiki/safety",
-            listOf(ResponseType.WIKI_PAGE)
+            listOf(ResponseType.WIKI_PAGE),
+            listOf("вики", "безопасност")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -270,7 +275,8 @@ internal class BotGetResponseTest {
                     "\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине" +
                     "\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины" +
                     "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg",
-            listOf(ResponseType.CITY_CHAT)
+            listOf(ResponseType.CITY_CHAT),
+            listOf("аугсбург")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -295,7 +301,8 @@ internal class BotGetResponseTest {
                     "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg" +
                     "\n\nEisenach чаты:" +
                     "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA",
-            listOf(ResponseType.CITY_CHAT)
+            listOf(ResponseType.CITY_CHAT),
+            listOf("аугсбург", "айзенах")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -318,7 +325,8 @@ internal class BotGetResponseTest {
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
                     "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
-            listOf(ResponseType.COUNTRY_CHAT)
+            listOf(ResponseType.COUNTRY_CHAT),
+            listOf("portugal")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -343,7 +351,8 @@ internal class BotGetResponseTest {
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
                     "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
-            listOf(ResponseType.COUNTRY_CHAT)
+            listOf(ResponseType.COUNTRY_CHAT),
+            listOf("болгария", "portugal")
         )
 
         assertThat(result).isEqualTo(expectedResult)
@@ -371,7 +380,8 @@ internal class BotGetResponseTest {
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
                     "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
-            listOf(ResponseType.WIKI_PAGE, ResponseType.CITY_CHAT, ResponseType.COUNTRY_CHAT)
+            listOf(ResponseType.WIKI_PAGE, ResponseType.CITY_CHAT, ResponseType.COUNTRY_CHAT),
+            listOf("вики", "аугсбург", "portugal")
         )
 
         assertThat(result).isEqualTo(expectedResult)

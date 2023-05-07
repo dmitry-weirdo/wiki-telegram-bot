@@ -26,7 +26,7 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
         return getResponseText(matches)
     }
 
-    @Suppress("unchecked")
+    @Suppress("UNCHECKED_CAST")
     fun getResponse(text: String): BotAnswerDataListResponse {
         val matches = findMatches(text)
 

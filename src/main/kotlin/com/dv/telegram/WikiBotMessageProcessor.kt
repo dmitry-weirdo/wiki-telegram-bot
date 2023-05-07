@@ -1,6 +1,7 @@
 package com.dv.telegram
 
 import com.dv.telegram.config.BotTriggerMode
+import com.dv.telegram.data.BotAnswerDataListResponse
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.text.MessageFormat
@@ -42,18 +43,17 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
             )
         }
 
-        // todo: it is not perfect that we match by (responseText: String != null) instead of a clear flag
         // normal commands - configured in the Google Sheet
-        val commandsAnswerText = wikiBot.commands.getResponseText(lowerText)
-        if (commandsAnswerText?.isNotBlank() == true) { // matching command found -> only handle the command
-            return MessageProcessingResult.answerFoundAsCommand(commandsAnswerText)
+        val commandsAnswer = wikiBot.commands.getResponse(lowerText)
+        if (commandsAnswer.matchFound) { // matching command found -> only handle the command
+            return MessageProcessingResult.answerFoundAsCommand(commandsAnswer)
         }
 
         return processMessage(
             text,
-            wikiBot.pages.getResponseText(lowerText), // wiki pages - configured in the Google Sheet
-            wikiBot.cityChats.getResponseText(lowerText), // city chats - configured in the Google Sheet
-            wikiBot.countryChats.getResponseText(lowerText) // country chats - configured in the Google Sheet
+            wikiBot.pages.getResponse(lowerText), // wiki pages - configured in the Google Sheet
+            wikiBot.cityChats.getResponse(lowerText), // city chats - configured in the Google Sheet
+            wikiBot.countryChats.getResponse(lowerText) // country chats - configured in the Google Sheet
         )
     }
 
@@ -71,9 +71,9 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
     private fun processMessage(
         text: String,
-        pagesResponse: String?,
-        cityChatsResponse: String?,
-        countryChatsResponse: String?
+        pagesResponse: BotAnswerDataListResponse,
+        cityChatsResponse: BotAnswerDataListResponse,
+        countryChatsResponse: BotAnswerDataListResponse
     ): MessageProcessingResult {
         val responseTypes = getResponseTypes(
             pagesResponse,
@@ -82,9 +82,9 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         )
 
         val answerOptionals: List<String?> = listOf(
-            pagesResponse,
-            cityChatsResponse,
-            countryChatsResponse
+            pagesResponse.responseText,
+            cityChatsResponse.responseText,
+            countryChatsResponse.responseText
         )
 
         val answers = answerOptionals
@@ -96,25 +96,36 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         }
 
         val combinedAnswers = answers.joinToString("\n\n")
-        return MessageProcessingResult.answerFound(combinedAnswers, responseTypes)
+
+        val matchedKeywordsAll: List<String> =
+            pagesResponse.matchedKeywords +
+            cityChatsResponse.matchedKeywords +
+            countryChatsResponse.matchedKeywords
+
+        // some lists may be empty - filter our the empty values. Super-safe filter out the blank responses.
+        val matchedKeywords = matchedKeywordsAll
+            .filter { it.isNotBlank() }
+            .distinct() // if the word is triggered in multiple tabs (eg "berlin" in chats and wiki pages) - do not count it twice
+
+        return MessageProcessingResult.answerFound(combinedAnswers, responseTypes, matchedKeywords)
     }
 
     private fun getResponseTypes(
-        pagesResponse: String?,
-        cityChatsResponse: String?,
-        countryChatsResponse: String?
+        pagesResponse: BotAnswerDataListResponse,
+        cityChatsResponse: BotAnswerDataListResponse,
+        countryChatsResponse: BotAnswerDataListResponse
     ): List<ResponseType> {
         val responseTypes = mutableListOf<ResponseType>()
 
-        if (pagesResponse?.isNotBlank() == true) {
+        if (pagesResponse.matchFound) {
             responseTypes.add(ResponseType.WIKI_PAGE)
         }
 
-        if (cityChatsResponse?.isNotBlank() == true) {
+        if (cityChatsResponse.matchFound) {
             responseTypes.add(ResponseType.CITY_CHAT)
         }
 
-        if (countryChatsResponse?.isNotBlank() == true) {
+        if (countryChatsResponse.matchFound) {
             responseTypes.add(ResponseType.COUNTRY_CHAT)
         }
 
