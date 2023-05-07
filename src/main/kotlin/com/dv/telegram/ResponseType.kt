@@ -1,5 +1,6 @@
 package com.dv.telegram
 
+import com.dv.telegram.tabs.TabConfig
 import com.dv.telegram.tabs.TabType
 
 enum class ResponseType {
@@ -15,6 +16,8 @@ enum class ResponseType {
     COUNTRY_CHAT;
 
     companion object {
+        fun fromTabType(tabConfig: TabConfig) = fromTabType(tabConfig.tabType)
+
         fun fromTabType(tabType: TabType) =
             when (tabType) {
                 TabType.COMMANDS -> COMMAND
