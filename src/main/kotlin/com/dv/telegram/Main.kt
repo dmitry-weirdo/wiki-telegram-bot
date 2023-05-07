@@ -46,11 +46,9 @@ class Main : Logging {
         private fun createCallableTask(config: WikiBotConfig, context: WikiBotsContext): Callable<String> {
             return Callable {
                 try {
-                    val botData = GoogleSheetLoader.readGoogleSheet(config)
-
                     val botTabsData = GoogleSheetLoader.readGoogleSheetTabs(config)
 
-                    val wikiBot = WikiBot(context, config, botData, botTabsData)
+                    val wikiBot = WikiBot(context, config, botTabsData)
 
                     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
                     botsApi.registerBot(wikiBot)

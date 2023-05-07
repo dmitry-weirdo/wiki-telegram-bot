@@ -3,14 +3,6 @@ package com.dv.telegram
 import com.dv.telegram.command.BotSpecialCommands
 import com.dv.telegram.config.BotSettings
 import com.dv.telegram.data.BotAnswerData
-import com.dv.telegram.data.CityChatData
-import com.dv.telegram.data.CityChatsDataList
-import com.dv.telegram.data.CountryChatData
-import com.dv.telegram.data.CountryChatsDataList
-import com.dv.telegram.data.WikiBotCommandData
-import com.dv.telegram.data.WikiBotCommandsDataList
-import com.dv.telegram.data.WikiPageData
-import com.dv.telegram.data.WikiPagesDataList
 import com.dv.telegram.statistics.BotStatistics
 import com.dv.telegram.tabs.BotAnswerTabData
 import com.dv.telegram.tabs.TabConfigs
@@ -28,10 +20,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 class WikiBot(
     val context: WikiBotsContext,
     private val config: WikiBotConfig,
-    wikiPagesData: List<WikiPageData>,
-    cityChatsData: List<CityChatData>,
-    countryChatsData: List<CountryChatData>,
-    commandsData: List<WikiBotCommandData>,
     commandTabsData: List<TabData>,
     dataTabsData: List<TabData>
 ) : TelegramLongPollingBot(), Logging {
@@ -39,18 +27,6 @@ class WikiBot(
         private set
 
     var dataTabs: List<BotAnswerTabData<BotAnswerData>> // can be reloaded from Google Sheet
-        private set
-
-    var pages: WikiPagesDataList // can be reloaded from Google Sheet
-        private set
-
-    var cityChats: CityChatsDataList // can be reloaded from Google Sheet
-        private set
-
-    var countryChats: CountryChatsDataList // can be reloaded from Google Sheet
-        private set
-
-    var commands: WikiBotCommandsDataList // can be reloaded from Google Sheet
         private set
 
     val botName: String
@@ -72,15 +48,10 @@ class WikiBot(
     constructor(
         context: WikiBotsContext,
         config: WikiBotConfig,
-        botData: GoogleSheetBotData,
         botTabsData: GoogleSheetBotTabsData
     ) : this(
         context,
         config,
-        botData.pages,
-        botData.cityChats,
-        botData.countryChats,
-        botData.commands,
         botTabsData.commandTabs,
         botTabsData.dataTabs
     )
@@ -90,11 +61,6 @@ class WikiBot(
 
         commandTabs = BotAnswerTabData.fromTabDataList(commandTabsData)
         dataTabs = BotAnswerTabData.fromTabDataList(dataTabsData)
-
-        pages = WikiPagesDataList(wikiPagesData, ResponseType.WIKI_PAGE)
-        cityChats = CityChatsDataList(cityChatsData, ResponseType.CITY_CHAT)
-        countryChats = CountryChatsDataList(countryChatsData, ResponseType.COUNTRY_CHAT)
-        commands = WikiBotCommandsDataList(commandsData, ResponseType.COMMAND)
 
         botName = config.botName
 

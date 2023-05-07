@@ -6,6 +6,7 @@ import com.dv.telegram.command.GetEnvironment
 import com.dv.telegram.command.GetStatistics
 import com.dv.telegram.command.Start
 import com.dv.telegram.config.ReplyWhenNoAnswer
+import com.dv.telegram.data.WikiBotCommandData
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -203,8 +204,8 @@ internal class BotGetResponseTest {
         val text = "$botName, добрый вечер, Слава Україні!"
         val result = wikiBot.processMessage(text, botAdmin, update)
 
-        val command0 = wikiBot.commands.answers[0]
-        val command1 = wikiBot.commands.answers[1]
+        val command0 = wikiBot.commandTabs[0].tabAnswers.answers[0] as WikiBotCommandData
+        val command1 = wikiBot.commandTabs[0].tabAnswers.answers[1] as WikiBotCommandData
 
         val expectedResult = MessageProcessingResult.answerFound(
             "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}",
