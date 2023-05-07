@@ -1,6 +1,9 @@
 package com.dv.telegram.notion
 
 import com.dv.telegram.GoogleSheetLoader
+import com.dv.telegram.data.CityChatData
+import com.dv.telegram.exception.CommandException
+import com.dv.telegram.tabs.TabType
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
@@ -24,9 +27,13 @@ object NotionWrapper : Logging {
         logger.info("Total bot configs: $threadsCount")
 
         val config = wikiBotConfigs.configs[0]
-        val botData = GoogleSheetLoader.readGoogleSheet(config)
+        val botData = GoogleSheetLoader.readGoogleSheetTabs(config)
 
-        val cityChatsData = botData.cityChats
+        val cityChatsTab = botData
+            .getCityChats()
+            ?: throw CommandException("В конфиге бота нет вкладок с типом ${TabType.CITY_CHATS}.")
+
+        val cityChatsData = cityChatsTab.answers as List<CityChatData>
         val cityChats = NotionCityChats.from(cityChatsData)
 //        val cityChats = getCityChats(); // use test data
 

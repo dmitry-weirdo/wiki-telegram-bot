@@ -228,7 +228,7 @@ class WikiBot(
 
     fun reloadBotDataFromGoogleSheet(): Boolean {
         return try {
-            val botData = loadBotDataFromGoogleSheetTabs()
+            val botData = loadBotDataFromGoogleSheet()
 
             commandTabs = BotAnswerTabData.fromTabDataList(botData.commandTabs)
             dataTabs = BotAnswerTabData.fromTabDataList(botData.dataTabs)
@@ -240,13 +240,7 @@ class WikiBot(
         }
     }
 
-    // todo: still used by CityChatsExportToNotion and CityChatsValidate
-    @Deprecated("Used only by CityChatsExportToNotion and CityChatsValidate, should be replaced there.")
-    fun loadBotDataFromGoogleSheet(): GoogleSheetBotData { // does NOT reload the bot data itself
-        return GoogleSheetLoader.readGoogleSheet(config)
-    }
-
-    fun loadBotDataFromGoogleSheetTabs(): GoogleSheetBotTabsData { // does NOT reload the bot data itself
+    fun loadBotDataFromGoogleSheet(): GoogleSheetBotTabsData { // does NOT reload the bot data itself
         return GoogleSheetLoader.readGoogleSheetTabs(config)
     }
 

@@ -1,9 +1,11 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import com.dv.telegram.data.CityChatData
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionCityChats
 import com.dv.telegram.notion.NotionWrapper
+import com.dv.telegram.tabs.TabType
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.meta.api.objects.Update
 
@@ -33,7 +35,13 @@ class CityChatsExportToNotion : BasicBotCommand(), Logging {
         return try {
             val botData = bot.loadBotDataFromGoogleSheet()
 
-            val cityChats = NotionCityChats.from(botData.cityChats)
+            val cityChatsTab = botData
+                .getCityChats()
+                ?: throw CommandException("В конфиге бота нет вкладок с типом ${TabType.CITY_CHATS}.")
+
+            val cityChatAnswers = cityChatsTab.answers as List<CityChatData>
+
+            val cityChats = NotionCityChats.from(cityChatAnswers)
             val totalChats = NotionCityChats.countTotalChats(cityChats)
 
             logger.info("$totalChats city chats for ${cityChats.size} cities successfully parsed from Google Sheet.")
