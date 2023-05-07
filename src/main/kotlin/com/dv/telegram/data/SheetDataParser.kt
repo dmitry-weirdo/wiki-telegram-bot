@@ -3,6 +3,7 @@ package com.dv.telegram.data
 import com.dv.telegram.google.RowData
 import com.dv.telegram.google.SheetData
 import com.dv.telegram.google.WikiBotGoogleSheet
+import com.dv.telegram.tabs.TabFormat
 
 /**
  * Parses the raw strings from [SheetData]
@@ -15,6 +16,11 @@ interface SheetDataParser<T : BotAnswerData> {
      * Which tab from the [WikiBotGoogleSheet] to parse.
      */
     fun getSheetData(sheet: WikiBotGoogleSheet): SheetData
+
+    /**
+     * Which tab format does the implementation parse.
+     */
+    fun getTabFormat(): TabFormat
 
     /**
      * Parses the given list of raw strings of row data
