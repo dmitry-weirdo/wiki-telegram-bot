@@ -3,6 +3,7 @@ package com.dv.telegram
 import com.dv.telegram.command.BotSpecialCommands
 import com.dv.telegram.config.BotSettings
 import com.dv.telegram.data.BotAnswerData
+import com.dv.telegram.exception.WikiBotException
 import com.dv.telegram.statistics.BotStatistics
 import com.dv.telegram.tabs.BotAnswerTabData
 import com.dv.telegram.tabs.TabConfigs
@@ -135,7 +136,7 @@ class WikiBot(
         }
         catch (e: TelegramApiException) {
             logger.error("TelegramApiException occurred on sending the bot response message", e) // todo: add which message has failed the bot
-            throw RuntimeException(e)
+            throw WikiBotException(e)
         }
     }
 

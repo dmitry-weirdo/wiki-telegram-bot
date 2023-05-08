@@ -1,6 +1,7 @@
 package com.dv.telegram.google
 
 import com.dv.telegram.WikiBotConfig
+import com.dv.telegram.exception.WikiBotException
 import com.dv.telegram.tabs.TabConfigs
 import com.dv.telegram.util.WikiBotUtils
 import com.google.api.client.http.HttpExecuteInterceptor
@@ -27,7 +28,7 @@ object GoogleSheetReader : Logging {
             return readGoogleSheet(config)
         }
         catch (e: IOException) {
-            throw RuntimeException(e)
+            throw WikiBotException(e)
         }
     }
 

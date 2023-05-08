@@ -1,6 +1,7 @@
 package com.dv.telegram
 
 import com.dv.telegram.config.SettingValidationException
+import com.dv.telegram.exception.WikiBotException
 import com.dv.telegram.util.WikiBotUtils
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.meta.TelegramBotsApi
@@ -39,7 +40,7 @@ class Main : Logging {
             catch (e: InterruptedException) {
                 logger.debug("============================================")
                 logger.error("executorService.invokeAll was interrupted", e)
-                throw RuntimeException(e)
+                throw WikiBotException(e)
             }
         }
 
@@ -60,15 +61,15 @@ class Main : Logging {
                 }
                 catch (e: TelegramApiException) {
                     logger.error("Error when starting the WikiBot", e)
-                    throw RuntimeException(e)
+                    throw WikiBotException(e)
                 }
                 catch (e: SettingValidationException) {
                     logger.error("Settings validation error when starting the WikiBot", e)
-                    throw RuntimeException(e)
+                    throw WikiBotException(e)
                 }
                 catch (e: Exception) {
                     logger.error("Unknown exception when starting the WikiBot", e)
-                    throw RuntimeException(e)
+                    throw WikiBotException(e)
                 }
             }
         }

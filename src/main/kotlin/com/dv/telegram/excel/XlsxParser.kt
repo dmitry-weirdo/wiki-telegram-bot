@@ -2,6 +2,7 @@ package com.dv.telegram.excel
 
 import com.dv.telegram.data.DataUtils.parseWords
 import com.dv.telegram.data.WikiPageData
+import com.dv.telegram.exception.WikiBotException
 import org.apache.logging.log4j.kotlin.Logging
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Workbook
@@ -22,7 +23,7 @@ object XlsxParser : Logging { // todo: this class has to read to WikiBotGoogleSh
             parseWikiPagesData()
         }
         catch (e: IOException) {
-            throw RuntimeException(e)
+            throw WikiBotException(e)
         }
     }
 
