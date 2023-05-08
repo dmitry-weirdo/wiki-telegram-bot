@@ -28,6 +28,7 @@
 
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <ktlint.version>0.49.0</ktlint.version>
+        <detekt.version>1.22.0</detekt.version>
 
     </properties>
 
@@ -333,7 +334,42 @@
                         </goals>
                     </execution>
 -->
+
+                    <!-- see https://detekt.dev/docs/gettingstarted/mavenanttask -->
+                    <execution>
+                        <!-- This can be run separately with mvn antrun:run@detekt -->
+                        <id>detekt</id>
+                        <phase>verify</phase>
+                        <configuration>
+                            <target name="detekt">
+                                <!-- do not fail on error! -->
+                                <java
+                                    taskname="detekt"
+                                    dir="${basedir}"
+                                    fork="true"
+                                    failonerror="false"
+                                    classname="io.gitlab.arturbosch.detekt.cli.Main"
+                                    classpathref="maven.plugin.classpath"
+                                >
+                                    <arg value="--input"/>
+                                    <arg value="${basedir}/src/main/kotlin"/>
+                                    <arg value="--excludes"/>
+                                    <arg value="**/special/package/internal/**"/>
+                                    <arg value="--report"/>
+                                    <arg value="xml:${basedir}/.ignoreme/detekt/reports/detekt.xml"/>
+                                    <arg value="--config"/>
+                                    <arg value="${basedir}/detekt.yml"/>
+                                    <arg value="--build-upon-default-config"/> <!-- see https://detekt.dev/docs/introduction/configurations/ -->
+                                </java>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+
                 </executions>
+
                 <dependencies>
                     <dependency>
                         <groupId>com.pinterest</groupId>
@@ -341,7 +377,15 @@
                         <version>${ktlint.version}</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->
+
+                    <!-- see https://detekt.dev/docs/gettingstarted/mavenanttask -->
+                    <dependency>
+                        <groupId>io.gitlab.arturbosch.detekt</groupId>
+                        <artifactId>detekt-cli</artifactId>
+                        <version>${detekt.version}</version>
+                    </dependency>
                 </dependencies>
+
             </plugin>
 
         </plugins>
