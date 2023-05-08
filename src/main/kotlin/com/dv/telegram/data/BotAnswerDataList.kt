@@ -65,6 +65,6 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
             return responseText
         }
 
-        return "==== $header ====\n$responseText"
+        return "$header\n$responseText"
     }
 }
