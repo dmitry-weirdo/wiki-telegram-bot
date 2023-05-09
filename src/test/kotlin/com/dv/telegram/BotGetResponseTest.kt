@@ -208,7 +208,7 @@ internal class BotGetResponseTest {
         val command1 = wikiBot.commandTabs[0].tabAnswers.answers[1] as WikiBotCommandData
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "${command0.getMultiLineAnswer()}\n${command1.getMultiLineAnswer()}",
+            "${command0.getAnswerWithBullet("—")}\n${command1.getAnswerWithBullet("—")}",
             listOf(ResponseType.COMMAND),
             listOf("добрый вечер", "слава україні")
         )

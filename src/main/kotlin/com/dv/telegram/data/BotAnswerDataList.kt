@@ -12,7 +12,8 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
     val answers: List<T>,
     private val responseType: ResponseType,
     private val showHeader: Boolean,
-    private val header: String?
+    private val header: String?,
+    val bullet: String
 ) : Logging {
     constructor(
         answers: List<T>,
@@ -21,7 +22,8 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
         answers,
         tabData.responseType,
         tabData.tabConfig.showHeader,
-        tabData.tabConfig.header
+        tabData.tabConfig.header,
+        tabData.tabConfig.bullet
     )
 
     @Suppress("UNCHECKED_CAST")
@@ -58,22 +60,33 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
             null
         }
         else {
-            getResponseText(matches)
+            val forceBullet = hasHeader() // when tab answers have header, display bullet even in the case of a single answer
+
+            getResponseText(matches, forceBullet)
         }
     }
 
-    abstract fun getResponseText(matches: List<T>): String? // matches are NOT empty by contract
+    abstract fun getResponseText(matches: List<T>, forceBullet: Boolean): String? // matches are NOT empty by contract
 
     private fun addHeader(responseText: String): String { // expects not-null and non-blank responseText
+        return if (hasHeader()) {
+            "$header\n$responseText"
+        }
+        else {
+            responseText
+        }
+    }
+
+    private fun hasHeader(): Boolean {
         if (!showHeader) {
-            return responseText
+            return false
         }
 
         if (header.isNullOrBlank()) { // pre-cautious for incorrect configuration
             logger.warn("showHeader is set to ${true} but header is null or blank. Do not add the header.")
-            return responseText
+            return false
         }
 
-        return "$header\n$responseText"
+        return true
     }
 }

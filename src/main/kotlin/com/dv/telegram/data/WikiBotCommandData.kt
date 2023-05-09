@@ -9,7 +9,7 @@ data class WikiBotCommandData(
 
     override fun getMatch(text: String) = getMatch(text, words)
 
-    fun getOneLineAnswer() = answer
+    fun getAnswerWithoutBullet() = answer
 
-    fun getMultiLineAnswer() = "▫ $answer" // todo: use configurable bullet
+    fun getAnswerWithBullet(bullet: String) = "$bullet $answer"
 }

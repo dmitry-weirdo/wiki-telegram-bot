@@ -47,9 +47,12 @@ object BotTestUtils {
     private fun getBotTabsData(): GoogleSheetBotTabsData {
         val commandsTabData = TabData(
             TabConfig(
-                "Команды бота",
-                TabFormat.COMMANDS,
-                TabType.COMMANDS
+                tabName = "Команды бота",
+                tabFormat = TabFormat.COMMANDS,
+                tabType = TabType.COMMANDS,
+                showHeader = false,
+                header = "Ответы бота",
+                bullet = "—"
             ),
             listOf(
                 WikiBotCommandData(
@@ -72,9 +75,11 @@ object BotTestUtils {
 
         val wikiPageTabData = TabData(
             TabConfig(
-                "Страницы вики",
-                TabFormat.WIKI_PAGES,
-                TabType.WIKI_PAGES
+                tabName = "Страницы вики",
+                tabFormat = TabFormat.WIKI_PAGES,
+                tabType = TabType.WIKI_PAGES,
+                showHeader = false,
+                header = "\uD83D\uDCC1 Страницы вики"
             ),
             listOf(
                 WikiPageData(

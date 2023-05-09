@@ -10,7 +10,8 @@ data class WikiPageData(
 
     override fun getMatch(text: String) = getMatch(text, words)
 
-    fun getOneLineAnswer() = "$name — $url"
+    // todo: for optimization, we can pre-fill the answers based on tabConfig, as in ChatData
+    fun getAnswerWithoutBullet() = "$name — $url"
 
-    fun getMultiLineAnswer() = "▫ $name — $url" // todo: use configurable bullet
+    fun getAnswerWithBullet(bullet: String) = "$bullet $name — $url"
 }
