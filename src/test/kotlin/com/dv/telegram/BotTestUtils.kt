@@ -92,12 +92,17 @@ object BotTestUtils {
             )
         )
 
+        val cityChatsTabConfig = TabConfig(
+            tabName = "Чаты городов",
+            tabFormat = TabFormat.CHATS,
+            tabType = TabType.CITY_CHATS,
+            showHeader = false,
+            header = "\uD83C\uDDE9\uD83C\uDDEA Чаты по городам Германии",
+            bullet = "—"
+        )
+
         val cityChatsTabData = TabData(
-            TabConfig(
-                "Чаты городов",
-                TabFormat.CHATS,
-                TabType.CITY_CHATS
-            ),
+            cityChatsTabConfig,
             listOf(
                 ChatData(
                     "Augsburg",
@@ -107,7 +112,8 @@ object BotTestUtils {
                         "https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине",
                         "https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины",
                         "https://t.me/Ukr_Augsburg_help — Українці Augsburg"
-                    )
+                    ),
+                    cityChatsTabConfig
                 ),
                 ChatData(
                     "Eisenach",
@@ -115,17 +121,23 @@ object BotTestUtils {
                     listOf("eisenach", "айзенах"),
                     listOf(
                         "https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA"
-                    )
+                    ),
+                    cityChatsTabConfig
                 )
             )
         )
 
+        val countryChatsTabConfig = TabConfig(
+            tabName = "Чаты стран",
+            tabFormat = TabFormat.CHATS,
+            tabType = TabType.COUNTRY_CHATS,
+            showHeader = false,
+            header = "\uD83C\uDF0E Чаты по странам",
+            bullet = "—"
+        )
+
         val countryChatsTabData = TabData(
-            TabConfig(
-                "Чаты стран",
-                TabFormat.CHATS,
-                TabType.COUNTRY_CHATS
-            ),
+            countryChatsTabConfig,
             listOf(
                 ChatData(
                     "Болгария",
@@ -133,7 +145,8 @@ object BotTestUtils {
                     listOf("болгария", "болгарія", "bulgaria", "bulgarien", "bolgaria", "bulgaria"),
                     listOf(
                         "https://t.me/UAhelpinfo/28 — Общая информация"
-                    )
+                    ),
+                    countryChatsTabConfig
                 ),
                 ChatData(
                     "Португалия",
@@ -143,7 +156,8 @@ object BotTestUtils {
                         "https://t.me/UAhelpinfo/89 — Общая информация",
                         "https://t.me/toportugal — Из Украины в Португалию",
                         "https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи"
-                    )
+                    ),
+                    countryChatsTabConfig
                 )
             )
         )

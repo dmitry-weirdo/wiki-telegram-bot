@@ -250,8 +250,8 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, botAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "— Стартовая страница вики — https://uahelp.wiki" +
-                    "\n— Правила безопасности — https://uahelp.wiki/safety",
+            "▫ Стартовая страница вики — https://uahelp.wiki" +
+                    "\n▫ Правила безопасности — https://uahelp.wiki/safety",
             listOf(ResponseType.WIKI_PAGE),
             listOf("вики", "безопасност")
         )
@@ -272,7 +272,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, botAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "Augsburg чаты:" +
+            "Augsburg:" +
                     "\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине" +
                     "\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины" +
                     "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg",
@@ -296,11 +296,11 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, botAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "Augsburg чаты:" +
+            "Augsburg:" +
                     "\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине" +
                     "\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины" +
                     "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg" +
-                    "\n\nEisenach чаты:" +
+                    "\n\nEisenach:" +
                     "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA",
             listOf(ResponseType.CITY_CHAT),
             listOf("аугсбург", "айзенах")
@@ -322,7 +322,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, botAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "Португалия чаты:" +
+            "Португалия:" +
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
                     "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
@@ -346,9 +346,9 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage(text, botAdmin, update)
 
         val expectedResult = MessageProcessingResult.answerFound(
-            "Болгария чаты:" +
+            "Болгария:" +
                     "\n— https://t.me/UAhelpinfo/28 — Общая информация" +
-                    "\n\nПортугалия чаты:" +
+                    "\n\nПортугалия:" +
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
                     "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",
@@ -373,11 +373,11 @@ internal class BotGetResponseTest {
 
         val expectedResult = MessageProcessingResult.answerFound(
             "Стартовая страница вики — https://uahelp.wiki" + // wiki pages
-                    "\n\nAugsburg чаты:" + // city chats
+                    "\n\nAugsburg:" + // city chats
                     "\n— https://t.me/NA6R_hilft — Наш Аугсбург помогает Украине" +
                     "\n— https://t.me/augsburgbegi — Аугсбург. Вопросы беженца из Украины" +
                     "\n— https://t.me/Ukr_Augsburg_help — Українці Augsburg" +
-                    "\n\nПортугалия чаты:" + // country chats
+                    "\n\nПортугалия:" + // country chats
                     "\n— https://t.me/UAhelpinfo/89 — Общая информация" +
                     "\n— https://t.me/toportugal — Из Украины в Португалию" +
                     "\n— https://t.me/+j3_sMgK6QG8yMmVi — Единый чат по помощи",

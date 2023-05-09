@@ -1,6 +1,7 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.google.RowData
+import com.dv.telegram.tabs.TabConfig
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -10,7 +11,7 @@ class ChatsParser : SheetDataParser<ChatData>, Logging {
         return TabFormat.CHATS
     }
 
-    override fun parse(rows: List<RowData>): List<ChatData> {
+    override fun parse(rows: List<RowData>, tabConfig: TabConfig): List<ChatData> {
         val chatsData = mutableListOf<ChatData>()
 
         var rowNum = 1
@@ -31,7 +32,7 @@ class ChatsParser : SheetDataParser<ChatData>, Logging {
                 }
             }
 
-            val chatData = ChatData(chatLabel, wordsString, words, chats)
+            val chatData = ChatData(chatLabel, wordsString, words, chats, tabConfig)
             chatsData.add(chatData)
 
             logger.info("Row $rowNum: / $chatLabel / $words / $chats")

@@ -42,10 +42,14 @@ object GoogleSheetLoader : Logging {
     }
 
     private fun parseSheetData(sheets: List<TabSheetData>) = sheets.map {
-        when (it.config.tabFormat) {
-            TabFormat.WIKI_PAGES -> TabData(it.config, WikiPagesParser().parse(it.sheet))
-            TabFormat.CHATS -> TabData(it.config, ChatsParser().parse(it.sheet))
-            TabFormat.COMMANDS -> TabData(it.config, WikiBotCommandsParser().parse(it.sheet))
+        val parser = when(it.config.tabFormat) {
+            TabFormat.WIKI_PAGES -> WikiPagesParser()
+            TabFormat.CHATS -> ChatsParser()
+            TabFormat.COMMANDS -> WikiBotCommandsParser()
         }
+
+        val answers = parser.parse(it.sheet, it.config)
+
+        TabData(it.config, answers)
     }
 }

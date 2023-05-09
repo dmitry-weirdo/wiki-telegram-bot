@@ -1,6 +1,7 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.google.RowData
+import com.dv.telegram.tabs.TabConfig
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -10,7 +11,7 @@ class WikiBotCommandsParser : SheetDataParser<WikiBotCommandData>, Logging {
         return TabFormat.COMMANDS
     }
 
-    override fun parse(rows: List<RowData>): List<WikiBotCommandData> {
+    override fun parse(rows: List<RowData>, tabConfig: TabConfig): List<WikiBotCommandData> {
         val commands = mutableListOf<WikiBotCommandData>()
 
         var rowNum = 1

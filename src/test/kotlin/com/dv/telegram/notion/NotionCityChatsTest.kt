@@ -2,6 +2,9 @@ package com.dv.telegram.notion
 
 import com.dv.telegram.data.ChatData
 import com.dv.telegram.exception.CommandException
+import com.dv.telegram.tabs.TabConfig
+import com.dv.telegram.tabs.TabFormat
+import com.dv.telegram.tabs.TabType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
@@ -120,6 +123,15 @@ internal class NotionCityChatsTest {
     @Test
     @DisplayName("Test List<CityChatData> → List<NotionCityChats> conversion: errors, expect a thrown exception.")
     fun testFromWithErrors() {
+        val cityChatsTabConfig = TabConfig(
+            tabName = "Чаты городов",
+            tabFormat = TabFormat.CHATS,
+            tabType = TabType.CITY_CHATS,
+            showHeader = false,
+            header = "\uD83C\uDDE9\uD83C\uDDEA Чаты по городам Германии",
+            bullet = "—"
+        )
+
         val cityChatsData = listOf(
             ChatData(
                 "   ", // empty city name -> will be just skipped
@@ -128,7 +140,8 @@ internal class NotionCityChatsTest {
                 listOf(
                     "bad",
                     "chats"
-                )
+                ),
+                cityChatsTabConfig
             ),
             ChatData(
                 "Aachen",
@@ -138,7 +151,8 @@ internal class NotionCityChatsTest {
                     "   ",
                     "",
                     "  \t  "
-                )
+                ),
+                cityChatsTabConfig
             ),
             ChatData(
                 "Berlin", // good chat -> no errors
@@ -147,7 +161,8 @@ internal class NotionCityChatsTest {
                 listOf(
                     "https://t.me/berlin_chat - Berlin chat 1",
                     "https://t.me/berlin_work - Berlin work"
-                )
+                ),
+                cityChatsTabConfig
             ),
             ChatData(
                 "Augsburg", // 2 of 3 chats have errors
@@ -157,7 +172,8 @@ internal class NotionCityChatsTest {
                     "https://t.me/augsburg_chat - Augsburg good chat",
                     "https://t.me/augsburg_work - ", // no chat name
                     "http://t.me/augsburg_parents - Parents chats" // not https
-                )
+                ),
+                cityChatsTabConfig
             ),
             ChatData(
                 "Duisburg", // 1 of 1 chats has errors
@@ -165,7 +181,8 @@ internal class NotionCityChatsTest {
                 listOf("Duisburg"),
                 listOf(
                     "https://t.me/duisburg_chat / Duisburg chat" // no correct separator
-                )
+                ),
+                cityChatsTabConfig
             )
         )
 
@@ -182,12 +199,22 @@ internal class NotionCityChatsTest {
     @Test
     @DisplayName("Test List<CityChatData> → List<NotionCityChats> conversion: successful conversion.")
     fun testFromWithoutErrors() {
+        val cityChatsTabConfig = TabConfig(
+            tabName = "Чаты городов",
+            tabFormat = TabFormat.CHATS,
+            tabType = TabType.CITY_CHATS,
+            showHeader = false,
+            header = "\uD83C\uDDE9\uD83C\uDDEA Чаты по городам Германии",
+            bullet = "—"
+        )
+
         val cityChatsData = listOf(
             ChatData(
                 "   ", // empty city name -> will be just skipped
                 "keywords",
                 listOf("keywords"),
-                listOf("bad", "chats")
+                listOf("bad", "chats"),
+                cityChatsTabConfig
             ),
             ChatData(
                 "Aachen",
@@ -197,7 +224,8 @@ internal class NotionCityChatsTest {
                     "   ",
                     "",
                     "  \t  "
-                )
+                ),
+                cityChatsTabConfig
             ),
             ChatData(
                 " Berlin  \t", // good chats
@@ -207,7 +235,8 @@ internal class NotionCityChatsTest {
                     "  https://t.me/berlin_chat \t —  \t Berlin chat 1   ", // separator 1
                     "https://t.me/berlin_work - Berlin work", // separator 2
                     "  \t " // empty chat must be ignored
-                )
+                ),
+                cityChatsTabConfig
             ),
             ChatData(
                 "Augsburg", // 1 of 1 chats is good
@@ -215,7 +244,8 @@ internal class NotionCityChatsTest {
                 listOf("Augsburg"),
                 listOf(
                     "https://t.me/augsburg_chat - Augsburg good chat"
-                )
+                ),
+                cityChatsTabConfig
             )
         )
 

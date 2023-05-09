@@ -1,6 +1,7 @@
 package com.dv.telegram.data
 
 import com.dv.telegram.google.RowData
+import com.dv.telegram.tabs.TabConfig
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -10,7 +11,7 @@ class WikiPagesParser : SheetDataParser<WikiPageData>, Logging {
         return TabFormat.WIKI_PAGES
     }
 
-    override fun parse(rows: List<RowData>): List<WikiPageData> {
+    override fun parse(rows: List<RowData>, tabConfig: TabConfig): List<WikiPageData> {
         val pages = mutableListOf<WikiPageData>()
 
         var rowNum = 1

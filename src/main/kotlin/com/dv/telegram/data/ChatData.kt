@@ -1,10 +1,13 @@
 package com.dv.telegram.data
 
+import com.dv.telegram.tabs.TabConfig
+
 data class ChatData(
     val chatLabel: String, // common label for one row in the config
     val wordsString: String,
-    val words: List<String>, // multiple chats for the same city/country etc. are possible
-    val chats: List<String>
+    val words: List<String>,
+    val chats: List<String>, // multiple chats for the same city/country etc. are possible
+    val tabConfig: TabConfig
 ) : BotAnswerData {
     val chatsAnswer: String = fillChatsAnswer() // pre-fill the bot answer to join the strings only once
 
@@ -19,7 +22,7 @@ data class ChatData(
     }
 
     private fun getChatLines(): String {
-        val chatLines = chats.map { "▫ $it" } // todo: use configurable bullet
+        val chatLines = chats.map { "${tabConfig.bullet} $it" }
 
         return chatLines.joinToString("\n")
     }

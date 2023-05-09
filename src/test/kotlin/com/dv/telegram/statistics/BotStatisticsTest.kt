@@ -92,7 +92,7 @@ internal class BotStatisticsTest {
         val successfulRequestResult = wikiBot.processMessage(successfulRequestText, botAdmin, update)
 
         val expectedSuccessfulRequestResult = MessageProcessingResult.answerFound(
-            "Eisenach чаты:" +
+            "Eisenach:" +
                 "\n— https://t.me/HelpUkraine_Eisenach — Help Ukraine \\uD83C\\uDDFA\\uD83C\\uDDE6 in Eisenach \\uD83C\\uDDE9\\uD83C\\uDDEA",
             listOf(ResponseType.CITY_CHAT),
             listOf("айзенах")
