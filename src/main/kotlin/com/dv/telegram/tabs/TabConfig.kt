@@ -5,6 +5,7 @@ data class TabConfig(
     val tabFormat: TabFormat,
     val tabType: TabType,
 
-    val showHeader: Boolean = false, // todo: think whether we need this
-    val header: String? = null // todo: think whether we need this
+    val showHeader: Boolean = false,
+    val header: String? = null,
+    val bullet: String = "▫" // without space
 )
