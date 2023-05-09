@@ -15,11 +15,11 @@ data class ChatData(
     private fun fillChatsAnswer(): String {
         val chatsList = getChatLines()
 
-        return "$chatLabel чаты:\n$chatsList" // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
+        return "$chatLabel:\n$chatsList" // %n will format as system-specific separator, see https://stackoverflow.com/questions/1883345/whats-up-with-javas-n-in-printf
     }
 
     private fun getChatLines(): String {
-        val chatLines = chats.map { "— $it" }
+        val chatLines = chats.map { "▫ $it" } // todo: use configurable bullet
 
         return chatLines.joinToString("\n")
     }

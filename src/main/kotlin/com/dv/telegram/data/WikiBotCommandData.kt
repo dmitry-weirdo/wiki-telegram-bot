@@ -11,5 +11,5 @@ data class WikiBotCommandData(
 
     fun getOneLineAnswer() = answer
 
-    fun getMultiLineAnswer() = "— $answer"
+    fun getMultiLineAnswer() = "▫ $answer" // todo: use configurable bullet
 }

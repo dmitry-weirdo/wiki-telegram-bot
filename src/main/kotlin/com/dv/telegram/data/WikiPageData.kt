@@ -12,5 +12,5 @@ data class WikiPageData(
 
     fun getOneLineAnswer() = "$name — $url"
 
-    fun getMultiLineAnswer() = "— $name — $url"
+    fun getMultiLineAnswer() = "▫ $name — $url" // todo: use configurable bullet
 }

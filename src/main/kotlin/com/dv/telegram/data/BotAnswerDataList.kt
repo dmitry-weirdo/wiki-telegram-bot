@@ -35,7 +35,7 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
         // todo: maybe a nicer code (typed-cast it.answer to <T> somehow)
         val matchedAnswers = matches.map { it.answer!! as T }
 
-        val responseText = getResponseText(matchedAnswers)
+        val responseText = getResponseTextWithPossibleNoMatches(matchedAnswers)
         if (responseText.isNullOrBlank()) { // super-safe - handle "there are matches, but no answers for these matches"
             return BotAnswerDataListResponse.noMatchFound(responseType)
         }
@@ -53,7 +53,16 @@ abstract class BotAnswerDataList<T : BotAnswerData>(
             .filter { it.isPresent }
     }
 
-    abstract fun getResponseText(matches: List<T>): String?
+    private fun getResponseTextWithPossibleNoMatches(matches: List<T>): String? {
+        return if (matches.isEmpty()) {
+            null
+        }
+        else {
+            getResponseText(matches)
+        }
+    }
+
+    abstract fun getResponseText(matches: List<T>): String? // matches are NOT empty by contract
 
     private fun addHeader(responseText: String): String { // expects not-null and non-blank responseText
         if (!showHeader) {
