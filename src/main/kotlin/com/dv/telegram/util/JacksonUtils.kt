@@ -18,6 +18,16 @@ import java.nio.charset.StandardCharsets
 
 object JacksonUtils : Logging {
 
+    fun <T> parse(s: String, clazz: Class<T>): T {
+        return try {
+            val mapper = createObjectMapper()
+            mapper.readValue(s, clazz)
+        }
+        catch (e: IOException) {
+            throw handleError(e, "Error on parsing string to class ${clazz.name}")
+        }
+    }
+
     fun <T> parse(file: File, clazz: Class<T>): T {
         return try {
             val mapper = createObjectMapper()

@@ -71,6 +71,10 @@ interface BotCommand {
             GetSetting(),
             SetSetting(),
 
+            // tabs
+            // GetTabConfigs(), todo: uncomment me
+            SetTabConfigs(),
+
             // statistics
             GetStatistics(),
             GetSuccessfulRequests(),

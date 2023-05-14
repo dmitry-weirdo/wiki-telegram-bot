@@ -56,13 +56,11 @@ object GoogleSheetReader : Logging {
         // map allSheetsData and tab configs to WikiBotGoogleSheetTabsData
         var sheetIndex = 0
 
-        val commandSheets = config
-            .tabs
+        val commandSheets = tabConfigs
             .commandTabs
             .map { TabSheetData(it, allSheetsData[sheetIndex++]) }
 
-        val dataSheets = config
-            .tabs
+        val dataSheets = tabConfigs
             .dataTabs
             .map { TabSheetData(it, allSheetsData[sheetIndex++]) }
 
