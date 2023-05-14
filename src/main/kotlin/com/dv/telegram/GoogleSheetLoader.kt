@@ -7,6 +7,7 @@ import com.dv.telegram.data.WikiPagesParser
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.google.GoogleSheetReader
 import com.dv.telegram.google.TabSheetData
+import com.dv.telegram.tabs.TabConfigs
 import com.dv.telegram.tabs.TabData
 import com.dv.telegram.tabs.TabFormat
 import org.apache.logging.log4j.kotlin.Logging
@@ -18,10 +19,13 @@ import org.apache.logging.log4j.kotlin.Logging
 object GoogleSheetLoader : Logging {
 
     @JvmStatic
-    fun readGoogleSheetTabs(config: WikiBotConfig): GoogleSheetBotTabsData {
+    fun readGoogleSheetTabs(config: WikiBotConfig) = readGoogleSheetTabs(config, config.tabs)
+
+    @JvmStatic
+    fun readGoogleSheetTabs(config: WikiBotConfig, tabConfigs: TabConfigs): GoogleSheetBotTabsData {
         try {
             logger.info("Loading bot tabs data from the Google Sheet...")
-            val botData = reloadGoogleSheetTabsUnsafe(config)
+            val botData = reloadGoogleSheetTabsUnsafe(config, tabConfigs)
             logger.info("Bot data successfully reloaded from the Google Sheet.")
 
             return botData
@@ -32,8 +36,8 @@ object GoogleSheetLoader : Logging {
         }
     }
 
-    private fun reloadGoogleSheetTabsUnsafe(config: WikiBotConfig): GoogleSheetBotTabsData {
-        val tabsDataRaw = GoogleSheetReader.readGoogleSheet(config)
+    private fun reloadGoogleSheetTabsUnsafe(config: WikiBotConfig, tabConfigs: TabConfigs): GoogleSheetBotTabsData {
+        val tabsDataRaw = GoogleSheetReader.readGoogleSheet(config, tabConfigs)
 
         val commandTabs = parseSheetData(tabsDataRaw.commandSheets)
         val dataTabs = parseSheetData(tabsDataRaw.dataSheets)

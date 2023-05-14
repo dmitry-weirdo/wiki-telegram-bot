@@ -20,25 +20,25 @@ object GoogleSheetReader : Logging {
     @JvmStatic
     fun main(args: Array<String>) {
         val config = WikiBotUtils.readConfig()
-        readGoogleSheetSafe(config)
+        readGoogleSheetSafe(config, config.tabs)
     }
 
-    fun readGoogleSheetSafe(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
+    fun readGoogleSheetSafe(config: WikiBotConfig, tabConfigs: TabConfigs): WikiBotGoogleSheetTabsData {
         try {
-            return readGoogleSheet(config)
+            return readGoogleSheet(config, tabConfigs)
         }
         catch (e: IOException) {
             throw WikiBotException(e)
         }
     }
 
-    fun readGoogleSheet(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
-        val allTabNames = getAllTabNames(config.tabs)
+    fun readGoogleSheet(config: WikiBotConfig, tabConfigs: TabConfigs): WikiBotGoogleSheetTabsData {
+        val allTabNames = getAllTabNames(tabConfigs)
 
         val sheetsService = getSheets(config.googleSheetsApiKey)
 
         // read all tabs in one iteration
-        val ranges = createRanges(config.tabs)
+        val ranges = createRanges(tabConfigs)
 
         val readResult = sheetsService
             .spreadsheets()

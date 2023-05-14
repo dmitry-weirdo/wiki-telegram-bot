@@ -24,6 +24,8 @@ class WikiBot(
     commandTabsData: List<TabData>,
     dataTabsData: List<TabData>
 ) : TelegramLongPollingBot(), Logging {
+    var tabConfigs: TabConfigs // will be loaded from config.tabs, but can be changed in runtime
+
     var commandTabs: List<BotAnswerTabData<BotAnswerData>> // can be reloaded from Google Sheet
         private set
 
@@ -60,6 +62,8 @@ class WikiBot(
     init {
         context.addBot(this)
 
+        tabConfigs = config.tabs
+
         commandTabs = BotAnswerTabData.fromTabDataList(commandTabsData)
         dataTabs = BotAnswerTabData.fromTabDataList(dataTabsData)
 
@@ -76,9 +80,6 @@ class WikiBot(
     }
 
     // additional getters
-    val tabConfigs: TabConfigs
-        get() = config.tabs
-
     val notionToken: String
         get() = config.notionToken
 
@@ -242,7 +243,7 @@ class WikiBot(
     }
 
     fun loadBotDataFromGoogleSheet(): GoogleSheetBotTabsData { // does NOT reload the bot data itself
-        return GoogleSheetLoader.readGoogleSheetTabs(config)
+        return GoogleSheetLoader.readGoogleSheetTabs(config, tabConfigs) // use tabConfigs from bot, it can be changed in runtime
     }
 
     companion object {
