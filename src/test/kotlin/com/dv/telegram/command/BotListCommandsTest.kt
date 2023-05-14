@@ -52,6 +52,7 @@ internal class BotListCommandsTest {
         // all bots commands
         val allBotsList = AllBotsList()
         val allBotsReloadFromGoogleSheet = AllBotsReloadFromGoogleSheet()
+        val allBotsGetTabConfigs = AllBotsGetTabConfigs()
         val allBotsGetStatistics = AllBotsGetStatistics()
         val allBotsGetSuccessfulRequests = AllBotsGetSuccessfulRequests()
         val allBotsGetFailedRequests = AllBotsGetFailedRequests()
@@ -91,6 +92,7 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${getLastMessageLog.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsList.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsReloadFromGoogleSheet.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${allBotsGetTabConfigs.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsGetStatistics.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsGetSuccessfulRequests.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${allBotsGetFailedRequests.defaultCommandName}`"
