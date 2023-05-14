@@ -77,7 +77,7 @@ class WikiBot(
 
     // additional getters
     val tabConfigs: TabConfigs
-        get() = config.sheets
+        get() = config.tabs
 
     val notionToken: String
         get() = config.notionToken
@@ -225,7 +225,7 @@ class WikiBot(
         }
     }
 
-    fun getCommandTabNames(): List<String> = config.sheets.commandTabs.map { it.tabName }
+    fun getCommandTabNames(): List<String> = config.tabs.commandTabs.map { it.tabName }
 
     fun reloadBotDataFromGoogleSheet(): Boolean {
         return try {

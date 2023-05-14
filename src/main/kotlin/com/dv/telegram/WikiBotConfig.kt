@@ -14,7 +14,7 @@ class WikiBotConfig(
 
     // see https://developers.google.com/sheets/api/guides/concepts
     // todo: use sheets by number instead if it is possible with A1 or R1C1 notation
-    val sheets: TabConfigs = TabConfigs(),
+    val tabs: TabConfigs = TabConfigs(),
 
     // Notion
     val notionToken: String = "",

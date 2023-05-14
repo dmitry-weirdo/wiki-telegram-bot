@@ -33,12 +33,12 @@ object GoogleSheetReader : Logging {
     }
 
     fun readGoogleSheet(config: WikiBotConfig): WikiBotGoogleSheetTabsData {
-        val allTabNames = getAllTabNames(config.sheets)
+        val allTabNames = getAllTabNames(config.tabs)
 
         val sheetsService = getSheets(config.googleSheetsApiKey)
 
         // read all tabs in one iteration
-        val ranges = createRanges(config.sheets)
+        val ranges = createRanges(config.tabs)
 
         val readResult = sheetsService
             .spreadsheets()
@@ -57,12 +57,12 @@ object GoogleSheetReader : Logging {
         var sheetIndex = 0
 
         val commandSheets = config
-            .sheets
+            .tabs
             .commandTabs
             .map { TabSheetData(it, allSheetsData[sheetIndex++]) }
 
         val dataSheets = config
-            .sheets
+            .tabs
             .dataTabs
             .map { TabSheetData(it, allSheetsData[sheetIndex++]) }
 
