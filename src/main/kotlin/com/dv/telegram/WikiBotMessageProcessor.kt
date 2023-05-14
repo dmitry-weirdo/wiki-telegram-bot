@@ -15,6 +15,8 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
     companion object {
         private const val START_COMMAND = "/start"
 
+        private const val PRIVATE_CHAT_TYPE = "private"
+
         fun getBotNameFullWordPattern(botName: String): Pattern {
             val botNameRegex = "(?i).*\\b$botName\\b.*"
             val botNamePatternFlags = Pattern.CASE_INSENSITIVE or Pattern.UNICODE_CASE or Pattern.DOTALL
@@ -30,7 +32,9 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
         val lowerText = text.lowercase()
 
-        if (!messageIsForTheBot(lowerText)) { // only work when bot is mentioned by name
+        val chatType = update.message?.chat?.type?.lowercase()
+
+        if (!messageIsForTheBot(lowerText, chatType)) { // only work when bot is mentioned by name
             return MessageProcessingResult.notForTheBot()
         }
 
@@ -60,8 +64,12 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         return processMessage(text, dataTabResponses)
     }
 
-    private fun messageIsForTheBot(lowerText: String): Boolean {
+    private fun messageIsForTheBot(lowerText: String, chatType: String?): Boolean {
         if (lowerText == START_COMMAND) { // special case: /start command without bot name
+            return true
+        }
+
+        if ((chatType != null) && (chatType == PRIVATE_CHAT_TYPE)) { // in private messages, any message is for the bot
             return true
         }
 
