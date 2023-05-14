@@ -184,7 +184,7 @@ object BotTestUtils {
     fun getUpdate(): Update {
         val chat = Chat()
         chat.id = 123456789
-        chat.type = "private"
+        chat.type = "group" // not "private", bot name required
         chat.title = "Test fake chat title"
 
         val message = Message()
