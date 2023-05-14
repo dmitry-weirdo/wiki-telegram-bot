@@ -57,6 +57,6 @@ class SetTabConfigs : BasicBotCommand() {
 $botTabConfigs
 ```
 Для перезагрузки конфига бота с новой конфигурацией вкладок используйте `${bot.botName} ${bot.specialCommands.reloadFromGoogleSheetCommand.commandText}`.
-""".trimIndent()
+        """.trimIndent()
     }
 }

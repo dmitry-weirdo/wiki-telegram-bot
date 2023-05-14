@@ -72,7 +72,7 @@ interface BotCommand {
             SetSetting(),
 
             // tabs
-            // GetTabConfigs(), todo: uncomment me
+            GetTabConfigs(),
             SetTabConfigs(),
 
             // statistics

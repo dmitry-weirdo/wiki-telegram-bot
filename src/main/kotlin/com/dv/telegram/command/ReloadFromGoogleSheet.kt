@@ -19,11 +19,27 @@ class ReloadFromGoogleSheet : BasicBotCommand() {
 
         val tabConfigsString = JacksonUtils.serializeToString(bot.tabConfigs, true)
 
+        // ugly formatting required for no indents in the response
         return if (reloadedSuccessful) {
-            "Данные бота успешно загружены из Google Sheet.\n\nКонфигурация вкладок бота:\n```$tabConfigsString```"
+            """
+Данные бота успешно загружены из Google Sheet.
+
+Конфигурация вкладок бота:
+```
+$tabConfigsString
+```
+            """.trimIndent()
         }
         else {
-            "При загрузке данных из Google Sheet произошла ошибка.\n\nКонфигурация вкладок бота:\n```$tabConfigsString```"
+            """
+При загрузке данных из Google Sheet произошла ошибка.
+
+Конфигурация вкладок бота:
+
+```
+$tabConfigsString
+```
+            """.trimIndent()
         }
     }
 }

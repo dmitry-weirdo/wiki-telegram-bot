@@ -38,6 +38,7 @@ internal class BotListCommandsTest {
         val setSetting = SetSetting()
 
         // tabs
+        val getTabConfigs = GetTabConfigs()
         val setTabConfigs = SetTabConfigs()
 
         // statistics
@@ -80,6 +81,7 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${helpSetting.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getSetting.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${setSetting.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${getTabConfigs.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${setTabConfigs.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getStatistics.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getSuccessfulRequests.defaultCommandName}`"
