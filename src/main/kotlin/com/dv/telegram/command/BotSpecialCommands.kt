@@ -8,6 +8,7 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
     val startCommand: Start = getCommand(commands, Start::class.java)
     val helpCommand: HelpCommand = getCommand(commands, HelpCommand::class.java)
     val listCommands: ListCommands = getCommand(commands, ListCommands::class.java)
+    val getTabConfigsCommand: GetTabConfigs = getCommand(commands, GetTabConfigs::class.java)
     val reloadFromGoogleSheetCommand: ReloadFromGoogleSheet = getCommand(commands, ReloadFromGoogleSheet::class.java)
     val cityChatsValidateCommand: CityChatsValidate = getCommand(commands, CityChatsValidate::class.java)
     val getStatisticsCommand: GetStatistics = getCommand(commands, GetStatistics::class.java)

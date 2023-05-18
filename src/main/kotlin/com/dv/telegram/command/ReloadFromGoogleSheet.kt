@@ -24,10 +24,7 @@ class ReloadFromGoogleSheet : BasicBotCommand() {
             """
 Данные бота успешно загружены из Google Sheet.
 
-Конфигурация вкладок бота:
-```
-$tabConfigsString
-```
+Для просмотра конфигурации вкладок используйте `${bot.botName} ${bot.specialCommands.getTabConfigsCommand.commandText}`.
             """.trimIndent()
         }
         else {
