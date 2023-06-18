@@ -131,7 +131,7 @@ object NotionPageTree : Logging {
         catch (e: Exception) {
             logger.error("Error when getting children for block $blockId", e)
             logger.error("$separator ERROR GETTING CHILDREN FOR BLOCK $blockId")
-            return;
+            return
         }
 
         if (children.hasMore) {
