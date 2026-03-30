@@ -11,11 +11,15 @@ import com.dv.telegram.tabs.TabData
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.GetMe
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
+import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 @Suppress("TooManyFunctions")
 class WikiBot(
@@ -129,6 +133,16 @@ class WikiBot(
 
         // command is for the bot and has the response -> send the response message
         try {
+/*
+            if (true) { // todo: remove this
+                val sendDocument = createSendDocument(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
+
+                execute(sendDocument) // Call method to send the file
+
+                return
+            }
+*/
+
             val sendMessages = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
 
             for (sendMessage in sendMessages) { // messages are split into 4096 characters
@@ -179,6 +193,42 @@ class WikiBot(
         }
 
         return messages
+    }
+
+    private fun createSendDocument(
+        updateMessage: Message,
+        replyToMessage: Message?,
+        deleteBotCallMessage: Boolean,
+        processingResult: MessageProcessingResult
+    ): SendDocument {
+        // todo: if required, split into multiple file responses
+        val chatId = updateMessage.chatId.toString()
+
+        val replyToMessageId =
+            if (deleteBotCallMessage) { // reply to the original message
+                replyToMessage!!.messageId
+            }
+            else { // reply to the "call bot" message
+                updateMessage.messageId
+            }
+
+        // todo: get file content from processingResult
+        val text = "File response. Это контент файла.\nСтрока два"
+        val inputStream: InputStream =
+            java.io.ByteArrayInputStream(text.toByteArray(StandardCharsets.UTF_8))
+
+        val currentTimeFormatted = com.dv.telegram.util.DateUtils.getCurrentDateTimeInFileNameFormat()
+        val fileName = "allBotsGetFailedRequests_$currentTimeFormatted.txt"
+
+        val sendDocument = SendDocument
+            .builder()
+            .chatId(chatId)
+            .replyToMessageId(replyToMessageId)
+            .document(InputFile(inputStream, fileName))
+            .caption("Here is your file")
+            .build()
+
+        return sendDocument
     }
 
     private fun deleteBotCallMessage(updateMessage: Message) {
