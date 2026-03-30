@@ -92,6 +92,9 @@ class WikiBot(
     val notionCityChatsToggleHeading1Text: String
         get() = config.cityChatsToggleHeading1Text
 
+    val notionImportTimeoutMinutes: Int
+        get() = config.notionImportTimeoutMinutes
+
     // functions overridden from Telegram API (TelegramLongPollingBot and its parent hierarchy)
     override fun getBotToken(): String {
         return config.botToken

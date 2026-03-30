@@ -6,8 +6,10 @@ import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionCityChats
 import com.dv.telegram.notion.NotionWrapper
 import com.dv.telegram.tabs.TabType
+import com.dv.telegram.util.DateUtils
 import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.meta.api.objects.Update
+import java.time.ZonedDateTime
 
 class CityChatsExportToNotion : BasicBotCommand(), Logging {
     override val name: String = javaClass.simpleName
@@ -33,6 +35,8 @@ class CityChatsExportToNotion : BasicBotCommand(), Logging {
 
     override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         return try {
+            val startTime = ZonedDateTime.now()
+
             val botData = bot.loadBotDataFromGoogleSheet()
 
             val cityChatsTab = botData
@@ -50,10 +54,18 @@ class CityChatsExportToNotion : BasicBotCommand(), Logging {
                 bot.notionToken,
                 bot.notionCityPageId,
                 bot.notionCityChatsToggleHeading1Text,
+                bot.notionImportTimeoutMinutes,
                 cityChats
             )
 
-            "${result.totalChats} чатов для ${result.totalCities} городов успешно считаны из Google Sheet и записаны на страницу вики \"${result.pageTitle}\" в секцию \"${result.toggleHeading1Text}\"."
+            val endTime = ZonedDateTime.now()
+
+            val startTimeFormatted = DateUtils.getDateTimeInNotionOperationFormat(startTime)
+            val endTimeFormatted = DateUtils.getDateTimeInNotionOperationFormat(endTime)
+
+            "${result.totalChats} чатов для ${result.totalCities} городов успешно считаны из Google Sheet и записаны на страницу вики \"${result.pageTitle}\" в секцию \"${result.toggleHeading1Text}\"." +
+                "\nНачало операции: $startTimeFormatted." +
+                "\nЗавершение операции: $endTimeFormatted."
         }
         catch (e: CommandException) {
             errorResponse(e)

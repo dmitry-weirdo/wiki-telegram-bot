@@ -66,6 +66,7 @@ object NotionWrapper : Logging {
             notionToken,
             pageId,
             TOGGLE_HEADER_1_TO_APPEND_TEXT,
+            60,
             cityChats
         )
     }
@@ -93,9 +94,10 @@ object NotionWrapper : Logging {
         notionToken: String,
         pageId: String,
         toggleHeading1Text: String,
+        notionImportTimeoutMinutes: Int,
         cityChats: List<NotionCityChats>
     ): NotionCityChatsImportResult {
-        NotionOperationBlocker.startOperation()
+        NotionOperationBlocker.startOperation(notionImportTimeoutMinutes)
 
         var result: NotionCityChatsImportResult? = null
 

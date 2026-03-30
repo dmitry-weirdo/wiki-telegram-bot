@@ -20,6 +20,7 @@ class WikiBotConfig(
     val notionToken: String = "",
     val cityChatsPageId: String = "9a0effe48cf34cd49c849a9e05c61fb9", // список чатов по городам (https://uahelp.wiki/german-city-chats)
     val cityChatsToggleHeading1Text: String = "Чаты по землям и городам Германии (Telegram, WhatsApp)",
+    val notionImportTimeoutMinutes: Int = 60,
 
     // special commands
     val botAdmins: List<String> = listOf(), // Telegram users that are allowed to execute the special commands

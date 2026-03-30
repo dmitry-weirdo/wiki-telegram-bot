@@ -1,8 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="JetRunConfigurationType" nameIsGenerated="true">
     <envs>
+      <env name="WIKI_BOT_CONFIG_FILE_PATH_NO_NOTION" value="C:\java\wiki-telegram-bot\.ignoreme\wiki-bot-config-test-MY-TEST-BOT.json" />
       <env name="WIKI_BOT_CONFIG_FILE_PATH_BINGO" value="C:\java\wiki-telegram-bot\.ignoreme\wiki-bot-config-test.json" />
-      <env name="WIKI_BOT_CONFIG_FILE_PATH" value="C:\java\wiki-telegram-bot\.ignoreme\wiki-bot-config-test-MY-TEST-BOT.json" />
+      <env name="WIKI_BOT_CONFIG_FILE_PATH" value="C:\java\wiki-telegram-bot\.ignoreme\wiki-bot-config-test-MY-TEST-BOT-WITH-NOTION.json" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="com.dv.telegram.Main" />
     <module name="wiki-telegram-bot" />
