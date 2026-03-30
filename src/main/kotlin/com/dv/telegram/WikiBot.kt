@@ -18,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
-import java.io.InputStream
 import java.nio.charset.StandardCharsets
 
 @Suppress("TooManyFunctions")
@@ -133,20 +132,17 @@ class WikiBot(
 
         // command is for the bot and has the response -> send the response message
         try {
-/*
-            if (true) { // todo: remove this
+            if (processingResult.returnFileInResponse) { // return SendDocumentResponse (file in one message)
                 val sendDocument = createSendDocument(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
 
                 execute(sendDocument) // Call method to send the file
-
-                return
             }
-*/
+            else { // send (potentially many) SendMessage response messages
+                val sendMessages = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
 
-            val sendMessages = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
-
-            for (sendMessage in sendMessages) { // messages are split into 4096 characters
-                execute(sendMessage) // Call method to send the message
+                for (sendMessage in sendMessages) { // messages are split into 4096 characters
+                    execute(sendMessage) // Call method to send the message
+                }
             }
         }
         catch (e: TelegramApiException) {
@@ -201,7 +197,7 @@ class WikiBot(
         deleteBotCallMessage: Boolean,
         processingResult: MessageProcessingResult
     ): SendDocument {
-        // todo: if required, split into multiple file responses
+        // todo: if required, split into multiple file responses. For now, we're just returning one file
         val chatId = updateMessage.chatId.toString()
 
         val replyToMessageId =
@@ -212,20 +208,18 @@ class WikiBot(
                 updateMessage.messageId
             }
 
-        // todo: get file content from processingResult
-        val text = "File response. Это контент файла.\nСтрока два"
-        val inputStream: InputStream =
-            java.io.ByteArrayInputStream(text.toByteArray(StandardCharsets.UTF_8))
+        val fileContent = processingResult.getResponseOrFail()
+        val inputStream =
+            java.io.ByteArrayInputStream(fileContent.toByteArray(StandardCharsets.UTF_8))
 
-        val currentTimeFormatted = com.dv.telegram.util.DateUtils.getCurrentDateTimeInFileNameFormat()
-        val fileName = "allBotsGetFailedRequests_$currentTimeFormatted.txt"
+        val fileName = processingResult.responseFileName
 
         val sendDocument = SendDocument
             .builder()
             .chatId(chatId)
             .replyToMessageId(replyToMessageId)
             .document(InputFile(inputStream, fileName))
-            .caption("Here is your file")
+            .caption(processingResult.responseFileCaption)
             .build()
 
         return sendDocument

@@ -1,6 +1,7 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
+import com.dv.telegram.util.DateUtils
 import org.telegram.telegrambots.meta.api.objects.Update
 
 class AllBotsGetFailedRequests : BasicBotCommand() {
@@ -10,6 +11,17 @@ class AllBotsGetFailedRequests : BasicBotCommand() {
         "`${bot.botName} $commandText` — получить список разных неуспешных вызовов всех ботов с момента текущего запуска окружения или с момента очистки этих списков в том или ином боте."
 
     override val defaultCommandName = "/allBotsGetFailedRequests"
+
+    override fun returnFileInResponse() = true
+
+    override fun getResponseFileName(): String {
+        val currentTimeFormatted = DateUtils.getCurrentDateTimeInFileNameFormat()
+        return "allBotsGetFailedRequests_$currentTimeFormatted.txt"
+    }
+
+    override fun getResponseFileCaption(): String {
+        return "Файл с неуспешными запросами для всех ботов."
+    }
 
     override fun getResponse(text: String, bot: WikiBot, update: Update): String {
         val lines = mutableListOf<String>()

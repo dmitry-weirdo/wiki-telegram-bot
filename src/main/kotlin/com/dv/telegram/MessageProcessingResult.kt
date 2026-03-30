@@ -9,6 +9,9 @@ data class MessageProcessingResult(
     val answerIsFound: Boolean,
     val response: String?,
     val responseTypes: List<ResponseType>,
+    val returnFileInResponse: Boolean,
+    val responseFileName: String,
+    val responseFileCaption: String,
     val matchedKeywords: List<String>
 ) {
     fun hasNoResponse(): Boolean {
@@ -29,12 +32,21 @@ data class MessageProcessingResult(
                 answerIsFound = false,
                 response = null,
                 responseTypes = listOf(ResponseType.NOT_FOR_THE_BOT),
+                returnFileInResponse = false,
+                responseFileName = "",
+                responseFileCaption = "",
                 matchedKeywords = listOf()
             )
         }
 
         @JvmStatic
-        fun specialCommand(response: String?, useMarkdown: Boolean): MessageProcessingResult {
+        fun specialCommand(
+            response: String?,
+            useMarkdown: Boolean,
+            returnFileInResponse: Boolean,
+            responseFileName: String,
+            responseFileCaption: String
+        ): MessageProcessingResult {
             return MessageProcessingResult(
                 messageIsForTheBot = true,
                 isSpecialCommand = true,
@@ -42,6 +54,9 @@ data class MessageProcessingResult(
                 answerIsFound = true,
                 response = response,
                 responseTypes = listOf(ResponseType.SPECIAL_COMMAND),
+                returnFileInResponse = returnFileInResponse,
+                responseFileName = responseFileName,
+                responseFileCaption = responseFileCaption,
                 matchedKeywords = listOf() // todo: think about this, maybe set command name?
             )
         }
@@ -65,6 +80,9 @@ data class MessageProcessingResult(
                 answerIsFound = true,
                 response = response,
                 responseTypes = responseTypes,
+                returnFileInResponse = false, // todo: implement if we need to return files from non-special commands
+                responseFileName = "",
+                responseFileCaption = "",
                 matchedKeywords = matchedKeywords
             )
         }
@@ -78,6 +96,9 @@ data class MessageProcessingResult(
                 answerIsFound = false,
                 response = response,
                 responseTypes = listOf(ResponseType.ANSWER_NOT_FOUND),
+                returnFileInResponse = false, // todo: implement if we need to return files from non-special commands
+                responseFileName = "",
+                responseFileCaption = "",
                 matchedKeywords = listOf()
             )
         }

@@ -55,7 +55,18 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
         val response = command.getResponse(text, bot, update)
         val useMarkdownInResponse = command.useMarkdownInResponse()
 
-        return SpecialCommandResponse.withResponse(response, useMarkdownInResponse)
+        return if (command.returnFileInResponse()) { // only trigger file-related returns from command if it returns a file
+            SpecialCommandResponse.withResponse(
+                response,
+                useMarkdownInResponse,
+                command.returnFileInResponse(),
+                command.getResponseFileName(),
+                command.getResponseFileCaption()
+            )
+        }
+        else {
+            SpecialCommandResponse.withResponse(response, useMarkdownInResponse)
+        }
     }
 
     private fun userHasRightsToExecuteSpecialCommands(userName: String) = botAdmins.contains(userName)

@@ -43,7 +43,10 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
         if (specialCommandResponse.hasResponse()) { // special command received -> return response for the special command
             return MessageProcessingResult.specialCommand(
                 specialCommandResponse.response,
-                specialCommandResponse.useMarkdownInResponse
+                specialCommandResponse.useMarkdownInResponse,
+                specialCommandResponse.returnFileInResponse,
+                specialCommandResponse.responseFileName,
+                specialCommandResponse.responseFileCaption,
             )
         }
 

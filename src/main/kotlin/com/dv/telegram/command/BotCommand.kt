@@ -10,6 +10,11 @@ interface BotCommand {
     fun getDescription(bot: WikiBot): String // description, in Russian // todo: must be localized with MessageBundle
     fun useMarkdownInResponse(): Boolean
 
+    // if we return a file in response
+    fun returnFileInResponse(): Boolean
+    fun getResponseFileName(): String
+    fun getResponseFileCaption(): String
+
     val defaultCommandName: String // default command name when it is not overridden by config
     var commandName: String? // overridden command name. Defines abstract getter and setter.
 
