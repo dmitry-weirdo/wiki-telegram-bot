@@ -42,6 +42,25 @@ data class MessageProcessingResult(
         @JvmStatic
         fun specialCommand(
             response: String?,
+            useMarkdown: Boolean
+        ): MessageProcessingResult {
+            return MessageProcessingResult(
+                messageIsForTheBot = true,
+                isSpecialCommand = true,
+                useMarkdown = useMarkdown,
+                answerIsFound = true,
+                response = response,
+                responseTypes = listOf(ResponseType.SPECIAL_COMMAND),
+                returnFileInResponse = false,
+                responseFileName = "",
+                responseFileCaption = "",
+                matchedKeywords = listOf() // todo: think about this, maybe set command name?
+            )
+        }
+
+        @JvmStatic
+        fun specialCommand(
+            response: String?,
             useMarkdown: Boolean,
             returnFileInResponse: Boolean,
             responseFileName: String,
