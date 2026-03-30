@@ -101,11 +101,18 @@ object NotionWrapper : Logging {
 
         var result: NotionCityChatsImportResult? = null
 
-        NotionPageUtils.execute(notionToken) { client ->
-            result = appendCityChats(client, pageId, toggleHeading1Text, cityChats)
+        try {
+            NotionPageUtils.execute(notionToken) { client ->
+                result = appendCityChats(client, pageId, toggleHeading1Text, cityChats)
+            }
         }
-
-        NotionOperationBlocker.stopOperation()
+        catch (e: Throwable) {
+            logger.error("Error on exporting city chats to Notion", e)
+            throw e
+        }
+        finally { // close even if notion export is throwing an exception
+            NotionOperationBlocker.stopOperation()
+        }
 
         return result!!
     }
