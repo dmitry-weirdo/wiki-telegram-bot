@@ -110,7 +110,7 @@ object NotionWrapper : Logging {
             logger.error("Error on exporting city chats to Notion", e)
             throw e
         }
-        finally { // close even if notion export is throwing an exception
+        finally { // end the operation even if Notion export has thrown an exception
             NotionOperationBlocker.stopOperation()
         }
 
