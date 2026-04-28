@@ -20,8 +20,6 @@ object NotionPageTree : Logging {
     private const val NOTION_TOKEN_ENV_NAME = "NOTION_TOKEN"
     private const val PAGE_ID_ENV_NAME = "PAGE_ID"
 
-    private const val RETRIEVE_BLOCK_CHILDREN_PAGE_SIZE = 100
-
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss") // only primitives and Strings can be const o_O
 
     @JvmStatic
@@ -56,7 +54,7 @@ object NotionPageTree : Logging {
 //            parseTree(client, tree, pageId, 0)
 
             // find the child pages tree
-            collectPagesTree(client, tree, node, pageId, node.level)
+            NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
 
 //            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
 //            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
@@ -120,65 +118,6 @@ object NotionPageTree : Logging {
 
         for (child in node.children) {
             fillRowsForExcelFile(child, nodes)
-        }
-    }
-
-    private fun collectPagesTree(client: NotionClient, tree: MutableList<String>, parent: NotionPageNode, blockId: String, currentLevel: Int) {
-        val separator = LEVEL_SEPARATOR.repeat(currentLevel)
-        val separatorNextLevel = LEVEL_SEPARATOR.repeat(currentLevel + 1)
-
-        var nextCursor: String? = null
-        var hasMore = true
-
-        while (hasMore) {
-            val children = try {
-                client.retrieveBlockChildren(blockId, nextCursor, RETRIEVE_BLOCK_CHILDREN_PAGE_SIZE)
-            }
-            catch (e: Exception) {
-                logger.error("Error when getting children for block $blockId", e)
-                logger.error("$separator ERROR GETTING CHILDREN FOR BLOCK $blockId")
-                return
-            }
-
-            children.results.forEach {
-                var childNode: NotionPageNode? = null
-
-                if (it.type == BlockType.ChildPage) { // only proceed if the child page is found
-                    val childPage = it.asChildPage()
-
-                    logger.info("$separatorNextLevel child page title: ${childPage.childPage.title}")
-
-                    tree.add("$separatorNextLevel ${childPage.childPage.title}")
-
-                    childNode = NotionPageNode(
-                        parent.level + 1,
-                        childPage.id!!,
-                        parent.id,
-                        childPage.childPage.title,
-                        NotionPageUtils.parseNotionDateTimeString(childPage.lastEditedTime!!),
-                        parent
-                    )
-
-                    parent.children.add(childNode)
-                }
-
-                if (
-//                it.type != BlockType.ChildPage && // do NOT parse into the child pages
-                    it.hasChildren == true
-                ) { // block has child blocks -> handle them at the next level
-                    val node = childNode ?: parent
-
-                    collectPagesTree(client, tree, node, it.id!!, currentLevel + 1)
-                }
-            }
-
-            // Update cursor and check if more results exist
-            hasMore = children.hasMore
-            nextCursor = children.nextCursor
-            
-            if (hasMore) {
-                logger.info("Block $blockId has more child pages. Fetching next batch with cursor: \"$nextCursor\".")
-            }
         }
     }
 
