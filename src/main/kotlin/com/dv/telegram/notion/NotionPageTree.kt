@@ -58,7 +58,7 @@ object NotionPageTree : Logging {
 
 //            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
 //            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
-            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
+//            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
 
             exportRowsToExcelFile(node)
 
