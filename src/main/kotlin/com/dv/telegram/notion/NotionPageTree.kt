@@ -8,6 +8,7 @@ import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.blocks.BlockType
 import notion.api.v1.model.blocks.ParagraphBlock
 import notion.api.v1.model.common.Emoji
+import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageParent
 import notion.api.v1.model.pages.PageProperty
 import org.apache.logging.log4j.kotlin.Logging
@@ -27,8 +28,8 @@ object NotionPageTree : Logging {
         // todo: may also read from bot json config
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 //        val pageId = WikiBotUtils.getEnvVariable(PAGE_ID_ENV_NAME)
-        val pageId = NotionPageIds.FIRST_STEPS_RU
-//        val pageId = NotionPageIds.MAIN_PAGE
+//        val pageId = NotionPageIds.FIRST_STEPS_RU
+        val pageId = NotionPageIds.MAIN_PAGE
 
         val tree = mutableListOf<String>()
 
@@ -54,13 +55,62 @@ object NotionPageTree : Logging {
 //            parseTree(client, tree, pageId, 0)
 
             // find the child pages tree
+            val startCollect = System.currentTimeMillis()
+
             NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
+
+            val endCollect = System.currentTimeMillis()
+            val collectTime = formatDuration(endCollect - startCollect)
+
+            logger.info("Collecting pages finished. Total root nodes collected: ${node.children.size}. Time spent: $collectTime")
+
+            // Toggle heading block within "All pages tree" page
+            // https://www.notion.so/russiansabroad/All-pages-tree-7f50480fb5614e11b9e379b19b311c2a?source=copy_link#35abc3d74a3080a48dc3e1b284f7d6b6
+            // https://www.notion.so/russiansabroad/All-pages-tree-7f50480fb5614e11b9e379b19b311c2a?source=copy_link#35abc3d74a3080a48dc3e1b284f7d6b6
+
+            // This is the id of the first parent block re
+            // 4807b405-2850-4d6f-ac89-38de5752c730
+            // https://www.notion.so/russiansabroad/All-pages-tree-7f50480fb5614e11b9e379b19b311c2a?source=copy_link#4807b40528504d6fac8938de5752c730
+
+            // 08.May.2026 toggle
+//            val toggleHeadingBlockId = "35abc3d74a3080a48dc3e1b284f7d6b6"
+
+            // 09.May.2026 toggle - Run 1
+//            val toggleHeadingBlockId = "35bbc3d74a308006bea9f4aa5fa62383"
+
+            // 09.May.2026 toggle - Run 2
+            val toggleHeadingBlockId = "35bbc3d74a3080af8159faa650ca3eba"
+            // https://www.notion.so/russiansabroad/All-pages-tree-7f50480fb5614e11b9e379b19b311c2a?source=copy_link#35bbc3d74a3080af8159faa650ca3eba
+
 
 //            val pageToAppend = NotionPageUtils.retrievePage(client, NotionPageIds.NOTION_API_TEST_PAGE)
 //            appendTree(client, NotionPageIds.NOTION_API_TEST_PAGE, node, 0)
 //            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
+//            appendTree(client, NotionPageIds.ALL_PAGES_TREE, node, 0)
+
+            val blockToAppendTo = toggleHeadingBlockId
+
+            try {
+                val startAppend = System.currentTimeMillis()
+
+                appendTree(client, blockToAppendTo, node, 0)
+
+                val endAppend = System.currentTimeMillis()
+                val appendTime = formatDuration(endAppend - startAppend)
+                logger.info("Appending tree finished. Time spent: $appendTime")
+            }
+            catch (e: Exception) {
+                logger.error("Error while appending tree to block \"$blockToAppendTo\"", e)
+            }
+
+            // export to Excel even if exporting the tree into Notion page has failed
+            val startExport = System.currentTimeMillis()
 
             exportRowsToExcelFile(node)
+
+            val endExport = System.currentTimeMillis()
+            val exportTime = formatDuration(endExport - startExport)
+            logger.info("Exporting to Excel finished. Time spent: $exportTime")
 
             val treeToPrint = tree.joinToString("\n")
             logger.info("tree: \n$treeToPrint")
@@ -69,8 +119,22 @@ object NotionPageTree : Logging {
         }
     }
 
+    private fun formatDuration(millis: Long): String {
+        val totalSeconds = millis / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d (minutes:seconds)", minutes, seconds)
+    }
+
     private fun appendTree(client: NotionClient, parentBlockId: String, node: NotionPageNode, level: Int) {
-        val page = NotionPageUtils.retrievePage(client, node.id) // retrieve the complete Page object is required for page mention
+//        val page = NotionPageUtils.retrievePage(client, node.id) // retrieve the complete Page object is required for page mention
+
+        val page = retryRetrievePage(
+            client = client,
+            pageId = node.id,
+            maxRetries = 10,
+            waitMillis = 1000L
+        )
 
         val separatorText = node.getSeparator()
 
@@ -99,6 +163,34 @@ object NotionPageTree : Logging {
         for (child in node.children) {
             appendTree(client, parentBlockId, child, level + 1)
         }
+    }
+
+    private fun retryRetrievePage(
+        client: NotionClient,
+        pageId: String,
+        maxRetries: Int,
+        waitMillis: Long
+    ): Page {
+        var attempt = 0
+
+        while (attempt < maxRetries) {
+            try {
+                return NotionPageUtils.retrievePage(client, pageId)
+            }
+            catch (e: Exception) {
+                logger.error("Error when getting retrieving page $pageId, attempt $attempt / $maxRetries.", e)
+
+                attempt++
+
+                if (attempt >= maxRetries) {
+                    throw e
+                }
+
+                Thread.sleep(waitMillis)
+            }
+        }
+
+        throw RuntimeException("Failed to retrieve page after $maxRetries attempts")
     }
 
     private fun exportRowsToExcelFile(root: NotionPageNode) {
@@ -207,7 +299,7 @@ object NotionPageTree : Logging {
             }
 
             // todo: columnList
-            // todo: synched blocks :scream:
+            // todo: synced blocks :scream:
             // todo: tables
             // todo: files?
 

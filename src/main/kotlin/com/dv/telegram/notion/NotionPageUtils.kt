@@ -14,6 +14,7 @@ import notion.api.v1.model.common.RichTextLinkType
 import notion.api.v1.model.common.RichTextMentionType
 import notion.api.v1.model.common.RichTextType
 import notion.api.v1.model.pages.Page
+import notion.api.v1.model.pages.PageProperty
 import notion.api.v1.model.pages.PageProperty.RichText
 import org.apache.logging.log4j.kotlin.Logging
 import java.time.ZonedDateTime
@@ -205,7 +206,12 @@ object NotionPageUtils : Logging {
     fun createRichTextWithPageMention(mentionedPage: Page): RichText {
         val mention = RichText.Mention(
             type = RichTextMentionType.Page,
-            page = mentionedPage,
+
+            // Using PageProperty is required for the current Notion API, I built a custom version of notion-sdk-jvm-core with this fix.
+            // see https://developers.notion.com/reference/rich-text#page-mention-type-object
+            // see https://github.com/seratch/notion-sdk-jvm/issues/186
+//            page = mentionedPage,
+            page = PageProperty.PageReference(mentionedPage.id)
         )
 
         return RichText(

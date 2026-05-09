@@ -24,7 +24,11 @@
 
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
 
-        <notion-sdk.version>1.8.0</notion-sdk.version>
+        <!--
+            This is my build with a local fix of using PageReference in the Mention
+            See https://github.com/seratch/notion-sdk-jvm/issues/186
+        -->
+        <notion-sdk.version>1.11.2-SNAPSHOT</notion-sdk.version>
 
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <ktlint.version>0.49.0</ktlint.version>
