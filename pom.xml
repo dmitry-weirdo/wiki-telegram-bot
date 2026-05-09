@@ -185,6 +185,10 @@
             <groupId>com.github.seratch</groupId>
             <artifactId>notion-sdk-jvm-core</artifactId>
             <version>${notion-sdk.version}</version>
+
+            <!-- My custom build with PageReference fix for adding Mention to Notion page -->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/notion-sdk-jvm-core-1.11.2-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <!-- Fixes the call to Http PATCH method which fails when using the default java.net.http.HttpClient -->
@@ -192,6 +196,10 @@
             <groupId>com.github.seratch</groupId>
             <artifactId>notion-sdk-jvm-okhttp4</artifactId>
             <version>${notion-sdk.version}</version>
+
+            <!-- My custom build with PageReference fix for adding Mention to Notion page -->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/notion-sdk-jvm-okhttp4-1.11.2-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>
