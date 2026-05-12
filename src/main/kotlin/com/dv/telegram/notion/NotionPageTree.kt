@@ -12,6 +12,7 @@ import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageParent
 import notion.api.v1.model.pages.PageProperty
 import org.apache.logging.log4j.kotlin.Logging
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -25,6 +26,13 @@ object NotionPageTree : Logging {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        val fakeTree = createFakePageTreeForTests()
+        exportRowsToExcelFile(fakeTree)
+
+        if (true) {
+            return
+        }
+
         // todo: may also read from bot json config
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 //        val pageId = WikiBotUtils.getEnvVariable(PAGE_ID_ENV_NAME)
@@ -124,6 +132,63 @@ object NotionPageTree : Logging {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d (minutes:seconds)", minutes, seconds)
+    }
+
+    /**
+     * Small in-memory tree for tests or local experiments (no Notion API): root (level 0) → two nodes (level 1) → one child each (level 2).
+     * Page ids are 32-char hex strings like the API; [NotionPageNode.parent] / [NotionPageNode.children] match [NotionPageNode.parentId] / levels.
+     */
+    fun createFakePageTreeForTests(): NotionPageNode {
+        val root = NotionPageNode(
+            NotionPageNode.ROOT_LEVEL,
+            "10000000000000000000000000000001",
+            "",
+            "Fake tree — root",
+            ZonedDateTime.of(2024, 6, 1, 9, 0, 0, 0, ZoneOffset.UTC),
+            null
+        )
+
+        val childA = NotionPageNode(
+            1,
+            "20000000000000000000000000000002",
+            root.id,
+            "Fake tree — level 1 — A",
+            ZonedDateTime.of(2024, 6, 2, 10, 30, 0, 0, ZoneOffset.UTC),
+            root
+        )
+        root.children.add(childA)
+
+        val grandA = NotionPageNode(
+            2,
+            "30000000000000000000000000000003",
+            childA.id,
+            "Fake tree — level 2 — under A",
+            ZonedDateTime.of(2024, 6, 3, 12, 15, 45, 0, ZoneOffset.UTC),
+            childA
+        )
+        childA.children.add(grandA)
+
+        val childB = NotionPageNode(
+            1,
+            "20000000000000000000000000000004",
+            root.id,
+            "Fake tree — level 1 — B",
+            ZonedDateTime.of(2024, 7, 1, 8, 0, 0, 0, ZoneOffset.UTC),
+            root
+        )
+        root.children.add(childB)
+
+        val grandB = NotionPageNode(
+            2,
+            "30000000000000000000000000000005",
+            childB.id,
+            "Fake tree — level 2 — under B",
+            ZonedDateTime.of(2024, 7, 2, 16, 45, 30, 0, ZoneOffset.UTC),
+            childB
+        )
+        childB.children.add(grandB)
+
+        return root
     }
 
     private fun appendTree(client: NotionClient, parentBlockId: String, node: NotionPageNode, level: Int) {
