@@ -1,84 +1,88 @@
 ---
 name: BotCommand getFileContent
-overview: Add `BotCommand.getFileContent` (UTF-8 `ByteArrayInputStream` when `returnFileInResponse()`, else null), thread the resulting `InputStream?` through `SpecialCommandResponse` and `MessageProcessingResult`, and have `WikiBot.createSendDocument` prefer that stream. Use an optional precomputed response string parameter so `BotSpecialCommands` does not invoke `getResponse` twice for file commands (binary overrides can ignore the cached string).
+overview: Commands that return files own String→UTF-8 InputStream conversion in their implementations. BotCommand exposes getFileContent with default null. SpecialCommandResponse and MessageProcessingResult carry the InputStream. WikiBot.createSendDocument sends only that stream — no string re-encoding fallback and no framework “precomputed response” parameter.
 todos:
   - id: bot-command-method
-    content: Add getFileContent to BotCommand (imports; default body; optional precomputed response body for single-pass plumbing)
+    content: BotCommand — getFileContent(text,bot,update) returns InputStream?, default null (no UTF-8 default on interface)
+    status: pending
+  - id: file-command-impls
+    content: AllBotsGetSuccessfulRequests + AllBotsGetFailedRequests — override getFileContent with UTF-8 BAIS; internal helper so body matches getResponse without duplicating logic twice per request
     status: pending
   - id: special-command-response
-    content: Extend SpecialCommandResponse with responseFileContent InputStream?, factories and hasResponse semantics
+    content: SpecialCommandResponse — responseFileContent InputStream?, update factories (text path null stream)
     status: pending
   - id: bot-special-commands
-    content: Wire BotSpecialCommands.getResponse to populate responseFileContent for file-returning commands
+    content: BotSpecialCommands — populate responseFileContent via command.getFileContent (no extra parameters)
     status: pending
   - id: message-processing-result
-    content: Add responseFileContent to MessageProcessingResult and specialCommand factory overload used by WikiBotMessageProcessor
+    content: MessageProcessingResult — responseFileContent through specialCommand(...) and WikiBotMessageProcessor
     status: pending
   - id: wiki-bot-send-document
-    content: Prefer processingResult.responseFileContent in createSendDocument; fallback encode string only if stream null
+    content: WikiBot.createSendDocument — use only processingResult.responseFileContent; fail if missing when returning a file (no fallback from String)
     status: pending
 isProject: false
 ---
 
-# `getFileContent` + `InputStream` on `SpecialCommandResponse`
+# `getFileContent` owned by commands; stream only in `WikiBot`
 
-## Context
+## Principles (per product direction)
 
-- Today the document body is built only in [`WikiBot.createSendDocument`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\WikiBot.kt) from `processingResult.getResponseOrFail()` as UTF-8 bytes.
-- [`BotSpecialCommands.getResponse`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\BotSpecialCommands.kt) returns [`SpecialCommandResponse`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\SpecialCommandResponse.kt) with text + file flags + name + caption; no stream yet.
-- File-returning commands today: [`AllBotsGetSuccessfulRequests`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\AllBotsGetSuccessfulRequests.kt), [`AllBotsGetFailedRequests`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\AllBotsGetFailedRequests.kt).
+- **No** converting `String` → `InputStream` inside [**`WikiBot.createSendDocument`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\WikiBot.kt). The attachment bytes come only from **`MessageProcessingResult.responseFileContent`** (ultimately **`SpecialCommandResponse.responseFileContent`**).
+- **No** “precomputed response body” (or similar) on **`getFileContent`** — that stays out of **`WikiBot`** and off the **`BotCommand`** API. Avoiding duplicated work stays **inside** each command implementation (shared private builder, etc.).
+- **Concrete file commands** are responsible for how the document body is built (today: UTF‑8 bytes of their text payload; tomorrow: arbitrary binary overrides).
 
 ## 1. `BotCommand.getFileContent`
 
-In [`BotCommand.kt`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\BotCommand.kt), add (imports: `ByteArrayInputStream`, `InputStream`, `StandardCharsets`):
+In [**`BotCommand.kt`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\BotCommand.kt):
 
-- **`fun getFileContent(text: String, bot: WikiBot, update: Update, precomputedResponseBody: String? = null): InputStream?`**
-  - If `!returnFileInResponse()` → `null`.
-  - Else `val body = precomputedResponseBody ?: getResponse(text, bot, update)` then `ByteArrayInputStream(body.toByteArray(StandardCharsets.UTF_8))` (matches current `createSendDocument` encoding).
-  - **Why the extra argument:** [`BotSpecialCommands`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\BotSpecialCommands.kt) already computes `response` once; passing it avoids calling `getResponse` twice when using the default UTF-8 file body. Commands that attach **binary** content later override `getFileContent` and can **ignore** `precomputedResponseBody`.
+- Add **`fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream?`**
+- **Default:** `null` (Kotlin interface default implementation).
 
-Place the method beside the other file-related declarations.
+Only commands with **`returnFileInResponse() == true`** override to return a non-null stream.**No** UTF‑8 **`ByteArrayInputStream`** helper on the interface itself.
 
-## 2. `SpecialCommandResponse`
+Imports: **`java.io.InputStream`** only on the interface file (implementations pull in **`ByteArrayInputStream`** / **`StandardCharsets`** where needed).
 
-In [`SpecialCommandResponse.kt`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\SpecialCommandResponse.kt):
+## 2. File command classes (implementations)
 
-- Add **`val responseFileContent: InputStream?`** (typically `null` when `returnFileInResponse == false`).
-- **`noResponse()`**: `responseFileContent = null`.
-- **`withResponse(...)` (two-arg text path):** keep `responseFileContent = null`.
-- **`withResponse(..., returnFileInResponse, fileName, caption)`:** add parameter **`responseFileContent: InputStream?`** — when `returnFileInResponse`, pass the stream from command (see §3); when false, pass `null`.
-- **`hasResponse()`**: unchanged in spirit (still keyed off non-blank `response`); file commands remain text-backed for captions/logging.
+[**`AllBotsGetSuccessfulRequests`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\AllBotsGetSuccessfulRequests.kt) and [**`AllBotsGetFailedRequests`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\AllBotsGetFailedRequests.kt):
 
-## 3. `BotSpecialCommands`
+- **`getResponse`** and **`getFileContent`** both use the **same** internal helper (e.g. `private fun buildFileBody(...) : String`) so [**`BotSpecialCommands`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\BotSpecialCommands.kt) can call **`getResponse`** then **`getFileContent`** without building two different payloads or invoking heavy logic twice.
+- **`override fun getFileContent(...)`**: `ByteArrayInputStream(buildFileBody(...).toByteArray(StandardCharsets.UTF_8))` — same encoding that **`createSendDocument`** used historically.
 
-In the branch where `command.returnFileInResponse()` ([`BotSpecialCommands.kt`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\BotSpecialCommands.kt) ~58–65):
+Future document commands replace **`getFileContent`** with workbook/disk/other streams without changing **`WikiBot`**.
 
-1. Keep **`val response = command.getResponse(...)`** once.
-2. **`val stream = command.getFileContent(text, bot, update, precomputedResponseBody = response)`** (non-null stream for current file commands; command contract may tighten later so file responses require non-null stream when `returnFileInResponse`).
-3. Extend **`SpecialCommandResponse.withResponse(...)`** call with **`responseFileContent = stream`**.
+## 3. `SpecialCommandResponse`
 
-## 4. `MessageProcessingResult`
+In [**`SpecialCommandResponse.kt`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\command\SpecialCommandResponse.kt):
 
-In [`MessageProcessingResult.kt`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\MessageProcessingResult.kt):
+- **`val responseFileContent: InputStream?`**
+- **`noResponse()`** / text-only **`withResponse`**: `null`
+- File **`withResponse(...)`**: callers pass **`responseFileContent`** from **`command.getFileContent(...)`**. When **`returnFileInResponse`**, it should be **non-null** for current commands (enforced implicitly or with **`require`** in factory if you want a hard invariant).
 
-- Add **`val responseFileContent: InputStream?`** (default `null` everywhere except the special-command-with-file factory).
-- Extend **`specialCommand(..., returnFileInResponse, responseFileName, responseFileCaption)`** to accept **`responseFileContent: InputStream?`** and copy it from [`WikiBotMessageProcessor`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\WikiBotMessageProcessor.kt) when building the result (pass `specialCommandResponse.responseFileContent`).
+## 4. `BotSpecialCommands`
 
-## 5. `WikiBot.createSendDocument`
+In the file branch (~58–65):
 
-In [`WikiBot.kt`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\WikiBot.kt):
+1. **`val response = command.getResponse(...)`**
+2. **`val stream = command.getFileContent(text, bot, update)`** — expect **`stream != null`** for current file-returning implementations.
+3. Pass **`responseFileContent = stream`** into **`SpecialCommandResponse.withResponse`**.
 
-- Prefer **`processingResult.responseFileContent`** when non-null for `InputFile(..., fileName)`.
-- If null (defensive / legacy path), keep current behavior: **`ByteArrayInputStream(processingResult.getResponseOrFail().toByteArray(StandardCharsets.UTF_8))`**.
+## 5. `MessageProcessingResult`
+
+In [**`MessageProcessingResult.kt`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\MessageProcessingResult.kt):
+
+- **`val responseFileContent: InputStream?`**
+- Thread through **`specialCommand(...)`** overload and [**`WikiBotMessageProcessor`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\main\kotlin\com\dv\telegram\WikiBotMessageProcessor.kt) from **`specialCommandResponse.responseFileContent`**
+
+## 6. `WikiBot.createSendDocument`
+
+- **`val inputStream = processingResult.responseFileContent ?: error("...")`** (or a small **`WikiBotException`** message) — **no** **`getResponseOrFail().toByteArray`** branch.
+- Remove **`StandardCharsets`** import from **`WikiBot.kt`** only if nothing else uses it there after the change.
 
 ## Tests
 
-- [`BotGetResponseTest.kt`](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\test\kotlin\com\dv\telegram\BotGetResponseTest.kt): adjust only if tests assert construction of `SpecialCommandResponse` / `MessageProcessingResult` field counts; otherwise no change.
+[**`BotGetResponseTest.kt`**](c:\java-vorwerk\java-u-x\wiki-telegram-bot\src\test\kotlin\com\dv\telegram\BotGetResponseTest.kt): update if anything constructs **`SpecialCommandResponse`** / **`MessageProcessingResult`** with the new field.
 
-## Architectural alternative (sealed split: text vs document)
+## Architectural alternative (sealed split)
 
-Deferred: a `sealed` split of command types still makes sense if many **binary** attachments appear; the current plan keeps one `BotCommand` type and uses `getFileContent` overrides for non-UTF-8 bodies.
-
-## Extension point
-
-Future commands that return **binary** files override **`getFileContent(..., precomputedResponseBody)`** and build the stream from disk/workbook, ignoring the cached string when appropriate.
+Unchanged: consider a sealed **text vs document** command model when many binary exports exist.
