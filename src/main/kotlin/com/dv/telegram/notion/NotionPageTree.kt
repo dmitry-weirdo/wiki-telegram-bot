@@ -264,10 +264,12 @@ object NotionPageTree : Logging {
         fillRowsForExcelFile(root, nodes)
         logger.info("Total page rows: ${nodes.size}")
 
+        val workbook = PageTreeXlsxWriter.createWorkbook(nodes)
+
         val directory = "c:/java/wiki-telegram-bot"
         val filePath = PageTreeXlsxWriter.getFilePath(directory, root.id, ZonedDateTime.now())
 
-        PageTreeXlsxWriter.createXlsxFile(filePath, nodes)
+        PageTreeXlsxWriter.createXlsxFile(filePath, workbook)
     }
 
     private fun fillRowsForExcelFile(node: NotionPageNode, nodes: MutableList<NotionPageNode>) {

@@ -58,15 +58,32 @@ object PageTreeXlsxWriter : Logging {
     }
 
     fun createXlsxFile(filePath: String, nodes: List<NotionPageNode>) {
-        val rowsAppender = getAppendPageNodes(nodes)
+        val workbook = createWorkbook(nodes)
 
-        createXlsxFile(filePath, rowsAppender)
+        createXlsxFile(filePath, workbook)
     }
 
     fun createXlsxFile(
         filePath: String,
         rowsAppender: (RowGenerationContext) -> Unit
     ) {
+        val workbook = createWorkbook(rowsAppender)
+
+        // write workbook to file
+        createXlsxFile(filePath, workbook)
+    }
+
+    fun createXlsxFile(filePath: String, workbook: XSSFWorkbook) {
+        writeToFile(filePath, workbook)
+    }
+
+    fun createWorkbook(nodes: List<NotionPageNode>): XSSFWorkbook {
+        val rowsAppender = getAppendPageNodes(nodes)
+
+        return createWorkbook(rowsAppender)
+    }
+
+    fun createWorkbook(rowsAppender: (RowGenerationContext) -> Unit): XSSFWorkbook {
         val workbook = XSSFWorkbook()
 
         val sheet = workbook.createSheet(SHEET_NAME)
@@ -95,8 +112,7 @@ object PageTreeXlsxWriter : Logging {
 
         rowsAppender(context)
 
-        // write workbook to file
-        writeToFile(filePath, workbook)
+        return workbook
     }
 
     private fun appendTestDataRows(
