@@ -27,11 +27,13 @@ class AllBotsGetFailedRequests : BasicBotCommand() {
     }
 
     override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+        // todo: this is not necessary for commands that return files. We can return an empty string here.
         return buildFileBody(text, bot, update)
     }
 
     override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream {
-        return ByteArrayInputStream(buildFileBody(text, bot, update).toByteArray(StandardCharsets.UTF_8))
+        val fileContentAsText = buildFileBody(text, bot, update)
+        return getFileContent(fileContentAsText)
     }
 
     private fun buildFileBody(text: String, bot: WikiBot, update: Update): String {
