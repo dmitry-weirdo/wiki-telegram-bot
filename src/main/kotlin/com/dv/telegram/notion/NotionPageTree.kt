@@ -2,6 +2,7 @@ package com.dv.telegram.notion
 
 import com.dv.telegram.excel.PageTreeXlsxWriter
 import com.dv.telegram.google.GoogleCloudTranslateApp
+import com.dv.telegram.util.DateUtils
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
@@ -68,7 +69,7 @@ object NotionPageTree : Logging {
             NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
 
             val endCollect = System.currentTimeMillis()
-            val collectTime = formatDuration(endCollect - startCollect)
+            val collectTime = DateUtils.formatDuration(endCollect - startCollect)
 
             logger.info("Collecting pages finished. Total root nodes collected: ${node.children.size}. Time spent: $collectTime")
 
@@ -104,7 +105,7 @@ object NotionPageTree : Logging {
                 appendTree(client, blockToAppendTo, node, 0)
 
                 val endAppend = System.currentTimeMillis()
-                val appendTime = formatDuration(endAppend - startAppend)
+                val appendTime = DateUtils.formatDuration(endAppend - startAppend)
                 logger.info("Appending tree finished. Time spent: $appendTime")
             }
             catch (e: Exception) {
@@ -117,7 +118,7 @@ object NotionPageTree : Logging {
             exportRowsToExcelFile(node)
 
             val endExport = System.currentTimeMillis()
-            val exportTime = formatDuration(endExport - startExport)
+            val exportTime = DateUtils.formatDuration(endExport - startExport)
             logger.info("Exporting to Excel finished. Time spent: $exportTime")
 
             val treeToPrint = tree.joinToString("\n")
@@ -125,13 +126,6 @@ object NotionPageTree : Logging {
 
 //            createPage(client, pageId, "[❗ Beta ❗] Тестовый автоперевод главной страницы", treeToPrint)
         }
-    }
-
-    private fun formatDuration(millis: Long): String {
-        val totalSeconds = millis / 1000
-        val minutes = totalSeconds / 60
-        val seconds = totalSeconds % 60
-        return String.format("%02d:%02d (minutes:seconds)", minutes, seconds)
     }
 
     /**

@@ -1,11 +1,11 @@
 package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
-import com.dv.telegram.exception.CommandException
 import com.dv.telegram.excel.PageTreeXlsxWriter
+import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionPageNode
-import com.dv.telegram.notion.NotionPageTree
 import com.dv.telegram.notion.NotionPageTree.fillRowsForExcelFile
+import com.dv.telegram.notion.NotionWrapper
 import com.dv.telegram.util.DateUtils
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.io.InputStream
@@ -26,7 +26,7 @@ class ExportNotionPageTreeToExcel : BasicBotCommand() {
     }
 
     override fun getResponseFileCaption(): String {
-        // todo: include page id and page name into response
+        // todo: include page id and page name and start - stop times into response
         return "Экспорт дерева страниц Notion в Excel."
     }
 
@@ -37,12 +37,20 @@ class ExportNotionPageTreeToExcel : BasicBotCommand() {
     override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream {
         val notionPageId = parseNotionPageId(text)
         if (notionPageId.isBlank()) {
-            throw CommandException("Не указан notionPageId.\nФормат: `${bot.botName} $commandText <notionPageId>`.", true)
+            throw CommandException("Не указан `notionPageId`.\nФормат: `${bot.botName} $commandText <notionPageId>`.", true)
         }
 
-        val fakeTree = NotionPageTree.createFakePageTreeForTests()
+        val result = NotionWrapper.collectPageTree(
+            bot.notionToken,
+            notionPageId,
+            bot.notionImportTimeoutMinutes, // todo: we can use separate timeout for this operation
+        )
+
+        // todo: set the response data (start date, end date, diff) for getResponseFileCaption
+
+//        val fakeTree = NotionPageTree.createFakePageTreeForTests()
         val nodes = mutableListOf<NotionPageNode>()
-        fillRowsForExcelFile(fakeTree, nodes)
+        fillRowsForExcelFile(result.root, nodes)
 
         val workbook = PageTreeXlsxWriter.createWorkbook(nodes)
         return PageTreeXlsxWriter.workbookToInputStream(workbook)

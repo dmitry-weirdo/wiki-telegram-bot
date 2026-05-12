@@ -1,9 +1,6 @@
 package com.dv.telegram.notion
 
-import com.dv.telegram.GoogleSheetLoader
-import com.dv.telegram.data.ChatData
-import com.dv.telegram.exception.CommandException
-import com.dv.telegram.tabs.TabType
+import com.dv.telegram.util.DateUtils
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
@@ -225,5 +222,59 @@ object NotionWrapper : Logging {
 
         return listOf(city1, city2)
             .sortedBy { it.cityName }
+    }
+
+    fun collectPageTree(
+        notionToken: String,
+        pageId: String,
+        notionTimeoutMinutes: Int,
+    ): NotionPageTreeCollectResult {
+        NotionOperationBlocker.startOperation(notionTimeoutMinutes)
+
+        var result: NotionPageTreeCollectResult? = null
+
+        try {
+            NotionPageUtils.execute(notionToken) { client ->
+                val startCollect = System.currentTimeMillis() // includes time for page retrieval
+
+                val page = NotionPageUtils.retrievePage(client, pageId)
+                val pageTitle = NotionPageUtils.getPageTitle(page)
+
+                val tree = mutableListOf<String>()
+
+                val node = NotionPageNode(
+                    NotionPageNode.ROOT_LEVEL,
+                    pageId,
+                    "",
+                    pageTitle,
+                    NotionPageUtils.parseNotionDateTimeString(page.lastEditedTime),
+                    null
+                )
+
+                NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
+
+                val endCollect = System.currentTimeMillis()
+
+                val collectTime = DateUtils.formatDuration(endCollect - startCollect)
+                logger.info("Collecting pages tree for root page \"$pageId\" finished. Total root nodes collected: ${node.children.size}. Time spent: $collectTime.")
+
+                result = NotionPageTreeCollectResult(
+                    rootPageId = pageId,
+                    rootPageTitle = pageTitle,
+                    root = node,
+                    startTime = startCollect,
+                    endTime = endCollect
+                )
+            }
+        }
+        catch (e: Throwable) {
+            logger.error("Error on collecting Notion page tree for page \"$pageId\"", e)
+            throw e
+        }
+        finally { // end the operation even if Notion tree collection has thrown an exception
+            NotionOperationBlocker.stopOperation()
+        }
+
+        return result!!
     }
 }
