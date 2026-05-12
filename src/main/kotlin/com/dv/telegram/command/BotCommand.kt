@@ -5,7 +5,7 @@ import com.dv.telegram.exception.CommandException
 import org.telegram.telegrambots.meta.api.objects.Update
 
 interface BotCommand {
-    val name: String // english name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
+    val name: String // English name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
 
     fun getDescription(bot: WikiBot): String // description, in Russian // todo: must be localized with MessageBundle
     fun useMarkdownInResponse(): Boolean
