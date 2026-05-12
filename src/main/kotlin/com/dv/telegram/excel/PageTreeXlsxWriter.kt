@@ -10,8 +10,11 @@ import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFRichTextString
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -75,6 +78,13 @@ object PageTreeXlsxWriter : Logging {
 
     fun createXlsxFile(filePath: String, workbook: XSSFWorkbook) {
         writeToFile(filePath, workbook)
+    }
+
+    fun workbookToInputStream(workbook: XSSFWorkbook): InputStream {
+        ByteArrayOutputStream().use { out ->
+            workbook.write(out)
+            return ByteArrayInputStream(out.toByteArray())
+        }
     }
 
     fun createWorkbook(nodes: List<NotionPageNode>): XSSFWorkbook {
