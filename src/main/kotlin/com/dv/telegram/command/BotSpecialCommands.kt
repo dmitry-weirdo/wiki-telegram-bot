@@ -2,9 +2,11 @@ package com.dv.telegram.command
 
 import com.dv.telegram.WikiBot
 import com.dv.telegram.WikiBotConfig
+import com.dv.telegram.exception.CommandException
+import org.apache.logging.log4j.kotlin.Logging
 import org.telegram.telegrambots.meta.api.objects.Update
 
-class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotCommand>) {
+class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotCommand>) : Logging {
     val startCommand: Start = getCommand(commands, Start::class.java)
     val helpCommand: HelpCommand = getCommand(commands, HelpCommand::class.java)
     val listCommands: ListCommands = getCommand(commands, ListCommands::class.java)
@@ -56,8 +58,17 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
         val useMarkdownInResponse = command.useMarkdownInResponse()
 
         return if (command.returnFileInResponse()) { // only trigger file-related returns from command if it returns a file
-            val responseFileContent = command.getFileContent(text, bot, update)
-                ?: error("Command ${command.javaClass.simpleName} has returnFileInResponse == true, but getFileContent returned null")
+            val responseFileContent = try {
+                command.getFileContent(text, bot, update)
+                    ?: error("Command ${command.javaClass.simpleName} has returnFileInResponse == true, but getFileContent returned null.")
+            }
+            catch (e: CommandException) { // handle exception gracefully - return it in the response
+                logger.error("Error on executing command ${command.javaClass.simpleName}", e)
+
+                val errorMessage: String = e.message ?: "Произошла неизвестная ошибка."
+
+                return SpecialCommandResponse.withResponse(errorMessage, e.useMarkdownInResponse)
+            }
 
             SpecialCommandResponse.withResponse(
                 response,

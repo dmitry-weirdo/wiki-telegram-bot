@@ -72,6 +72,7 @@ interface BotCommand {
             // Notion
             CityChatsValidate(),
             CityChatsExportToNotion(),
+            ExportNotionPageTreeToExcel(),
 
             // settings
             ListSettings(),

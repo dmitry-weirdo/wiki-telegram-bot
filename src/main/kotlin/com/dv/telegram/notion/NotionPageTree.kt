@@ -272,7 +272,7 @@ object NotionPageTree : Logging {
         PageTreeXlsxWriter.createXlsxFile(filePath, workbook)
     }
 
-    private fun fillRowsForExcelFile(node: NotionPageNode, nodes: MutableList<NotionPageNode>) {
+    fun fillRowsForExcelFile(node: NotionPageNode, nodes: MutableList<NotionPageNode>) {
         nodes.add(node)
 
         for (child in node.children) {
