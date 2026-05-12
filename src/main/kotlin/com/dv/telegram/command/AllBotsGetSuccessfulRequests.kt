@@ -3,6 +3,9 @@ package com.dv.telegram.command
 import com.dv.telegram.WikiBot
 import com.dv.telegram.util.DateUtils
 import org.telegram.telegrambots.meta.api.objects.Update
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 class AllBotsGetSuccessfulRequests : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -24,6 +27,14 @@ class AllBotsGetSuccessfulRequests : BasicBotCommand() {
     }
 
     override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+        return buildFileBody(text, bot, update)
+    }
+
+    override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream {
+        return ByteArrayInputStream(buildFileBody(text, bot, update).toByteArray(StandardCharsets.UTF_8))
+    }
+
+    private fun buildFileBody(text: String, bot: WikiBot, update: Update): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
@@ -31,7 +42,7 @@ class AllBotsGetSuccessfulRequests : BasicBotCommand() {
 
         val successfulRequests = mutableSetOf<String>() // won't be repeats since all bots have different names. But probably for the modes triggering without bot name there may be duplicates
 
-        // no markdown because of user input in the successfulRequests
+        // no Markdown because of user input in the successfulRequests
         for (contextBot in bots) {
             successfulRequests.addAll(contextBot.statistics.successfulRequests)
 

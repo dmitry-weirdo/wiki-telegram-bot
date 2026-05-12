@@ -3,6 +3,7 @@ package com.dv.telegram.command
 import com.dv.telegram.WikiBot
 import com.dv.telegram.exception.CommandException
 import org.telegram.telegrambots.meta.api.objects.Update
+import java.io.InputStream
 
 interface BotCommand {
     val name: String // English name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
@@ -31,6 +32,8 @@ interface BotCommand {
     }
 
     fun getResponse(text: String, bot: WikiBot, update: Update): String
+
+    fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream?
 
     fun textContainsCommand(text: String): Boolean {
         return text.contains(

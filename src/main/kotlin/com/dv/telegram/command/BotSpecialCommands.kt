@@ -56,12 +56,16 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
         val useMarkdownInResponse = command.useMarkdownInResponse()
 
         return if (command.returnFileInResponse()) { // only trigger file-related returns from command if it returns a file
+            val responseFileContent = command.getFileContent(text, bot, update)
+                ?: error("Command ${command.javaClass.simpleName} has returnFileInResponse == true, but getFileContent returned null")
+
             SpecialCommandResponse.withResponse(
-                response, // todo: response is not necessary for "return file" commands, it should be the InputStream instead
+                response,
                 useMarkdownInResponse,
                 command.returnFileInResponse(),
                 command.getResponseFileName(),
-                command.getResponseFileCaption()
+                command.getResponseFileCaption(),
+                responseFileContent
             )
         }
         else {

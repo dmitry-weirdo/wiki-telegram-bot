@@ -47,6 +47,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
                 specialCommandResponse.returnFileInResponse,
                 specialCommandResponse.responseFileName,
                 specialCommandResponse.responseFileCaption,
+                specialCommandResponse.responseFileContent,
             )
         }
 

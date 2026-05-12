@@ -18,7 +18,7 @@ class AllBotsGetTabConfigs : BasicBotCommand() {
         val bots = bot.context.bots
             .sortedBy { it.botName }
 
-        // no markdown because of user input in the successfulRequests
+        // no Markdown because of user input in the successfulRequests
         for (contextBot in bots) {
             val botTelegramName = contextBot.getTelegramUserName()
             val botTelegramNameForResponse = BotCommandUtils.getClickableUserName(botTelegramName)

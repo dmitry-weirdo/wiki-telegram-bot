@@ -1,6 +1,9 @@
 package com.dv.telegram.command
 
+import com.dv.telegram.WikiBot
 import com.dv.telegram.config.BotSetting
+import org.telegram.telegrambots.meta.api.objects.Update
+import java.io.InputStream
 
 abstract class BasicBotCommand : BotCommand {
     override var commandName: String? = null // interface only defines abstract getter and setter, not the field itself
@@ -16,6 +19,8 @@ abstract class BasicBotCommand : BotCommand {
     override fun getResponseFileCaption(): String {
         throw UnsupportedOperationException("Cannot get response file caption for bot commands that do not return the file.")
     }
+
+    override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream? = null
 
     companion object {
         @JvmStatic
