@@ -13,7 +13,7 @@ class AllBotsReloadFromGoogleSheet : BasicBotCommand() {
 
     override val defaultCommandName = "/allBotsReloadConfigs"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
@@ -26,7 +26,7 @@ class AllBotsReloadFromGoogleSheet : BasicBotCommand() {
             val botReloadConfigResponse = contextBot
                 .specialCommands
                 .reloadFromGoogleSheetCommand
-                .getResponse("", contextBot, update)
+                .getResponse("", contextBot, update, context)
 
             // no multi-line string because of indent problems when parameter string itself contains the line breaks
             lines.add("*${contextBot.botName}* ($botTelegramNameForMarkdown)\n$botReloadConfigResponse")

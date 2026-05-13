@@ -17,26 +17,26 @@ class AllBotsGetSuccessfulRequests : BasicBotCommand() {
 
     override fun returnFileInResponse() = true
 
-    override fun getResponseFileName(): String {
+    override fun getResponseFileName(context: BotContext): String {
         val currentTimeFormatted = DateUtils.getCurrentDateTimeInFileNameFormat()
         return "allBotsGetSuccessfulRequests_$currentTimeFormatted.txt"
     }
 
-    override fun getResponseFileCaption(): String {
+    override fun getResponseFileCaption(context: BotContext): String {
         return "Файл с успешными запросами для всех ботов."
     }
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         // todo: this is not necessary for commands that return files. We can return an empty string here.
-        return buildFileBody(text, bot, update)
+        return buildFileBody(text, bot, update, context)
     }
 
-    override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream {
-        val fileContentAsText = buildFileBody(text, bot, update)
+    override fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream {
+        val fileContentAsText = buildFileBody(text, bot, update, context)
         return getFileContent(fileContentAsText)
     }
 
-    private fun buildFileBody(text: String, bot: WikiBot, update: Update): String {
+    private fun buildFileBody(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
@@ -54,7 +54,7 @@ class AllBotsGetSuccessfulRequests : BasicBotCommand() {
             val botGetSuccessfulRequestsResponse = contextBot
                 .specialCommands
                 .getSuccessfulRequestsCommand
-                .getResponse("", contextBot, update)
+                .getResponse("", contextBot, update, context)
 
             // no multi-line string because of indent problems when parameter string itself contains the line breaks
             lines.add("${contextBot.botName} ($botTelegramNameForResponse)\n$botGetSuccessfulRequestsResponse")

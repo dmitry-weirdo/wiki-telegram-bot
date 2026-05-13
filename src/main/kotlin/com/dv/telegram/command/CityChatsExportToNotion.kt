@@ -33,7 +33,7 @@ class CityChatsExportToNotion : BasicBotCommand(), Logging {
 
     override val defaultCommandName = "/cityChatsExportToNotion"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         return try {
             val startTime = ZonedDateTime.now()
 

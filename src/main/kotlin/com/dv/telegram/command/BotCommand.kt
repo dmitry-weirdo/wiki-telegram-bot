@@ -13,8 +13,8 @@ interface BotCommand {
 
     // if we return a file in response
     fun returnFileInResponse(): Boolean
-    fun getResponseFileName(): String
-    fun getResponseFileCaption(): String
+    fun getResponseFileName(context: BotContext): String
+    fun getResponseFileCaption(context: BotContext): String
 
     val defaultCommandName: String // default command name when it is not overridden by config
     var commandName: String? // overridden command name. Defines abstract getter and setter.
@@ -31,9 +31,9 @@ interface BotCommand {
         return true
     }
 
-    fun getResponse(text: String, bot: WikiBot, update: Update): String
+    fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String
 
-    fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream?
+    fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream?
 
     fun textContainsCommand(text: String): Boolean {
         return text.contains(

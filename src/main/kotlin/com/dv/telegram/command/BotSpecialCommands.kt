@@ -54,12 +54,14 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
             }
             ?: return SpecialCommandResponse.noResponse() // no rights on command -> return "special command unknown" response
 
-        val response = command.getResponse(text, bot, update)
+        val context = BotContext()
+
+        val response = command.getResponse(text, bot, update, context)
         val useMarkdownInResponse = command.useMarkdownInResponse()
 
         return if (command.returnFileInResponse()) { // only trigger file-related returns from command if it returns a file
             val responseFileContent = try {
-                command.getFileContent(text, bot, update)
+                command.getFileContent(text, bot, update, context)
                     ?: error("Command ${command.javaClass.simpleName} has returnFileInResponse == true, but getFileContent returned null.")
             }
             catch (e: CommandException) { // handle exception gracefully - return it in the response
@@ -74,8 +76,8 @@ class BotSpecialCommands(val botAdmins: Set<String>, val commands: List<BotComma
                 response,
                 useMarkdownInResponse,
                 command.returnFileInResponse(),
-                command.getResponseFileName(),
-                command.getResponseFileCaption(),
+                command.getResponseFileName(context),
+                command.getResponseFileCaption(context),
                 responseFileContent
             )
         }

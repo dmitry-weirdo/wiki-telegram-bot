@@ -20,21 +20,21 @@ class ExportNotionPageTreeToExcel : BasicBotCommand() {
 
     override fun returnFileInResponse() = true
 
-    override fun getResponseFileName(): String {
+    override fun getResponseFileName(context: BotContext): String {
         val currentTimeFormatted = DateUtils.getCurrentDateTimeInFileNameFormat()
         return "notionPageTreeToExcel_$currentTimeFormatted.xlsx"
     }
 
-    override fun getResponseFileCaption(): String {
+    override fun getResponseFileCaption(context: BotContext): String {
         // todo: include page id and page name and start - stop times into response
         return "Экспорт дерева страниц Notion в Excel."
     }
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         return "fakeString"
     }
 
-    override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream {
+    override fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream {
         val notionPageId = parseNotionPageId(text)
         if (notionPageId.isBlank()) {
             throw CommandException("Не указан `notionPageId`.\nФормат: `${bot.botName} $commandText <notionPageId>`.", true)

@@ -11,7 +11,7 @@ class GetFailedRequests : BasicBotCommand() {
 
     override val defaultCommandName = "/getFailedRequests"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val failedRequestsLines = bot
             .statistics
             .failedRequests

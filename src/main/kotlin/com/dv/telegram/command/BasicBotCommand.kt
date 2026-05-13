@@ -14,15 +14,15 @@ abstract class BasicBotCommand : BotCommand {
 
     override fun returnFileInResponse() = false
 
-    override fun getResponseFileName(): String {
+    override fun getResponseFileName(context: BotContext): String {
         throw UnsupportedOperationException("Cannot get response file name for bot commands that do not return the file.")
     }
 
-    override fun getResponseFileCaption(): String {
+    override fun getResponseFileCaption(context: BotContext): String {
         throw UnsupportedOperationException("Cannot get response file caption for bot commands that do not return the file.")
     }
 
-    override fun getFileContent(text: String, bot: WikiBot, update: Update): InputStream? = null
+    override fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream? = null
 
     companion object {
         @JvmStatic
