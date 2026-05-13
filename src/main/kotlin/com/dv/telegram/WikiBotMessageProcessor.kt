@@ -34,7 +34,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
         val chatType = update.message?.chat?.type?.lowercase()
 
-        if (!messageIsForTheBot(lowerText, chatType)) { // only work when bot is mentioned by name
+        if (!messageIsForTheBot(lowerText, chatType)) { // only work when bot is mentioned by name or this is a private chat with bot
             return MessageProcessingResult.notForTheBot()
         }
 

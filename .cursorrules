@@ -1,0 +1,30 @@
+You are working in a Kotlin codebase.
+
+General rules:
+- Follow idiomatic Kotlin and official Kotlin style conventions.
+- Prefer clarity over brevity.
+
+Strict rules:
+- NEVER generate single-line `if` statements.
+- Always use block `if` statements with braces, even for single statements.
+- For ?: long operators, move ?: and the following expression to a new line, and indent it by 4 spaces.
+- Before any block or multiline statement, insert a blank line, unless it's the first statement in a method.
+- When writing values in tests, introduce them in variable within the test-method instead of using the hard-code multiple times.
+  - Also for values put in fields of objects and in the lists, use variable in the method.
+
+Example (FORBIDDEN):
+if (x > 0) println(x)
+
+Correct:
+if (x > 0) {
+    println(x)
+}
+
+
+Example (incorrect)
+val person = Person(name = "Bob", age = 25)
+
+Correct:
+val name = "Bob"
+val age = 25
+val person = Person(name = name, age = age)

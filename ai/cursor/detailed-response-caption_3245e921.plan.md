@@ -22,7 +22,7 @@ isProject: false
 ## What will change
 - Extend `ExportNotionPageTreeToExcel` to persist operation context produced in `getFileContent` and consume it in `getResponseFileCaption`.
 - Build a multiline caption in the requested format:
-  - `Экспорта дерева страницы <pageId> ("<pageTitle>") в Excel.`
+  - `Экспорт дерева страницы <pageId> ("<pageTitle>") в Excel.`
   - `Начало операции: <formatted startTime>`
   - `Конец  операции: <formatted endTime>`
   - `Длительность: X мин Y сек`
