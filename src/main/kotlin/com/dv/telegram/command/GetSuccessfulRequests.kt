@@ -11,7 +11,7 @@ class GetSuccessfulRequests : BasicBotCommand() {
 
     override val defaultCommandName = "/getSuccessfulRequests"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val successfulRequestsLines = bot
             .statistics
             .successfulRequests

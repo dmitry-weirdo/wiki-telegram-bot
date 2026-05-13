@@ -2,6 +2,7 @@ package com.dv.telegram
 
 import com.dv.telegram.BotTestUtils.getUpdate
 import com.dv.telegram.BotTestUtils.getWikiBot
+import com.dv.telegram.command.BotContext
 import com.dv.telegram.command.GetEnvironment
 import com.dv.telegram.command.GetStatistics
 import com.dv.telegram.command.Start
@@ -27,7 +28,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage("/start", notBotAdmin, update)
 
         val expectedResult = MessageProcessingResult.specialCommand(
-            start.getResponse("", wikiBot, update),
+            start.getResponse("", wikiBot, update, BotContext()),
             false
         )
 
@@ -115,7 +116,7 @@ internal class BotGetResponseTest {
         val result = wikiBot.processMessage("$botName ${getEnvironment.defaultCommandName}", botAdmin, update)
 
         val expectedResult = MessageProcessingResult.specialCommand(
-            getEnvironment.getResponse("", wikiBot, update),
+            getEnvironment.getResponse("", wikiBot, update, BotContext()),
             false
         )
 

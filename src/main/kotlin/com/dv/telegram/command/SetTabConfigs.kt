@@ -18,7 +18,7 @@ class SetTabConfigs : BasicBotCommand() {
 
     override val defaultCommandName = "/setTabConfigs"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val commandStartIndex = text.indexOf(commandText)
         if (commandStartIndex < 0) {
             return "JSON-конфиг не может быть пустым. Укажите валидный JSON-конфиг."

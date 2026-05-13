@@ -1,13 +1,11 @@
 package com.dv.telegram.notion
 
-import com.dv.telegram.GoogleSheetLoader
-import com.dv.telegram.data.ChatData
-import com.dv.telegram.exception.CommandException
-import com.dv.telegram.tabs.TabType
+import com.dv.telegram.util.DateUtils
 import com.dv.telegram.util.WikiBotUtils
 import notion.api.v1.NotionClient
 import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.blocks.HeadingOneBlock
+import notion.api.v1.model.blocks.ParagraphBlock
 import org.apache.logging.log4j.kotlin.Logging
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -21,7 +19,7 @@ object NotionWrapper : Logging {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val wikiBotConfigs = WikiBotUtils.readConfigs()
+/*        val wikiBotConfigs = WikiBotUtils.readConfigs()
 
         val threadsCount = wikiBotConfigs.configs.size
         logger.info("Total bot configs: $threadsCount")
@@ -37,14 +35,20 @@ object NotionWrapper : Logging {
         val cityChats = NotionCityChats.from(cityChatsData)
 //        val cityChats = getCityChats(); // use test data
 
-        logger.info("$cityChats.size city chats read from Google Sheet.")
+        logger.info("$cityChats.size city chats read from Google Sheet.")*/
 
         val notionToken = WikiBotUtils.getEnvVariable(NOTION_TOKEN_ENV_NAME)
 
-//        val pageId = "2b4f00e80cb94440af00e8d83b758f27" // Помощь украинцам в Германии
-//        val pageId = "24ec680a988441698efe1003a304ded1" // Test page for Notion API
-//        val pageId = "9a0effe48cf34cd49c849a9e05c61fb9" // список чатов по городам (german-city-chats)
-        val pageId = "67sadfsadfjlkfdsaj" // incorrect page
+//        val pageId = NotionPageIds.MAIN_PAGE // Помощь украинцам в Германии
+        val pageId = NotionPageIds.NOTION_API_TEST_PAGE // Test page for Notion API
+//        val pageId = NotionPageIds.GERMAN_CITY_CHATS_RU // список чатов по городам (german-city-chats)
+//        val pageId = "67sadfsadfjlkfdsaj" // incorrect page
+
+        if (true) {
+            appendPageMention(notionToken, pageId)
+            return
+        }
+
 
 /*
         if (true) {
@@ -62,6 +66,7 @@ object NotionWrapper : Logging {
         );
 */
 
+/*
         appendCityChats(
             notionToken,
             pageId,
@@ -69,6 +74,25 @@ object NotionWrapper : Logging {
             60,
             cityChats
         )
+*/
+    }
+
+    private fun appendPageMention(notionToken: String, pageId: String) {
+
+        NotionPageUtils.execute(notionToken) {
+            val textBeforeLink = NotionPageUtils.createRichText("This will be a mention link 3 — ")
+
+            val mentionedPageId = NotionPageIds.MAIN_PAGE
+            val mentionRichText = NotionPageUtils.createRichTextWithPageMention(it, mentionedPageId)
+
+            val paragraph = ParagraphBlock(
+                ParagraphBlock.Element(
+                    listOf(textBeforeLink, mentionRichText)
+                )
+            )
+
+            it.appendBlockChildren(pageId, listOf(paragraph))
+        }
     }
 
     private fun appendToggleHeadingOne(notionToken: String, pageId: String) {
@@ -198,5 +222,59 @@ object NotionWrapper : Logging {
 
         return listOf(city1, city2)
             .sortedBy { it.cityName }
+    }
+
+    fun collectPageTree(
+        notionToken: String,
+        pageId: String,
+        notionTimeoutMinutes: Int,
+    ): NotionPageTreeCollectResult {
+        NotionOperationBlocker.startOperation(notionTimeoutMinutes)
+
+        var result: NotionPageTreeCollectResult? = null
+
+        try {
+            NotionPageUtils.execute(notionToken) { client ->
+                val startCollect = System.currentTimeMillis() // includes time for page retrieval
+
+                val page = NotionPageUtils.retrievePage(client, pageId)
+                val pageTitle = NotionPageUtils.getPageTitle(page)
+
+                val tree = mutableListOf<String>()
+
+                val node = NotionPageNode(
+                    NotionPageNode.ROOT_LEVEL,
+                    pageId,
+                    "",
+                    pageTitle,
+                    NotionPageUtils.parseNotionDateTimeString(page.lastEditedTime),
+                    null
+                )
+
+                NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
+
+                val endCollect = System.currentTimeMillis()
+
+                val collectTime = DateUtils.formatDuration(endCollect - startCollect)
+                logger.info("Collecting pages tree for root page \"$pageId\" finished. Total root nodes collected: ${node.children.size}. Time spent: $collectTime.")
+
+                result = NotionPageTreeCollectResult(
+                    rootPageId = pageId,
+                    rootPageTitle = pageTitle,
+                    root = node,
+                    startTime = startCollect,
+                    endTime = endCollect
+                )
+            }
+        }
+        catch (e: Throwable) {
+            logger.error("Error on collecting Notion page tree for page \"$pageId\"", e)
+            throw e
+        }
+        finally { // end the operation even if Notion tree collection has thrown an exception
+            NotionOperationBlocker.stopOperation()
+        }
+
+        return result!!
     }
 }

@@ -3,6 +3,7 @@ package com.dv.telegram.statistics
 import com.dv.telegram.BotTestUtils
 import com.dv.telegram.MessageProcessingResult
 import com.dv.telegram.ResponseType
+import com.dv.telegram.command.BotContext
 import com.dv.telegram.command.ClearFailedRequests
 import com.dv.telegram.command.ClearSuccessfulRequests
 import com.dv.telegram.command.GetEnvironment
@@ -69,7 +70,7 @@ internal class BotStatisticsTest {
         )
 
         val expectedGetEnvironmentResult = MessageProcessingResult.specialCommand(
-            getEnvironment.getResponse("", wikiBot, update),
+            getEnvironment.getResponse("", wikiBot, update, BotContext()),
             false
         )
 

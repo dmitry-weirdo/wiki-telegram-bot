@@ -14,7 +14,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.7.20</kotlin.version>
 
         <log4j2.version>2.17.2</log4j2.version>
 
@@ -24,7 +24,11 @@
 
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
 
-        <notion-sdk.version>1.3.2</notion-sdk.version>
+        <!--
+            This is my build with a local fix of using PageReference in the Mention
+            See https://github.com/seratch/notion-sdk-jvm/issues/186
+        -->
+        <notion-sdk.version>1.11.2-SNAPSHOT</notion-sdk.version>
 
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <ktlint.version>0.49.0</ktlint.version>
@@ -68,6 +72,14 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
+        <!-- to be able tu use #use with the AutoCloseable classes -->
+        <!-- see https://www.baeldung.com/kotlin/try-with-resources#closeable -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
             <version>${kotlin.version}</version>
         </dependency>
 
@@ -122,6 +134,21 @@
             <version>1.33.2</version>
         </dependency>
 
+        <!-- Google Translate API - old version - I failed to make it work -->
+<!--
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-translate</artifactId>
+            <version>v3-rev20221021-2.0.0</version>
+        </dependency>
+-->
+
+        <!-- Google Cloud Translate API v3 -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-translate</artifactId>
+        </dependency>
+
         <!-- Additional Jackson dependency for JacksonUtils -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -158,6 +185,10 @@
             <groupId>com.github.seratch</groupId>
             <artifactId>notion-sdk-jvm-core</artifactId>
             <version>${notion-sdk.version}</version>
+
+            <!-- My custom build with PageReference fix for adding Mention to Notion page -->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/notion-sdk-jvm-core-1.11.2-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <!-- Fixes the call to Http PATCH method which fails when using the default java.net.http.HttpClient -->
@@ -165,9 +196,25 @@
             <groupId>com.github.seratch</groupId>
             <artifactId>notion-sdk-jvm-okhttp4</artifactId>
             <version>${notion-sdk.version}</version>
+
+            <!-- My custom build with PageReference fix for adding Mention to Notion page -->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/notion-sdk-jvm-okhttp4-1.11.2-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>20.9.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

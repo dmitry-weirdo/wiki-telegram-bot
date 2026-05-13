@@ -11,10 +11,13 @@ import notion.api.v1.model.blocks.HeadingOneBlock
 import notion.api.v1.model.blocks.ParagraphBlock
 import notion.api.v1.model.blocks.ToggleBlock
 import notion.api.v1.model.common.RichTextLinkType
+import notion.api.v1.model.common.RichTextMentionType
 import notion.api.v1.model.common.RichTextType
 import notion.api.v1.model.pages.Page
+import notion.api.v1.model.pages.PageProperty
 import notion.api.v1.model.pages.PageProperty.RichText
 import org.apache.logging.log4j.kotlin.Logging
+import java.time.ZonedDateTime
 
 @Suppress("TooManyFunctions")
 object NotionPageUtils : Logging {
@@ -66,6 +69,20 @@ object NotionPageUtils : Logging {
             ?.text
             ?.content
             ?: throw CommandException("Не удалось получить название страницы ${page.id}.")
+    }
+
+    fun getPageNotionLink(pageId: String?): String? {
+        if (pageId == null) {
+            return null
+        }
+
+        val pageIdWithoutHyphens = pageId.replace("-", "")
+
+        return "https://www.notion.so/$pageIdWithoutHyphens"
+    }
+
+    fun parseNotionDateTimeString(dateString: String): ZonedDateTime {
+        return ZonedDateTime.parse(dateString)
     }
 
     fun deleteToggleHeading1Content(client: NotionClient, blocks: Blocks, heading1Text: String): HeadingOneBlock {
@@ -167,6 +184,44 @@ object NotionPageUtils : Logging {
         return RichText(
             RichTextType.Text,
             RichText.Text(text, link)
+        )
+    }
+
+    fun createRichTextWithPageMention(client: NotionClient, mentionedPageId: String): RichText {
+        // it's almost impossible to construct the Page object manually, we must not do this
+        /*
+                    val mentionPage = Page(
+                        id = mentionedPageId,
+                        icon = null,
+                        cover = null,
+
+                    )
+        */
+
+        val mentionedPage = retrievePage(client, mentionedPageId)
+
+        return createRichTextWithPageMention(mentionedPage)
+    }
+
+    fun createRichTextWithPageMention(mentionedPage: Page): RichText {
+        val mention = RichText.Mention(
+            type = RichTextMentionType.Page,
+
+            // Using PageProperty is required for the current Notion API, I built a custom version of notion-sdk-jvm-core with this fix.
+            // see https://developers.notion.com/reference/rich-text#page-mention-type-object
+            // see https://github.com/seratch/notion-sdk-jvm/issues/186
+//            page = mentionedPage,
+            page = PageProperty.PageReference(mentionedPage.id)
+        )
+
+        return RichText(
+            type = RichTextType.Mention,
+//                plainText = "My plain text page name override", // does not override the page name
+
+            // todo: do we need to set href manually?
+//                href = "https://www.notion.so/$mentionedPageId",
+
+            mention = mention
         )
     }
 

@@ -12,13 +12,13 @@ class AllBotsGetTabConfigs : BasicBotCommand() {
 
     override val defaultCommandName = "/allBotsGetTabConfigs"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
             .sortedBy { it.botName }
 
-        // no markdown because of user input in the successfulRequests
+        // no Markdown because of user input in the successfulRequests
         for (contextBot in bots) {
             val botTelegramName = contextBot.getTelegramUserName()
             val botTelegramNameForResponse = BotCommandUtils.getClickableUserName(botTelegramName)
