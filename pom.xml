@@ -24,6 +24,8 @@
 
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
 
+        <okhttp4.version>4.11.0</okhttp4.version>
+
         <!--
             This is my build with a local fix of using PageReference in the Mention
             See https://github.com/seratch/notion-sdk-jvm/issues/186
@@ -200,6 +202,13 @@
             <!-- My custom build with PageReference fix for adding Mention to Notion page -->
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/notion-sdk-jvm-okhttp4-1.11.2-SNAPSHOT.jar</systemPath>
+        </dependency>
+
+        <!-- try to avoid java.lang.NoClassDefFoundError: okhttp3/MediaType -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp4.version}</version>
         </dependency>
 
     </dependencies>
