@@ -14,7 +14,7 @@ class HelpCommand : BasicBotCommand() {
     override val defaultCommandName: String
         get() = "/helpCommand"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val commandStartIndex = text.indexOf(commandText)
         if (commandStartIndex < 0) {
             return unknownCommandResponse()

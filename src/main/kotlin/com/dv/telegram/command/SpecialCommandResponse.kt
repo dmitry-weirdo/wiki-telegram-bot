@@ -1,11 +1,14 @@
 package com.dv.telegram.command
 
+import java.io.InputStream
+
 data class SpecialCommandResponse(
     val response: String?,
     val useMarkdownInResponse: Boolean,
     val returnFileInResponse: Boolean,
     val responseFileName: String,
-    val responseFileCaption: String
+    val responseFileCaption: String,
+    val responseFileContent: InputStream?
 ) {
     fun hasResponse(): Boolean {
         return response?.isNotBlank() == true
@@ -17,14 +20,15 @@ data class SpecialCommandResponse(
             useMarkdownInResponse = false,
             returnFileInResponse = false,
             responseFileName = "",
-            responseFileCaption = ""
+            responseFileCaption = "",
+            responseFileContent = null
         )
 
         fun withResponse(
             response: String,
             useMarkdownInResponse: Boolean,
         ): SpecialCommandResponse {
-            return withResponse(response, useMarkdownInResponse, false, "", "")
+            return withResponse(response, useMarkdownInResponse, false, "", "", null)
         }
 
         fun withResponse(
@@ -33,6 +37,7 @@ data class SpecialCommandResponse(
             returnFileInResponse: Boolean,
             responseFileName: String,
             responseFileCaption: String,
+            responseFileContent: InputStream?,
         ): SpecialCommandResponse {
             require(response.isNotBlank()) { "response cannot be blank." }
 
@@ -41,7 +46,8 @@ data class SpecialCommandResponse(
                 useMarkdownInResponse = useMarkdownInResponse,
                 returnFileInResponse = returnFileInResponse,
                 responseFileName = responseFileName,
-                responseFileCaption = responseFileCaption
+                responseFileCaption = responseFileCaption,
+                responseFileContent = responseFileContent
             )
         }
     }

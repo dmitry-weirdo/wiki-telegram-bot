@@ -14,7 +14,7 @@ class ReloadFromGoogleSheet : BasicBotCommand() {
 
     override val defaultCommandName = "/gs-reload-5150" // "secret" name to not be guessed by the user
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val reloadedSuccessful = bot.reloadBotDataFromGoogleSheet()
 
         val tabConfigsString = JacksonUtils.serializeToString(bot.tabConfigs, true)

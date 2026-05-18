@@ -1,6 +1,7 @@
 package com.dv.telegram
 
 import com.dv.telegram.data.BotAnswerDataListResponse
+import java.io.InputStream
 
 data class MessageProcessingResult(
     val messageIsForTheBot: Boolean,
@@ -12,6 +13,7 @@ data class MessageProcessingResult(
     val returnFileInResponse: Boolean,
     val responseFileName: String,
     val responseFileCaption: String,
+    val responseFileContent: InputStream?,
     val matchedKeywords: List<String>
 ) {
     fun hasNoResponse(): Boolean {
@@ -35,6 +37,7 @@ data class MessageProcessingResult(
                 returnFileInResponse = false,
                 responseFileName = "",
                 responseFileCaption = "",
+                responseFileContent = null,
                 matchedKeywords = listOf()
             )
         }
@@ -54,6 +57,7 @@ data class MessageProcessingResult(
                 returnFileInResponse = false,
                 responseFileName = "",
                 responseFileCaption = "",
+                responseFileContent = null,
                 matchedKeywords = listOf() // todo: think about this, maybe set command name?
             )
         }
@@ -64,7 +68,8 @@ data class MessageProcessingResult(
             useMarkdown: Boolean,
             returnFileInResponse: Boolean,
             responseFileName: String,
-            responseFileCaption: String
+            responseFileCaption: String,
+            responseFileContent: InputStream?,
         ): MessageProcessingResult {
             return MessageProcessingResult(
                 messageIsForTheBot = true,
@@ -76,6 +81,7 @@ data class MessageProcessingResult(
                 returnFileInResponse = returnFileInResponse,
                 responseFileName = responseFileName,
                 responseFileCaption = responseFileCaption,
+                responseFileContent = responseFileContent,
                 matchedKeywords = listOf() // todo: think about this, maybe set command name?
             )
         }
@@ -102,6 +108,7 @@ data class MessageProcessingResult(
                 returnFileInResponse = false, // todo: implement if we need to return files from non-special commands
                 responseFileName = "",
                 responseFileCaption = "",
+                responseFileContent = null,
                 matchedKeywords = matchedKeywords
             )
         }
@@ -118,6 +125,7 @@ data class MessageProcessingResult(
                 returnFileInResponse = false, // todo: implement if we need to return files from non-special commands
                 responseFileName = "",
                 responseFileCaption = "",
+                responseFileContent = null,
                 matchedKeywords = listOf()
             )
         }

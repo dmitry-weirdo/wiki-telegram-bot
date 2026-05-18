@@ -1,0 +1,1 @@
+File is copied from `C:\Users\dmitr\.cursor\plans`.

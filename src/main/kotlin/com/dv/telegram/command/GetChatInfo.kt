@@ -15,6 +15,6 @@ class GetChatInfo : BasicBotCommand() {
 
     override val defaultCommandName = "/getChatInfo"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update) =
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext) =
         JacksonUtils.serializeToString(update.message.chat, true)
 }

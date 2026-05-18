@@ -3,17 +3,18 @@ package com.dv.telegram.command
 import com.dv.telegram.WikiBot
 import com.dv.telegram.exception.CommandException
 import org.telegram.telegrambots.meta.api.objects.Update
+import java.io.InputStream
 
 interface BotCommand {
-    val name: String // english name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
+    val name: String // English name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
 
     fun getDescription(bot: WikiBot): String // description, in Russian // todo: must be localized with MessageBundle
     fun useMarkdownInResponse(): Boolean
 
     // if we return a file in response
     fun returnFileInResponse(): Boolean
-    fun getResponseFileName(): String
-    fun getResponseFileCaption(): String
+    fun getResponseFileName(context: BotContext): String
+    fun getResponseFileCaption(context: BotContext): String
 
     val defaultCommandName: String // default command name when it is not overridden by config
     var commandName: String? // overridden command name. Defines abstract getter and setter.
@@ -30,7 +31,9 @@ interface BotCommand {
         return true
     }
 
-    fun getResponse(text: String, bot: WikiBot, update: Update): String
+    fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String
+
+    fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream?
 
     fun textContainsCommand(text: String): Boolean {
         return text.contains(
@@ -41,7 +44,7 @@ interface BotCommand {
     fun errorResponse(e: CommandException): String {
         val allErrors: MutableList<String> = mutableListOf()
 
-        // no bold markdown in the header, because we can return the user input data in the error messages
+        // no bold Markdown in the header, because we can return the user input data in the error messages
         allErrors.add("При выполнении команды возникли следующие ошибки:")
         e.errorMessages.forEach {
             allErrors.add("— $it\n")
@@ -69,6 +72,7 @@ interface BotCommand {
             // Notion
             CityChatsValidate(),
             CityChatsExportToNotion(),
+            ExportNotionPageTreeToExcel(),
 
             // settings
             ListSettings(),

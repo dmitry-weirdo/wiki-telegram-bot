@@ -14,7 +14,7 @@ class GetLastMessageLog : BasicBotCommand() {
     override val defaultCommandName = "/getLastMessage"
 
     // todo: we can add the option to pass the id of the user (id can be gotten from Rose)
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         return if (bot.lastMessageLog != null) {
             JacksonUtils.serializeToString(bot.lastMessageLog!!, true)
         }

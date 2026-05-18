@@ -13,7 +13,7 @@ class ListCommands : BasicBotCommand() {
 
     override val defaultCommandName = "/listCommands"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val lines = mutableListOf<String>()
 
         lines.add("Список команд бота:")

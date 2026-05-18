@@ -11,7 +11,7 @@ class ClearFailedRequests : BasicBotCommand() {
 
     override val defaultCommandName = "/clearFailedRequests"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val clearedFailedRequestsCount = bot.statistics.failedRequests.size
 
         bot.statistics.clearFailedRequests()

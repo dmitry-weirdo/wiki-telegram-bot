@@ -16,7 +16,7 @@ class ListAdmins : BasicBotCommand() {
 
     override val defaultCommandName = "/listAdmins"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val adminLines = mutableListOf<String>()
 
         for (botAdmin in bot.specialCommands.botAdmins) {

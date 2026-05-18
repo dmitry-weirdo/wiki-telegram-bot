@@ -16,6 +16,6 @@ class GetUserInfo : BasicBotCommand() {
     override val defaultCommandName = "/getUserInfo"
 
     // todo: we can add the option to pass the id of the user (id can be gotten from Rose)
-    override fun getResponse(text: String, bot: WikiBot, update: Update) =
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext) =
         JacksonUtils.serializeToString(update.message.from, true)
 }

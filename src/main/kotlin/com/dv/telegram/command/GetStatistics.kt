@@ -13,7 +13,7 @@ class GetStatistics : BasicBotCommand() {
 
     override val defaultCommandName = "/getStats"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val statistics = bot.statistics
 
         val statisticsLines = listOf(

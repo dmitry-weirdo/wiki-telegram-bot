@@ -14,7 +14,7 @@ class GetTabConfigs : BasicBotCommand() {
 
     override val defaultCommandName = "/getTabConfigs"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         val tabConfigsString = JacksonUtils.serializeToString(bot.tabConfigs, true)
 
         // ugly formatting required for no indents in the response

@@ -11,6 +11,6 @@ class GetEnvironment : BasicBotCommand() {
 
     override val defaultCommandName = "/getEnvironment"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update) =
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext) =
         "${bot.botName} живёт здесь: ${bot.environmentName}."
 }

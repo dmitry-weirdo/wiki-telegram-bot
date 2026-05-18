@@ -18,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
-import java.nio.charset.StandardCharsets
 
 @Suppress("TooManyFunctions")
 class WikiBot(
@@ -211,9 +210,8 @@ class WikiBot(
                 updateMessage.messageId
             }
 
-        val fileContent = processingResult.getResponseOrFail()
-        val inputStream =
-            java.io.ByteArrayInputStream(fileContent.toByteArray(StandardCharsets.UTF_8))
+        val inputStream = processingResult.responseFileContent
+            ?: error("returnFileInResponse requires responseFileContent; ensure the BotCommand fills it.")
 
         val fileName = processingResult.responseFileName
 

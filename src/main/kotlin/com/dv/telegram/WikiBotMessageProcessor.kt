@@ -19,7 +19,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
         fun getBotNameFullWordPattern(botName: String): Pattern {
             val botNameRegex = "(?i).*\\b$botName\\b.*"
-            val botNamePatternFlags = Pattern.CASE_INSENSITIVE or Pattern.UNICODE_CASE or Pattern.DOTALL
+            val botNamePatternFlags = Pattern.CASE_INSENSITIVE or Pattern.UNICODE_CASE or Pattern.DOTALL or Pattern.UNICODE_CHARACTER_CLASS
 
             return Pattern.compile(botNameRegex, botNamePatternFlags) // see https://stackoverflow.com/a/43738714/8534088
         }
@@ -34,7 +34,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
 
         val chatType = update.message?.chat?.type?.lowercase()
 
-        if (!messageIsForTheBot(lowerText, chatType)) { // only work when bot is mentioned by name
+        if (!messageIsForTheBot(lowerText, chatType)) { // only work when bot is mentioned by name or this is a private chat with bot
             return MessageProcessingResult.notForTheBot()
         }
 
@@ -47,6 +47,7 @@ class WikiBotMessageProcessor(private val wikiBot: WikiBot) : Logging {
                 specialCommandResponse.returnFileInResponse,
                 specialCommandResponse.responseFileName,
                 specialCommandResponse.responseFileCaption,
+                specialCommandResponse.responseFileContent,
             )
         }
 

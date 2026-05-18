@@ -21,7 +21,7 @@ class CityChatsValidate : BasicBotCommand(), Logging {
 
     override val defaultCommandName = "/cityChatsValidate"
 
-    override fun getResponse(text: String, bot: WikiBot, update: Update): String {
+    override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         return try {
             val botData = bot.loadBotDataFromGoogleSheet()
 
