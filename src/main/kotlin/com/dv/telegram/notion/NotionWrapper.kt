@@ -235,7 +235,7 @@ object NotionWrapper : Logging {
 
         try {
             NotionPageUtils.execute(notionToken) { client ->
-                val startCollect = System.currentTimeMillis() // includes time for page retrieval
+                val startCollect = ZonedDateTime.now() // includes time for page retrieval
 
                 val page = NotionPageUtils.retrievePage(client, pageId)
                 val pageTitle = NotionPageUtils.getPageTitle(page)
@@ -253,9 +253,9 @@ object NotionWrapper : Logging {
 
                 NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
 
-                val endCollect = System.currentTimeMillis()
+                val endCollect = ZonedDateTime.now()
 
-                val collectTime = DateUtils.formatDuration(endCollect - startCollect)
+                val collectTime = DateUtils.formatDurationForLogs(startCollect, endCollect)
                 logger.info("Collecting pages tree for root page \"$pageId\" finished. Total root nodes collected: ${node.children.size}. Time spent: $collectTime.")
 
                 result = NotionPageTreeCollectResult(

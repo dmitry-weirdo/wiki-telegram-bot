@@ -11,6 +11,9 @@ Strict rules:
 - Before any block or multiline statement, insert a blank line, unless it's the first statement in a method.
 - When writing values in tests, introduce them in variable within the test-method instead of using the hard-code multiple times.
   - Also for values put in fields of objects and in the lists, use variable in the method.
+- Within class, put the `companion object` first, before any fields or methods.
+- Don't move already existing imports into non-imported signatures.
+- Within a class, call the calling methods before the called methods, especially for the methods with the same name.
 
 Example (FORBIDDEN):
 if (x > 0) println(x)

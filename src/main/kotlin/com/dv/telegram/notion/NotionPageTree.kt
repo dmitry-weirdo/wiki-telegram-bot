@@ -69,7 +69,7 @@ object NotionPageTree : Logging {
             NotionPageTreeCollector.collectPagesTree(client, tree, node, pageId, node.level)
 
             val endCollect = System.currentTimeMillis()
-            val collectTime = DateUtils.formatDuration(endCollect - startCollect)
+            val collectTime = DateUtils.formatDuration(startCollect, endCollect)
 
             logger.info("Collecting pages finished. Total root nodes collected: ${node.children.size}. Time spent: $collectTime")
 
@@ -105,7 +105,7 @@ object NotionPageTree : Logging {
                 appendTree(client, blockToAppendTo, node, 0)
 
                 val endAppend = System.currentTimeMillis()
-                val appendTime = DateUtils.formatDuration(endAppend - startAppend)
+                val appendTime = DateUtils.formatDuration(startAppend, endAppend)
                 logger.info("Appending tree finished. Time spent: $appendTime")
             }
             catch (e: Exception) {
@@ -118,7 +118,7 @@ object NotionPageTree : Logging {
             exportRowsToExcelFile(node)
 
             val endExport = System.currentTimeMillis()
-            val exportTime = DateUtils.formatDuration(endExport - startExport)
+            val exportTime = DateUtils.formatDuration(startExport, endExport)
             logger.info("Exporting to Excel finished. Time spent: $exportTime")
 
             val treeToPrint = tree.joinToString("\n")

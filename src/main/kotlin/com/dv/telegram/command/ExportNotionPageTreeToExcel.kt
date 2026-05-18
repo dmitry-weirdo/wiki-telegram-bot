@@ -5,12 +5,17 @@ import com.dv.telegram.excel.PageTreeXlsxWriter
 import com.dv.telegram.exception.CommandException
 import com.dv.telegram.notion.NotionPageNode
 import com.dv.telegram.notion.NotionPageTree.fillRowsForExcelFile
+import com.dv.telegram.notion.NotionPageTreeCollectResult
 import com.dv.telegram.notion.NotionWrapper
 import com.dv.telegram.util.DateUtils
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.io.InputStream
 
 class ExportNotionPageTreeToExcel : BasicBotCommand() {
+    companion object {
+        const val CONTEXT_KEY = "exportNotionPageTreeResult"
+    }
+
     override val name: String = javaClass.simpleName
 
     override fun getDescription(bot: WikiBot) =
@@ -21,13 +26,24 @@ class ExportNotionPageTreeToExcel : BasicBotCommand() {
     override fun returnFileInResponse() = true
 
     override fun getResponseFileName(context: BotContext): String {
+        val result = context.getOrFail<NotionPageTreeCollectResult>(CONTEXT_KEY)
+
         val currentTimeFormatted = DateUtils.getCurrentDateTimeInFileNameFormat()
-        return "notionPageTreeToExcel_$currentTimeFormatted.xlsx"
+
+        return "notionPageTree_${result.rootPageId}_$currentTimeFormatted.xlsx"
     }
 
     override fun getResponseFileCaption(context: BotContext): String {
-        // todo: include page id and page name and start - stop times into response
-        return "Экспорт дерева страниц Notion в Excel."
+        val result = context.getOrFail<NotionPageTreeCollectResult>(CONTEXT_KEY)
+        val startFormatted = DateUtils.getDateTimeInNotionOperationFormat(result.startTime)
+        val endFormatted = DateUtils.getDateTimeInNotionOperationFormat(result.endTime)
+        val duration = DateUtils.formatDurationForBotMessage(result.startTime, result.endTime)
+        
+        return """Экспорт дерева страницы ${result.rootPageId} ("${result.rootPageTitle}") в Excel.
+
+Начало операции: $startFormatted
+Конец операции: $endFormatted
+Длительность: $duration"""
     }
 
     override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
@@ -46,9 +62,8 @@ class ExportNotionPageTreeToExcel : BasicBotCommand() {
             bot.notionImportTimeoutMinutes, // todo: we can use separate timeout for this operation
         )
 
-        // todo: set the response data (start date, end date, diff) for getResponseFileCaption
+        context.put(CONTEXT_KEY, result)
 
-//        val fakeTree = NotionPageTree.createFakePageTreeForTests()
         val nodes = mutableListOf<NotionPageNode>()
         fillRowsForExcelFile(result.root, nodes)
 
