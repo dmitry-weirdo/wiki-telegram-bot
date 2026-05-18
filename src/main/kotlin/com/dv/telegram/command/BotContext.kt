@@ -16,14 +16,14 @@ class BotContext {
 
     fun getOrFail(key: String): Any {
         return context[key]
-            ?: throw IllegalStateException("Key '$key' not found in BotContext")
+            ?: error("Key '$key' not found in BotContext")
     }
 
     @JvmName("getOrFailTyped")
     inline fun <reified T> getOrFail(key: String): T {
         val value = context[key]
         return value as? T
-            ?: throw IllegalStateException("Key '$key' not found in BotContext or value is not of type ${T::class.simpleName}")
+            ?: error("Key '$key' not found in BotContext or value is not of type ${T::class.simpleName}")
     }
 
     fun isPresent(key: String): Boolean {

@@ -14,6 +14,7 @@ Strict rules:
 - Within class, put the `companion object` first, before any fields or methods.
 - Don't move already existing imports into non-imported signatures.
 - Within a class, call the calling methods before the called methods, especially for the methods with the same name.
+- Instead of `throw IllegalStateException` use Kotlin's `error`.
 
 Example (FORBIDDEN):
 if (x > 0) println(x)
