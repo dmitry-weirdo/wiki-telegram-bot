@@ -3,9 +3,7 @@ package com.dv.telegram.command
 import com.dv.telegram.WikiBot
 import com.dv.telegram.util.DateUtils
 import org.telegram.telegrambots.meta.api.objects.Update
-import java.io.ByteArrayInputStream
 import java.io.InputStream
-import java.nio.charset.StandardCharsets
 
 class AllBotsGetFailedRequests : BasicBotCommand() {
     override val name: String = javaClass.simpleName
@@ -28,15 +26,15 @@ class AllBotsGetFailedRequests : BasicBotCommand() {
 
     override fun getResponse(text: String, bot: WikiBot, update: Update, context: BotContext): String {
         // todo: this is not necessary for commands that return files. We can return an empty string here.
-        return buildFileBody(text, bot, update, context)
+        return buildFileBody(bot, update, context)
     }
 
     override fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream {
-        val fileContentAsText = buildFileBody(text, bot, update, context)
+        val fileContentAsText = buildFileBody(bot, update, context)
         return getFileContent(fileContentAsText)
     }
 
-    private fun buildFileBody(text: String, bot: WikiBot, update: Update, context: BotContext): String {
+    private fun buildFileBody(bot: WikiBot, update: Update, context: BotContext): String {
         val lines = mutableListOf<String>()
 
         val bots = bot.context.bots
