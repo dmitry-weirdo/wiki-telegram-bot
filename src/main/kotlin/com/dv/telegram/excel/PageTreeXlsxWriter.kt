@@ -38,10 +38,14 @@ object PageTreeXlsxWriter : Logging {
 //            "Parent page link"
     )
 
+    private const val PAGE_COLUMN_WIDTH = 20000
+    private const val EDIT_DATE_TIME_COLUMN_WIDTH = 5000
+    private const val PARENT_PAGE_COLUMN_WIDTH = 15000
+
     private val COLUMN_WIDTHS = listOf(
-        20000,
-        5000,
-        15000,
+        PAGE_COLUMN_WIDTH,
+        EDIT_DATE_TIME_COLUMN_WIDTH,
+        PARENT_PAGE_COLUMN_WIDTH,
     )
 
     @JvmStatic
