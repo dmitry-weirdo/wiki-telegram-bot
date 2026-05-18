@@ -18,6 +18,7 @@ import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+@Suppress("TooManyFunctions")
 object PageTreeXlsxWriter : Logging {
 
     private const val DATE_TIME_FORMAT = "dd.mm.yyyy hh:mm:ss"

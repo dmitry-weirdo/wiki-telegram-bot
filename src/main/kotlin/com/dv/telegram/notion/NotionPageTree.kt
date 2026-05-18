@@ -17,6 +17,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+@Suppress("TooManyFunctions")
 object NotionPageTree : Logging {
 
     private const val LEVEL_SEPARATOR = "--"

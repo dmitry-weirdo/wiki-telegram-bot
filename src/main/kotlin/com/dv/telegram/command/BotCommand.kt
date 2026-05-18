@@ -5,6 +5,7 @@ import com.dv.telegram.exception.CommandException
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.io.InputStream
 
+@Suppress("TooManyFunctions")
 interface BotCommand {
     val name: String // English name, no spaces. Used to override defaultCommandName with commandName in the config (e.g. "ListSettings": "/overriddenListSettings"
 
