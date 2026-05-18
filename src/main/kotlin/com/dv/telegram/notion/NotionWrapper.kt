@@ -15,6 +15,9 @@ object NotionWrapper : Logging {
 
     private const val TOGGLE_HEADER_1_TO_APPEND_TEXT = "Чаты по землям и городам Германии (Telegram, WhatsApp)"
 
+    private const val RETRIEVE_BLOCK_CHILDREN_PAGE_SIZE = 100
+    private const val APPEND_BLOCK_CHILDREN_MAX_ELEMENTS_COUNT = 100
+
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss") // only primitives and Strings can be const o_O
 
     @JvmStatic
@@ -155,7 +158,7 @@ object NotionWrapper : Logging {
         logger.info("Page created by: ${page.createdBy.name}")
         logger.info("Page title: $pageTitle")
 
-        val blocks = client.retrieveBlockChildren(pageId, null, 100)
+        val blocks = client.retrieveBlockChildren(pageId, null, RETRIEVE_BLOCK_CHILDREN_PAGE_SIZE)
         logger.info("Total blocks retrieved from the page: ${blocks.results.size}")
 
         val rootBlock = NotionPageUtils.deleteToggleHeading1Content(client, blocks, toggleHeading1Text)
@@ -181,7 +184,7 @@ object NotionWrapper : Logging {
         val cityChatToggles = NotionPageUtils.getCityChatToggles(cityChats)
 
         // 13.09.2022: Notion API started to fail when adding more than 100 elements in one operation -> split to list of 100 and append chunk by chunk
-        val cityChatTogglesChunked = cityChatToggles.chunked(100)
+        val cityChatTogglesChunked = cityChatToggles.chunked(APPEND_BLOCK_CHILDREN_MAX_ELEMENTS_COUNT)
 
         cityChatTogglesChunked.forEach {
             NotionPageUtils.append(client, rootBlock, it)
