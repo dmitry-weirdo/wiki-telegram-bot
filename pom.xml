@@ -321,9 +321,9 @@
                             <mainClass>com.dv.telegram.Main</mainClass>
                         </manifest>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <descriptors>
+                        <descriptor>src/assembly/jar-with-system-dependencies.xml</descriptor>
+                    </descriptors>
                 </configuration>
 
                 <executions>
