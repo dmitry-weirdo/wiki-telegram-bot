@@ -53,6 +53,28 @@ internal class BotCommandUtilsTest {
     }
 
     @Test
+    fun testGetBotTelegramNameMarkdownLink() {
+        val userNameWithoutAt = "augsburg_wiki_bot"
+        val expectedLinkWithoutAt = "[@augsburg_wiki_bot](https://t.me/augsburg_wiki_bot)"
+
+        Assertions.assertThat(
+            BotCommandUtils.getBotTelegramNameMarkdownLink(userNameWithoutAt)
+        )
+            .isEqualTo(expectedLinkWithoutAt)
+
+        val userNameWithAt = "@bingo_chgk_bot"
+        val expectedLinkWithAt = "[@bingo_chgk_bot](https://t.me/bingo_chgk_bot)"
+
+        Assertions.assertThat(
+            BotCommandUtils.getBotTelegramNameMarkdownLink(userNameWithAt)
+        )
+            .isEqualTo(expectedLinkWithAt)
+
+        Assertions.assertThatThrownBy { BotCommandUtils.getBotTelegramNameMarkdownLink("   \t  ") }
+            .isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
     fun testGetBotAdmins() {
         val config = WikiBotConfig(
             botAdmins = listOf(
