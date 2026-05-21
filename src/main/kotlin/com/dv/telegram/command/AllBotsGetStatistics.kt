@@ -70,6 +70,7 @@ class AllBotsGetStatistics : BasicBotCommand() {
             ${GetStatistics.getStatisticsLine("Всего запросов (вместе со специальными командами)", aggregateStatistics.totalCallsWithSpecialCommands)}
         """.trimIndent())
 
-        return lines.joinToString("  \n\n") { withMarkdownLineBreaks(it) }
+        val differentBotLinesSeparator = "$MARKDOWN_NEWLINE\n"
+        return lines.joinToString(differentBotLinesSeparator) { withMarkdownLineBreaks(it) }
     }
 }

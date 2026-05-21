@@ -26,7 +26,7 @@ abstract class BasicBotCommand : BotCommand {
 
     companion object {
         private val NEWLINE_REGEX = Regex("\r?\n")
-        private const val MARKDOWN_NEWLINE = "  \n"
+        internal const val MARKDOWN_NEWLINE = "  \n"
 
         fun withMarkdownLineBreaks(text: String): String {
             return text.replace(NEWLINE_REGEX, MARKDOWN_NEWLINE)
