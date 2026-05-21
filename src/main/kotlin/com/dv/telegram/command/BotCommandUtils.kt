@@ -56,4 +56,13 @@ object BotCommandUtils {
         // append "@" if it is NOT present
         return "$USER_NAME_PREFIX$userName"
     }
+
+    @JvmStatic
+    fun getBotTelegramNameMarkdownLink(userName: String): String {
+        val clickableUserName = getClickableUserName(userName)
+        val normalizedUserName = normalizeUserName(userName)
+        val telegramUrl = "https://t.me/$normalizedUserName"
+
+        return "[$clickableUserName]($telegramUrl)"
+    }
 }
