@@ -25,6 +25,13 @@ abstract class BasicBotCommand : BotCommand {
     override fun getFileContent(text: String, bot: WikiBot, update: Update, context: BotContext): InputStream? = null
 
     companion object {
+        private val NEWLINE_REGEX = Regex("\r?\n")
+        private const val MARKDOWN_NEWLINE = "  \n"
+
+        fun withMarkdownLineBreaks(text: String): String {
+            return text.replace(NEWLINE_REGEX, MARKDOWN_NEWLINE)
+        }
+
         @JvmStatic
         fun getSettingValueForMarkdown(botSetting: BotSetting<*>): String {
             return getSettingValueForMarkdown(

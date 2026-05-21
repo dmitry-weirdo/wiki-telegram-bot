@@ -72,9 +72,4 @@ class AllBotsGetStatistics : BasicBotCommand() {
 
         return lines.joinToString("  \n\n") { withMarkdownLineBreaks(it) }
     }
-
-    private fun withMarkdownLineBreaks(text: String): String {
-        // todo: compile pattern first?
-        return text.replace(Regex("\r?\n"), "  \n")
-    }
 }
