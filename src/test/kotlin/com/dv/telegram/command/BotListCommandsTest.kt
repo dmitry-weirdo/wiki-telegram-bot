@@ -30,6 +30,7 @@ internal class BotListCommandsTest {
         // Notion
         val cityChatsValidate = CityChatsValidate()
         val cityChatsExportToNotion = CityChatsExportToNotion()
+        val exportNotionPageTreeToExcel = ExportNotionPageTreeToExcel()
 
         // settings
         val listSettings = ListSettings()
@@ -49,7 +50,7 @@ internal class BotListCommandsTest {
         val clearFailedRequests = ClearFailedRequests()
         val getLastMessageLog = GetLastMessageLog()
 
-        // all bots commands
+        // all bot commands
         val allBotsList = AllBotsList()
         val allBotsReloadFromGoogleSheet = AllBotsReloadFromGoogleSheet()
         val allBotsGetTabConfigs = AllBotsGetTabConfigs()
@@ -78,6 +79,7 @@ internal class BotListCommandsTest {
                 + "\n\n— `${wikiBot.botName} ${reloadFromGoogleSheet.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${cityChatsValidate.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${cityChatsExportToNotion.defaultCommandName}`"
+                + "\n\n— `${wikiBot.botName} ${exportNotionPageTreeToExcel.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${listSettings.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${helpSetting.defaultCommandName}`"
                 + "\n\n— `${wikiBot.botName} ${getSetting.defaultCommandName}`"
