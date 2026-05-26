@@ -49,8 +49,8 @@ java -Dlog4j.configurationFile=./log4j2-override.xml -jar wiki-telegram-bot-1.0-
 
 # Run bot on AWS EC2 instance
 
-## Install java 17 on AWS EC instance
-https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/amazon-linux-install.html
+## Install java 25 on AWS EC instance
+https://docs.aws.amazon.com/corretto/latest/corretto-25-ug/amazon-linux-install.html
 
 ## Connect to EC2 via Putty
 https://asf.alaska.edu/how-to/data-recipes/connect-to-your-ec2-instance-using-putty-v1-1/ 
