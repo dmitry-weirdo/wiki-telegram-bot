@@ -11,20 +11,39 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
 
-        <kotlin.version>1.7.20</kotlin.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
 
-        <log4j2.version>2.17.2</log4j2.version>
+        <kotlin.version>2.3.21</kotlin.version>
 
-        <!-- todo: version 1.2.0 is not uploaded to Maven repo :( -->
-        <!--        <log4j2.api.kotlin.version>1.2.0</log4j2.api.kotlin.version>-->
-        <log4j2.api.kotlin.version>1.1.0</log4j2.api.kotlin.version>
+        <log4j2.version>2.25.4</log4j2.version>
 
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <log4j2.api.kotlin.version>1.5.0</log4j2.api.kotlin.version>
+
+        <junit-jupiter.version>5.13.2</junit-jupiter.version>
+        <assertj.version>3.27.7</assertj.version>
+
+        <!--
+            todo: migrate to version 3 when it's released. JacksonUtils should be adapted then
+            see https://mvnrepository.com/artifact/tools.jackson.module/jackson-module-kotlin
+        -->
+        <jackson-module-kotlin.version>2.21.3</jackson-module-kotlin.version>
+
+        <!--
+            todo: migrate to version 3 when it's released
+            see https://mvnrepository.com/artifact/tools.jackson.datatype/jackson-datatype-jsr310
+        -->
+        <jackson-datatype-jsr310.version>2.21.3</jackson-datatype-jsr310.version>
+
 
         <okhttp4.version>4.11.0</okhttp4.version>
+
+        <lombok.version>1.18.46</lombok.version>
+
+        <poi.version>5.5.1</poi.version>
+        <commons-io.version>2.22.0</commons-io.version>
 
         <!--
             This is my build with a local fix of using PageReference in the Mention
@@ -32,9 +51,12 @@
         -->
         <notion-sdk.version>1.11.2-SNAPSHOT</notion-sdk.version>
 
-        <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
-        <ktlint.version>0.49.0</ktlint.version>
-        <detekt.version>1.22.0</detekt.version>
+        <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+
+        <ktlint.version>1.8.0</ktlint.version>
+        <detekt.version>1.23.8</detekt.version>
 
     </properties>
 
@@ -45,21 +67,29 @@
             <version>5.7.1</version>
         </dependency>
 
+        <!-- POI dependencies -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>5.2.2</version>
+            <version>${poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.2.2</version>
+            <version>${poi.version}</version>
+        </dependency>
+
+        <!-- Required for POI 5.5.1 -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -108,32 +138,33 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>${commons-lang3.version}</version>
         </dependency>
 
         <!-- dependencies to read from Google Sheets -->
+        <!--
+            todo: updating to version 2.9.0 is a breaking change, to be done separately
+            see https://github.com/dmitry-weirdo/wiki-telegram-bot/issues/28
+        -->
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-<!--            <version>1.23.0</version>-->
-            <version>1.33.2</version>
+            <version>1.35.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-jetty</artifactId>
-<!--            <version>1.23.0</version>-->
-            <version>1.33.1</version>
+            <version>1.39.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-sheets</artifactId>
-            <!--            <version>v4-rev493-1.23.0</version>-->
             <version>v4-rev612-1.25.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-jackson2</artifactId>
-            <version>1.33.2</version>
+            <version>2.9.0</version>
         </dependency>
 
         <!-- Google Translate API - old version - I failed to make it work -->
@@ -149,13 +180,14 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-translate</artifactId>
+            <version>2.92.0</version>
         </dependency>
 
         <!-- Additional Jackson dependency for JacksonUtils -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.15.0</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
 
         <!-- Properly serialize and deserialize Kotlin data classes -->
@@ -163,7 +195,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.15.0</version>
+            <version>${jackson-module-kotlin.version}</version>
         </dependency>
 
         <!-- junit 5 -->
@@ -178,7 +210,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.22.0</version>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -274,10 +306,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>25</source>
+                    <target>25</target>
                 </configuration>
                 <executions>
                     <!-- Replacing default-compile as it is treated specially by maven -->
@@ -310,7 +342,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M6</version>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
 
             <plugin>
@@ -428,8 +460,8 @@
 
                 <dependencies>
                     <dependency>
-                        <groupId>com.pinterest</groupId>
-                        <artifactId>ktlint</artifactId>
+                        <groupId>com.pinterest.ktlint</groupId>
+                        <artifactId>ktlint-cli</artifactId>
                         <version>${ktlint.version}</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->

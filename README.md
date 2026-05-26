@@ -25,6 +25,11 @@ Set the environment variable `WIKI_BOT_CONFIG_FILE_PATH`:
 export WIKI_BOT_CONFIG_FILE_PATH=/path/to/your/file/wiki-bot-config.json
 ```
 
+Currently, it's actually `wiki-bot-config-prod.json`:
+```bash
+export WIKI_BOT_CONFIG_FILE_PATH="/home/ec2-user/wiki-bot/wiki-bot-config-prod.json"
+```
+
 In the json config, set `environmentName` property to indicate the environment:
 ```json
   "environmentName": "My local super environment",
