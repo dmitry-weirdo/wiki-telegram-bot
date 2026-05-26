@@ -108,7 +108,7 @@ Get back to the `screen` session:
 screen -r wiki-bot
 ```
 
-And press `Ctrl + C` to stop the bot.
+And press `Ctrl + C` to stop the bots.
 
 
 # How to add a new bot instance
@@ -126,3 +126,6 @@ And press `Ctrl + C` to stop the bot.
 * Stop the running bot instances with `Ctrl + C`.
 * Deploy the new bot configuration with `copy-to-ec2.sh`.
 * Start bot instances with `run-ec2.sh`.
+* Detach from the `screen` session: `Ctrl + A`, `D`.
+* Check the bot logs: `tail -f ~/wiki-bot/wiki-bot.log`.
+* Exit the SSH session to EC2 machine: `exit`.
