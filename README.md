@@ -96,7 +96,7 @@ Disconnect from the current `screen` session: `Ctrl + A`, `D`.
 
 You can watch the logs of the bot:
 ```bash
-tail -f ./wiki-bot.log
+tail -f ~/wiki-bot/wiki-bot.log
 ```
 
 Now you can disconnect from PuTTY and the bot will continue to work!
