@@ -81,6 +81,11 @@ Make sure you've set up the environment variable:
 export WIKI_BOT_CONFIG_FILE_PATH="/home/ec2-user/wiki-bot/wiki-bot-config.json"
 ```
 
+Currently, it's:
+```bash
+export WIKI_BOT_CONFIG_FILE_PATH="/home/ec2-user/wiki-bot/wiki-bot-config-prod.json"
+```
+
 Run the bot using the `run-ec2.sh` script
 
 ```bash
