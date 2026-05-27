@@ -15,6 +15,7 @@
         <maven.compiler.target>25</maven.compiler.target>
 
         <commons-lang3.version>3.20.0</commons-lang3.version>
+        <telegrambots.version>9.6.0</telegrambots.version>
 
         <kotlin.version>2.3.21</kotlin.version>
 
@@ -63,8 +64,14 @@
     <dependencies>
         <dependency>
             <groupId>org.telegram</groupId>
-            <artifactId>telegrambots</artifactId>
-            <version>5.7.1</version>
+            <artifactId>telegrambots-longpolling</artifactId>
+            <version>${telegrambots.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-client</artifactId>
+            <version>${telegrambots.version}</version>
         </dependency>
 
         <!-- POI dependencies -->

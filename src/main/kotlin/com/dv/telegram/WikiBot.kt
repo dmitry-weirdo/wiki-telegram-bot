@@ -9,23 +9,26 @@ import com.dv.telegram.tabs.BotAnswerTabData
 import com.dv.telegram.tabs.TabConfigs
 import com.dv.telegram.tabs.TabData
 import org.apache.logging.log4j.kotlin.Logging
-import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
+import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer
 import org.telegram.telegrambots.meta.api.methods.GetMe
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.InputFile
-import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
+import org.telegram.telegrambots.meta.api.objects.message.Message
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
+import org.telegram.telegrambots.meta.generics.TelegramClient
 
 @Suppress("TooManyFunctions")
 class WikiBot(
     val context: WikiBotsContext,
     private val config: WikiBotConfig,
     commandTabsData: List<TabData>,
-    dataTabsData: List<TabData>
-) : TelegramLongPollingBot(), Logging {
+    dataTabsData: List<TabData>,
+    private val telegramClient: TelegramClient = OkHttpTelegramClient(config.botToken)
+) : LongPollingSingleThreadUpdateConsumer, Logging {
     var tabConfigs: TabConfigs // will be loaded from config.tabs, but can be changed in runtime
 
     var commandTabs: List<BotAnswerTabData<BotAnswerData>> // can be reloaded from Google Sheet
@@ -94,16 +97,10 @@ class WikiBot(
     val notionImportTimeoutMinutes: Int
         get() = config.notionImportTimeoutMinutes
 
-    // functions overridden from Telegram API (TelegramLongPollingBot and its parent hierarchy)
-    override fun getBotToken(): String {
-        return config.botToken
-    }
+    val botToken: String
+        get() = config.botToken
 
-    override fun getBotUsername(): String {
-        return "dv_wiki_bot" // todo: read from config if needed. Seems to be overridden by what is set by "/setname" in the @BotFather
-    }
-
-    override fun onUpdateReceived(update: Update) {
+    override fun consume(update: Update) {
         // todo: env option to disable the bot globally!
         val updateMessage = update.message
         if (!update.hasMessage() || !updateMessage.hasText()) {
@@ -137,13 +134,13 @@ class WikiBot(
             if (processingResult.returnFileInResponse) { // return SendDocumentResponse (file in one message)
                 val sendDocument = createSendDocument(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
 
-                execute(sendDocument) // Call method to send the file
+                telegramClient.execute(sendDocument) // Call method to send the file
             }
             else { // send (potentially many) SendMessage response messages
                 val sendMessages = createSendMessage(updateMessage, replyToMessage, deleteBotCallMessage, processingResult)
 
                 for (sendMessage in sendMessages) { // messages are split into 4096 characters
-                    execute(sendMessage) // Call method to send the message
+                    telegramClient.execute(sendMessage) // Call method to send the message
                 }
             }
         }
@@ -176,16 +173,19 @@ class WikiBot(
                     updateMessage.messageId
                 }
 
-            val sendMessage = SendMessage()
-            sendMessage.chatId = chatId
-            sendMessage.replyToMessageId = replyToMessageId
-            sendMessage.text = messageText
-            sendMessage.disableWebPagePreview()
+            val sendMessageBuilder = SendMessage
+                .builder()
+                .chatId(chatId)
+                .replyToMessageId(replyToMessageId)
+                .text(messageText)
+                .disableWebPagePreview(true)
 
             // todo: markdown can be broken if it is split into different message parts. Probably turn it off if responseTexts.size > 1
             if (processingResult.useMarkdown) {
-                sendMessage.parseMode = "Markdown"
+                sendMessageBuilder.parseMode("Markdown")
             }
+
+            val sendMessage = sendMessageBuilder.build()
 
             messages.add(sendMessage)
         }
@@ -233,7 +233,7 @@ class WikiBot(
         )
 
         try {
-            execute(deleteMessage)
+            telegramClient.execute(deleteMessage)
         }
         catch (e: TelegramApiException) {
             logger.error("Failed to delete message", e)
@@ -259,7 +259,7 @@ class WikiBot(
 
         return try {
             val getMe = GetMe()
-            val getMeResult = execute(getMe)
+            val getMeResult = telegramClient.execute(getMe)
 
             telegramName = getMeResult.userName
 

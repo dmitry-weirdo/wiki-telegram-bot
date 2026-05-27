@@ -4,9 +4,8 @@ import com.dv.telegram.config.SettingValidationException
 import com.dv.telegram.exception.WikiBotException
 import com.dv.telegram.util.WikiBotUtils
 import org.apache.logging.log4j.kotlin.Logging
-import org.telegram.telegrambots.meta.TelegramBotsApi
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
@@ -51,13 +50,13 @@ class Main : Logging {
 
                     val wikiBot = WikiBot(context, config, botTabsData)
 
-                    val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
-                    botsApi.registerBot(wikiBot)
+                    val botsApplication = TelegramBotsLongPollingApplication()
+                    botsApplication.registerBot(config.botToken, wikiBot)
                     logger.info(
-                        "The bot \"${wikiBot.botUsername}\" (${wikiBot.botName}) has started on \"${wikiBot.environmentName}\" environment!"
+                        "The bot \"${wikiBot.botName}\" has started on \"${wikiBot.environmentName}\" environment!"
                     )
 
-                    "The bot ${wikiBot.botUsername} has started on \"${wikiBot.environmentName}\" environment!"
+                    "The bot ${wikiBot.botName} has started on \"${wikiBot.environmentName}\" environment!"
                 }
                 catch (e: TelegramApiException) {
                     logger.error("Error when starting the WikiBot", e)
