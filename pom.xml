@@ -38,7 +38,7 @@
         <jackson-datatype-jsr310.version>2.21.3</jackson-datatype-jsr310.version>
 
 
-        <okhttp4.version>4.11.0</okhttp4.version>
+        <okhttp4.version>5.3.2</okhttp4.version>
 
         <lombok.version>1.18.46</lombok.version>
 
