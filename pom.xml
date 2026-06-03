@@ -36,7 +36,7 @@
             todo: migrate to version 3 when it's released
             see https://mvnrepository.com/artifact/tools.jackson.datatype/jackson-datatype-jsr310
         -->
-        <jackson-datatype-jsr310.version>2.21.3</jackson-datatype-jsr310.version>
+        <jackson-datatype-jsr310.version>2.22.0</jackson-datatype-jsr310.version>
 
 
         <okhttp4.version>4.11.0</okhttp4.version>
