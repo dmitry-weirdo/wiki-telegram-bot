@@ -1,8 +1,8 @@
 package com.dv.telegram
 
-import org.telegram.telegrambots.meta.api.objects.Chat
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.User
+import org.telegram.telegrambots.meta.api.objects.chat.Chat
 
 data class MessageProcessingLog( // to be logged in a JSON
     val botName: String, // multiple bots can be run on the same instance

@@ -9,9 +9,9 @@ import com.dv.telegram.tabs.TabFormat
 import com.dv.telegram.tabs.TabType
 import com.dv.telegram.util.JacksonUtils
 import org.assertj.core.api.Assertions
-import org.telegram.telegrambots.meta.api.objects.Chat
-import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
+import org.telegram.telegrambots.meta.api.objects.chat.Chat
+import org.telegram.telegrambots.meta.api.objects.message.Message
 
 object BotTestUtils {
 
@@ -182,9 +182,7 @@ object BotTestUtils {
 
     @JvmStatic
     fun getUpdate(): Update {
-        val chat = Chat()
-        chat.id = 123456789
-        chat.type = "group" // not "private", bot name required
+        val chat = Chat(123456789L, "group") // not "private", bot name required
         chat.title = "Test fake chat title"
 
         val message = Message()
